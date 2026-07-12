@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>京me推送 抽屉 - 原型图</title>
+<style>
+  :root { color-scheme: light; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#dfe3e8; color:#1f2329;
+    display:flex; justify-content:center; padding:16px;
+  }
+  .app {
+    position:relative;
+    width:1490px; height:770px;
+    background:#fff; border-radius:12px; overflow:hidden;
+    box-shadow:0 12px 50px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+  }
+
+  /* ---------- Top notice bar ---------- */
+  .notice {
+    display:flex; align-items:center; gap:8px;
+    background:#fdf3e6; color:#8a5a1a;
+    padding:8px 16px; font-size:13px;
+  }
+  .notice .warn { color:#fa8c16; }
+  .notice .all { color:#2f54eb; cursor:pointer; }
+  .notice .sp { flex:1; }
+  .notice .x { color:#b98b4a; cursor:pointer; }
+
+  /* ---------- Title bar ---------- */
+  .titlebar { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid #eef0f2; font-size:13px; color:#555;}
+  .titlebar .fname { font-size:15px; font-weight:700; color:#1f2329; }
+  .titlebar .mode { background:#eef1ff; color:#2f54eb; border-radius:5px; padding:2px 8px; font-size:12px; }
+  .titlebar .sp { flex:1; }
+  .titlebar .save { background:#2f54eb; color:#fff; border-radius:6px; padding:7px 20px; font-weight:600; }
+
+  /* ---------- Ribbon ---------- */
+  .ribbon-tabs { display:flex; gap:22px; padding:7px 16px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555; }
+  .ribbon-tabs .rt.active { color:#2f54eb; font-weight:600; position:relative; }
+  .ribbon-tabs .rt.active::after { content:""; position:absolute; left:0;right:0;bottom:-8px; height:2px; background:#2f54eb; }
+  .ribbon-body { height:70px; border-bottom:1px solid #f2f3f5; background:#fbfbfc; }
+  .formulabar { display:flex; align-items:center; gap:10px; padding:6px 16px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555;}
+  .formulabar .cellref { border:1px solid #e5e7eb; border-radius:4px; padding:3px 12px; width:100px; }
+
+  /* ---------- Main ---------- */
+  .main { flex:1; display:flex; min-height:0; }
+
+  /* left sidebar */
+  .lside { width:185px; border-right:1px solid #eef0f2; background:#fafbfc; display:flex; flex-direction:column; flex-shrink:0; position:relative;}
+  .lside .scroll { flex:1; overflow:hidden; padding:12px 12px 0; font-size:12px; color:#666; }
+  .lside .s { background:#eceff3; border-radius:6px; padding:6px 10px; color:#999; margin-bottom:14px; }
+  .lside .h { font-weight:600; color:#333; margin:12px 0 6px; display:flex; justify-content:space-between; align-items:center;}
+  .lside .li { padding:5px 3px; color:#666; }
+  .lside .li.active { color:#2f54eb; font-weight:600; }
+  .lside .more { color:#2f54eb; padding:4px 3px; }
+  .lside .badge { background:#f5222d; color:#fff; border-radius:9px; font-size:10px; padding:0 6px; }
+  .lside .btns { display:flex; gap:8px; padding:10px 12px; }
+  .lside .btns .b1 { background:#2f54eb; color:#fff; border-radius:6px; padding:8px 18px; font-size:13px; }
+  .lside .btns .b2 { border:1px solid #d0d3d9; background:#fff; border-radius:6px; padding:8px 16px; font-size:13px; color:#555; }
+
+  /* bottom split tabs (change) */
+  .lbottom { display:flex; border-top:1px solid #eef0f2; }
+  .lbottom .bt {
+    flex:1; text-align:center; font-size:12px; color:#666;
+    padding:11px 4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;
+    position:relative;
+  }
+  .lbottom .bt + .bt { border-left:1px solid #eef0f2; }
+  .lbottom .bt.active { color:#2f54eb; font-weight:600; background:#eef1ff; }
+  .lbottom .bt.active::after { content:""; position:absolute; left:12%; right:12%; top:0; height:2px; background:#2f54eb; }
+
+  /* spreadsheet area */
+  .sheet-wrap { flex:1; overflow:hidden; position:relative; }
+  table.grid { border-collapse:collapse; table-layout:fixed; width:100%; }
+  table.grid th, table.grid td { border:1px solid #e6e8eb; font-size:12px; height:22px; }
+  table.grid th { background:#f4f6f8; color:#8a9099; font-weight:500; text-align:center; }
+  table.grid th.rowh { width:32px; }
+  td.a1 { outline:2px solid #217346; background:#fff; }
+  .sheettabs { display:flex; align-items:center; gap:2px; border-top:1px solid #eef0f2; padding:5px 10px; font-size:12px; background:#fafbfc;}
+  .sheettabs .st { padding:5px 12px; border-radius:5px 5px 0 0; color:#555; }
+  .sheettabs .st.active { color:#217346; font-weight:600; border-bottom:2px solid #217346; }
+
+  /* ---------- Overlay + Drawer (sized like 图3) ---------- */
+  .overlay { position:absolute; inset:0; background:rgba(15,20,30,.28); z-index:40; }
+  .drawer {
+    position:absolute; top:0; right:0; bottom:0;
+    width:1245px;              /* leaves the 185px sidebar visible, matches 图3 */
+    background:#fff;
+    border-radius:12px 0 0 12px;
+    z-index:50;
+    box-shadow:-8px 0 30px rgba(0,0,0,.15);
+    display:flex; flex-direction:column;
+    animation:slidein .25s ease;
+  }
+  @keyframes slidein { from { transform:translateX(40px); opacity:.6; } to { transform:translateX(0); opacity:1; } }
+
+  /* drawer header: 推送中心 */
+  .dwr-tabhead { display:flex; align-items:center; justify-content:space-between; padding:14px 22px 0; }
+  .dwr-tabhead .titlechip { color:#2f54eb; font-weight:700; font-size:15px; border-bottom:2px solid #2f54eb; padding-bottom:12px; }
+  .dwr-tabhead .avatar { width:32px; height:32px; border-radius:50%; background:#ec6a9c; color:#fff; display:flex;align-items:center;justify-content:center; font-size:12px; }
+  .dwr-tabhead .close { color:#999; font-size:20px; cursor:pointer; margin-left:14px; }
+  .dwr-head-line { border-bottom:1px solid #eef0f2; margin-top:-1px; }
+
+  /* sub tabs 推送管理/推送历史 */
+  .dwr-subtabs { display:flex; gap:26px; padding:12px 24px 0; border-bottom:1px solid #eef0f2; background:#f6f7f9;}
+  .dwr-subtabs .stab { font-size:14px; color:#666; padding:8px 2px 12px; cursor:pointer; position:relative;}
+  .dwr-subtabs .stab.active { color:#2f54eb; font-weight:600; }
+  .dwr-subtabs .stab.active::after { content:""; position:absolute; left:0;right:0;bottom:-1px; height:2px; background:#2f54eb; }
+
+  .dwr-body { flex:1; overflow-y:auto; padding:18px 24px; }
+
+  /* toolbar row */
+  .pc-toolbar { display:flex; align-items:center; margin-bottom:16px; }
+  .pc-toolbar .newbtn { background:#2f54eb; color:#fff; border-radius:6px; padding:9px 18px; font-size:13px; font-weight:600; }
+  .pc-toolbar .sp { flex:1; }
+  .pc-toolbar .flabel { font-size:13px; color:#555; margin:0 8px 0 18px; }
+  .pc-toolbar .fdrop { border:1px solid #dfe3e8; border-radius:6px; padding:7px 12px; font-size:13px; color:#aab0b8; width:150px; display:flex; justify-content:space-between; }
+  .pc-toolbar .finput { border:1px solid #dfe3e8; border-radius:6px; padding:7px 12px; font-size:13px; color:#aab0b8; width:230px; }
+  .pc-toolbar .searchbtn { background:#2f54eb; color:#fff; border-radius:6px; padding:7px 14px; margin-left:6px; }
+
+  /* table */
+  table.pc { width:100%; border-collapse:collapse; }
+  table.pc th { text-align:left; font-size:13px; color:#8a9099; font-weight:600; padding:12px 14px; border-bottom:1px solid #eef0f2; }
+  table.pc td { font-size:13px; color:#3a3f45; padding:16px 14px; border-bottom:1px solid #f2f3f5; }
+  .subtag { background:#f0f2f5; color:#8a9099; border-radius:4px; font-size:11px; padding:2px 7px; margin-left:8px; }
+  .toggle { display:inline-flex; align-items:center; gap:6px; }
+  .sw { width:34px; height:18px; border-radius:9px; position:relative; }
+  .sw.off { background:#d5d8dd; }
+  .sw.on { background:#2f54eb; }
+  .sw::after { content:""; position:absolute; top:2px; width:14px; height:14px; border-radius:50%; background:#fff; transition:.2s; }
+  .sw.off::after { left:2px; }
+  .sw.on::after { left:18px; }
+  .sw-txt.off { color:#8a9099; } .sw-txt.on { color:#2f54eb; }
+  .ops a { color:#2f54eb; text-decoration:none; margin-right:14px; }
+  .ops .drop::after { content:" ▾"; color:#2f54eb; }
+
+  .pc-footer { display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-top:26px; font-size:13px; color:#666; }
+  .pc-footer .pg { border:1px solid #dfe3e8; border-radius:5px; padding:5px 10px; }
+  .pc-footer .pg.active { background:#2f54eb; color:#fff; border-color:#2f54eb; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- Notice -->
+    <div class="notice">
+      <span class="warn">⚠</span>
+      <span>Sheet【7月截止5号数据】部分指标的更新时效为T+1 10点，包括：价格星级。</span>
+      <span class="all">全部通知</span>
+      <span class="sp"></span>
+      <span class="x">×</span>
+    </div>
+
+    <!-- Title bar -->
+    <div class="titlebar">
+      <span class="fname">未命名_0706_2</span> ✎
+      <span class="mode">编辑模式</span>
+      <span>本人编辑中</span><span style="color:#e5484d;">未保存</span>
+      <span class="sp"></span>
+      <span>📖 帮助与反馈</span>
+      <span>🕘 报表刷新时间：18:34:21 <span style="color:#2f54eb;">刷新</span></span>
+      <span>⤢ 最大化</span>
+      <span>✎ 批量修改查询规则</span>
+      <span style="color:#2f54eb;">＋ 新建数据查询</span>
+      <span class="save">保存 ▾</span>
+      <span>⋯</span>
+    </div>
+
+    <!-- Ribbon -->
+    <div class="ribbon-tabs">
+      <span class="rt">文件</span><span class="rt active">开始</span><span class="rt">插入</span>
+      <span class="rt">页面布局</span><span class="rt">公式</span><span class="rt">数据</span>
+      <span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span>
+    </div>
+    <div class="ribbon-body"></div>
+    <div class="formulabar">
+      <span class="cellref">A1 ▾</span>
+      <span style="color:#999;">fx</span>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Sidebar with split bottom tabs -->
+      <div class="lside">
+        <div class="scroll">
+          <div class="s">🔍 搜索</div>
+          <div class="h">模板库</div>
+          <div class="li">▤ 销售进度监控–品牌维度</div>
+          <div class="li">▤ 经营分析日报–品牌维度</div>
+          <div class="more">更多模板 ›</div>
+          <div class="h" style="margin-top:16px;">我收到的 <span class="badge">31</span></div>
+          <div class="h">我创建的 <span style="color:#aaa;font-weight:400;">＋ ›</span></div>
+          <div class="li active">▦ 未命名_0706_2</div>
+          <div class="li">▦ 销售进度监控–品...</div>
+          <div class="li">▦ 未命名_0702_2</div>
+          <div class="li">▦ 价促场趋势分析–...</div>
+          <div class="li">▦ 库存结构看板_副...</div>
+          <div class="li">▦ 未命名_0625_10</div>
+        </div>
+        <div class="btns">
+          <span class="b1">＋ 新建</span>
+          <span class="b2">⤒ 导入</span>
+        </div>
+        <!-- CHANGE: split into 2 tabs, 京me推送 active -->
+        <div class="lbottom">
+          <div class="bt">⧉ 外发文件管理</div>
+          <div class="bt active">🔔 京me推送</div>
+        </div>
+      </div>
+
+      <!-- Spreadsheet (behind drawer) -->
+      <div class="sheet-wrap">
+        <table class="grid" id="grid"></table>
+        <script>
+          const cols = 27, rows = 30;
+          let html = "<tr><th class='rowh'></th>";
+          for(let c=0;c<cols;c++){ let l = c<26? String.fromCharCode(65+c) : "A"+String.fromCharCode(65+c-26); html+=`<th>${l}</th>`; }
+          html+="</tr>";
+          for(let r=1;r<=rows;r++){ html+=`<tr><th class='rowh'>${r}</th>`; for(let c=0;c<cols;c++){ html+=`<td class='${(r===1&&c===0)?'a1':''}'></td>`; } html+="</tr>"; }
+          document.getElementById('grid').innerHTML = html;
+        </script>
+      </div>
+    </div>
+
+    <!-- Sheet tabs -->
+    <div class="sheettabs">
+      <span class="st active">Sheet3</span>
+      <span class="st">7月截止5号数据</span>
+      <span class="st">Sheet2</span>
+      <span class="st">＋</span>
+    </div>
+
+    <!-- ============ Overlay + Drawer (content = 图2 推送中心) ============ -->
+    <div class="overlay"></div>
+    <div class="drawer">
+      <div class="dwr-tabhead">
+        <div class="titlechip">推送中心</div>
+        <div style="display:flex;align-items:center;">
+          <div class="avatar">👤</div>
+          <span class="close">×</span>
+        </div>
+      </div>
+      <div class="dwr-head-line"></div>
+
+      <div class="dwr-subtabs">
+        <div class="stab active">推送管理</div>
+        <div class="stab">推送历史</div>
+      </div>
+
+      <div class="dwr-body">
+        <div class="pc-toolbar">
+          <span class="newbtn">新建推送</span>
+          <span class="sp"></span>
+          <span class="flabel">推送来源：</span>
+          <span class="fdrop">推送来源 <span style="color:#ccc;">▾</span></span>
+          <span class="flabel">推送ID/名称：</span>
+          <span class="finput">推送ID/推送名称</span>
+          <span class="searchbtn">🔍</span>
+        </div>
+
+        <table class="pc">
+          <thead>
+            <tr>
+              <th style="width:13%">推送编码</th>
+              <th style="width:22%">推送名称</th>
+              <th style="width:11%">启用/未启用</th>
+              <th style="width:13%">过期时间</th>
+              <th style="width:14%">创建时间</th>
+              <th style="width:14%">更新时间</th>
+              <th style="width:13%">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>-</td>
+              <td>测试123【副本】<span class="subtag">未配置</span></td>
+              <td><span class="toggle"><span class="sw off"></span><span class="sw-txt off">未启用</span></span></td>
+              <td>-</td>
+              <td>2026-07-03 21:11:40</td>
+              <td>2026-07-03 21:11:39</td>
+              <td class="ops"><a href="#">编辑画板</a><a href="#">编辑规则</a><a href="#" class="drop">更多</a></td>
+            </tr>
+            <tr>
+              <td>R7950M176062</td>
+              <td>测试123</td>
+              <td><span class="toggle"><span class="sw on"></span><span class="sw-txt on">已启用</span></span></td>
+              <td>2026-08-02 20:56:44</td>
+              <td>2026-07-03 20:55:18</td>
+              <td>2026-07-03 20:56:45</td>
+              <td class="ops"><a href="#">编辑画板</a><a href="#">编辑规则</a><a href="#" class="drop">推送</a><a href="#" class="drop">更多</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pc-footer">
+          <span>共 2 条记录</span>
+          <span class="pg">‹</span>
+          <span class="pg active">1</span>
+          <span class="pg">›</span>
+          <span class="pg">10 条/页 ▾</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
