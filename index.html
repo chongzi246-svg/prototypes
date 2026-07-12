@@ -26,7 +26,7 @@
 
   .nav{position:sticky;top:0;z-index:100;height:50px;background:rgba(241,236,220,.72);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-bottom:1px solid var(--line-soft);display:flex;align-items:center}
   .nav .inner{max-width:1040px;margin:0 auto;padding:0 24px;width:100%;display:flex;align-items:center;justify-content:space-between}
-  .nav .brand{font-size:16px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;padding-left:.28em}
+  .nav .brand{font-size:18px;font-weight:600;letter-spacing:.14em;padding-left:.14em}
   .nav .n{font-size:12.5px;color:var(--sub);letter-spacing:.02em}
 
   /* hero with floating color blobs */
@@ -66,17 +66,16 @@
 
   .info{padding:24px 22px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;flex:1}
   .info-main{display:flex;flex-direction:column;align-items:center;width:100%}
-  .head{display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%}
-  .name{font-size:23px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;max-width:100%;overflow-wrap:anywhere}
+  .head{display:flex;align-items:center;justify-content:center;gap:6px;max-width:100%;width:100%}
+  .name{font-size:23px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
   .edit{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--sub);display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s,background .2s}
   .tile:hover .edit{opacity:1}
   .edit:hover{background:rgba(120,100,66,.14);color:var(--ink)}
   .edit svg{width:15px;height:15px}
   .name-input{font-family:var(--font);font-size:22px;font-weight:600;letter-spacing:-0.01em;text-align:center;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--ink);padding:0 2px 3px;max-width:100%;outline:none}
-  .meta{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px}
-  .file{font-size:12.5px;color:var(--sub);font-family:var(--mono);overflow-wrap:anywhere}
-  .date{font-size:12.5px;color:var(--sub)}
-  .date:empty{display:none}
+  .meta{display:flex;flex-direction:column;align-items:stretch;gap:2px;margin-top:6px;width:100%;max-width:100%}
+  .file{font-size:12.5px;color:var(--sub);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .date{font-size:12.5px;color:var(--sub);min-height:1.15em}
 
   .links{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}
   .lk{font-size:15.5px;color:var(--accent);text-decoration:none;background:none;border:none;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:3px;font-weight:500}
@@ -120,7 +119,7 @@
 <div class="grain" aria-hidden="true"></div>
 
 <nav class="nav">
-  <div class="inner"><span class="brand">Маніфест</span><span class="n" id="navCount"></span></div>
+  <div class="inner"><span class="brand">超级大表</span><span class="n" id="navCount"></span></div>
 </nav>
 
 <header class="hero">
