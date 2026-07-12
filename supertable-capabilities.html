@@ -273,22 +273,6 @@
         <span>&#10005; &#10003; <i>fx</i></span>
       </div>
 
-      <!-- goal summary strip -->
-      <div class="goalstrip" id="goalstrip">
-        <div class="gicon">&#127919;</div>
-        <div>
-          <div class="gt">7月 · GMV品牌目标</div>
-          <div class="gsub">周期 2026-07-01 ~ 2026-07-31 · 负责人 罗博华</div>
-        </div>
-        <div class="prog">
-          <div class="bar"><i id="stripbar"></i></div>
-          <div class="barmeta"><span>已达成 ¥3,600,000</span><span id="strippct">达成率 68.6%</span></div>
-        </div>
-        <div class="kpi"><small>目标</small><b>¥5.25M</b></div>
-        <div class="kpi down"><small>距目标</small><b>¥1.65M</b></div>
-        <div class="kpi"><small>剩余</small><b>9 天</b></div>
-      </div>
-
       <!-- comment mode hint -->
       <div class="hintbar" id="hintbar">
         &#128161; <b>圈选留言模式已开启</b>：在表格中按住鼠标框选一片区域，松开后点击「＋ 留言」即可对该区域评论。
@@ -513,12 +497,6 @@ function renderGoalPanelExtras(){
       +'<div class="tmeta"><span>实际 '+money(b.actual)+'</span><span>目标 '+money(b.goal)+'</span></div></div>';
   });
   document.getElementById('trackBox').innerHTML = t;
-  // strip
-  const totAct = brands.reduce((s,b)=>s+b.actual,0);
-  const totGoal = brands.reduce((s,b)=>s+b.goal,0);
-  const p = totAct/totGoal*100;
-  document.getElementById('stripbar').style.width = Math.min(100,p)+'%';
-  document.getElementById('strippct').textContent = '达成率 '+p.toFixed(1)+'%';
 }
 
 // ---------- feature toggles ----------
@@ -529,12 +507,10 @@ function toggleGoal(){
   const opening = !p.classList.contains('show');
   closeAllPanels();
   if(opening){ p.classList.add('show'); goalOn=true; setActive('ab-goal',true); renderGoalPanelExtras(); }
-  document.getElementById('goalstrip').classList.toggle('show', goalOn);
   renderSheet();
 }
 function applyGoal(){
   goalOn=true;
-  document.getElementById('goalstrip').classList.add('show');
   renderSheet();
   toast('已保存目标并联动表格：新增目标/进度/差距列，按达成率自动着色');
 }
@@ -661,7 +637,6 @@ function toast(msg){ const t=document.getElementById('toast'); t.innerHTML='&#10
 
 // ---------- init ----------
 renderSheet();
-document.getElementById('goalstrip').classList.add('show');
 setActive('ab-goal',false);
 renderComments();
 </script>
