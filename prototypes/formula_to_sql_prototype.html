@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公式转SQL计算 - 功能原型</title>
+<style>
+  :root { color-scheme: light; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#dfe3e8; color:#1f2329; display:flex; justify-content:center; padding:16px; }
+  .app { width:1560px; height:900px; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 12px 50px rgba(0,0,0,.18); display:flex; flex-direction:column; position:relative; }
+
+  .titlebar { display:flex; align-items:center; gap:14px; padding:10px 18px; border-bottom:1px solid #eef0f2; font-size:13px; color:#555; }
+  .titlebar .fname { font-size:15px; font-weight:700; color:#1f2329; }
+  .titlebar .err { color:#e5484d; } .titlebar .lock { color:#999; }
+  .titlebar .sp { flex:1; }
+  .titlebar .demo { background:#2f54eb; color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:600; }
+
+  .ribbon-tabs { display:flex; gap:22px; padding:7px 18px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555; }
+  .ribbon-tabs .rt.active { color:#2f54eb; font-weight:600; position:relative; }
+  .ribbon-tabs .rt.active::after { content:""; position:absolute; left:0;right:0;bottom:-8px; height:2px; background:#2f54eb; }
+  .ribbon-body { height:60px; border-bottom:1px solid #f2f3f5; background:#fbfbfc; display:flex; align-items:center; gap:24px; padding:0 18px; color:#9aa0a6; font-size:12px; }
+  .formulabar { display:flex; align-items:center; gap:10px; padding:6px 18px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#3a3f45;}
+  .formulabar .cellref { border:1px solid #e5e7eb; border-radius:4px; padding:3px 12px; width:80px; }
+  .formulabar .fx { color:#999; }
+  .formulabar .fx-content { font-family:Consolas,monospace; color:#2f54eb; }
+
+  .main { flex:1; display:flex; min-height:0; }
+  .lside { width:175px; border-right:1px solid #eef0f2; background:#fafbfc; padding:12px; font-size:12px; color:#666; flex-shrink:0; }
+  .lside .s { background:#eceff3; border-radius:6px; padding:6px 10px; color:#999; margin-bottom:12px; }
+  .lside .li { padding:6px 3px; color:#666; } .lside .li.active { color:#2f54eb; font-weight:600; }
+
+  .sheet-wrap { flex:1; overflow:auto; position:relative; }
+  table.ss { border-collapse:collapse; table-layout:fixed; font-size:12px; }
+  table.ss th, table.ss td { border:1px solid #dfe2e6; height:26px; padding:2px 8px; white-space:nowrap; overflow:hidden; }
+  table.ss th { background:#f4f6f8; color:#8a9099; text-align:center; font-weight:500; }
+  table.ss th.rownum, table.ss td.rownum { width:34px; background:#f4f6f8; color:#8a9099; text-align:center; }
+  table.ss col { width:120px; } table.ss col.rownum { width:34px; } table.ss col.small { width:78px; }
+  .hdr-row td { background:#4a86c8; color:#fff; font-weight:600; position:relative; }
+  .hdr-row td .fltr { position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:9px; opacity:.85; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  td.neg { color:#e5484d; } td.pos { color:#1f7a45; }
+  tbody tr:nth-child(even) td:not(.rownum):not(.hcol) { background:#eef4fb; }
+  .selcell { outline:2px solid #217346; outline-offset:-2px; position:relative; }
+  .hcol { position:relative; }
+  .badge { position:absolute; top:1px; right:2px; font-size:9px; color:#2f54eb; background:#eef1ff; border-radius:3px; padding:0 3px; line-height:1.4; }
+  .hcol.calc { color:#1f2329; text-align:right; }
+  .hcol.pending { color:#c9ccd1; text-align:right; font-style:italic; }
+  .spin { display:inline-block; width:11px; height:11px; border:2px solid #c3cffb; border-top-color:#2f54eb; border-radius:50%; animation:sp .7s linear infinite; vertical-align:middle;}
+  @keyframes sp { to { transform:rotate(360deg); } }
+
+  .hdr-hcol { background:#2f54eb !important; }
+  .hdr-hcol .b { font-size:9px; background:#fff; color:#2f54eb; border-radius:3px; padding:0 4px; margin-left:5px; }
+
+  /* AI hint popover */
+  .hint { position:absolute; width:340px; background:#fff; border:1px solid #dbe0ff; border-radius:10px; box-shadow:0 10px 30px rgba(47,84,235,.18); z-index:40; overflow:hidden; }
+  .hint .hh { display:flex; align-items:center; gap:8px; padding:12px 14px 6px; font-size:13px; font-weight:700; color:#2f54eb; }
+  .hint .hb { padding:0 14px 10px; font-size:12.5px; color:#4a5160; line-height:1.6; }
+  .hint .code { margin:0 14px 10px; background:#f5f7ff; border:1px solid #e7ebff; border-radius:6px; padding:8px 10px; font-family:Consolas,monospace; font-size:11.5px; color:#3a4664; }
+  .hint .code .kw { color:#2f54eb; }
+  .hint .hf { display:flex; gap:8px; padding:10px 14px; border-top:1px solid #f0f1f3; background:#fafbff; }
+  .hint .hf .b { border-radius:6px; padding:7px 12px; font-size:12.5px; cursor:pointer; }
+  .hint .hf .primary { background:#2f54eb; color:#fff; font-weight:600; }
+  .hint .hf .ghost { border:1px solid #c3cffb; color:#2f54eb; }
+  .hint .hf .plain { color:#8a9099; margin-left:auto; }
+  .hint::after { content:""; position:absolute; top:-8px; left:40px; border:8px solid transparent; border-bottom-color:#fff; }
+
+  .sheettabs { display:flex; align-items:center; gap:2px; border-top:1px solid #eef0f2; padding:5px 10px; font-size:12px; background:#fafbfc; }
+  .sheettabs .st { padding:6px 14px; border-radius:5px 5px 0 0; color:#555; } .sheettabs .st.active { color:#1f7a45; font-weight:600; border-bottom:2px solid #1f7a45; }
+  .statusbar { border-top:1px solid #eef0f2; padding:5px 16px; font-size:12px; color:#8a9099; background:#f0fdf4; }
+
+  /* toast */
+  .toast { position:absolute; left:50%; bottom:70px; transform:translateX(-50%) translateY(20px); background:#1f2329; color:#fff; font-size:13px; padding:11px 18px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transition:.25s; z-index:60; display:flex; align-items:center; gap:9px;}
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .ok { color:#5ee0a0; }
+
+  /* summary chip */
+  .summary { position:absolute; right:22px; bottom:70px; background:#fff; border:1px solid #d7f0e0; border-left:4px solid #22a06b; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:12px 16px; font-size:12.5px; color:#2c3a30; z-index:55; display:none; max-width:300px; line-height:1.6;}
+  .summary b { color:#1f7a45; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="titlebar">
+      <span class="fname">胡雪测试2</span> ✎
+      <span class="lock">🔒 编辑锁不可用</span><span class="err">Network Error</span>
+      <span class="sp"></span>
+      <span>📝 反馈</span><span>🕘 报表刷新时间 23:32:25 <span style="color:#2f54eb;">刷新</span></span><span>⤢ 全屏</span><span>⋯</span>
+      <span class="demo" onclick="resetDemo()">↻ 重新演示</span>
+    </div>
+
+    <div class="ribbon-tabs">
+      <span class="rt">文件</span><span class="rt active">开始</span><span class="rt">插入</span><span class="rt">页面布局</span>
+      <span class="rt">公式</span><span class="rt">数据</span><span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span>
+    </div>
+    <div class="ribbon-body"><span>↺ 撤销</span><span>📋 粘贴</span><span>B I U</span><span>常规 ▾</span><span>合并后居中 ▾</span><span>条件格式</span><span>套用表格样式</span><span style="margin-left:auto;color:#2f54eb;">✦ 数据分析</span></div>
+    <div class="formulabar"><span class="cellref" id="cellref">H2</span><span class="fx">fx</span><span class="fx-content" id="fxc">=SUMIFS(基础数据集!GMV, 基础数据集!主品牌id, C2)</span></div>
+
+    <div class="main">
+      <div class="lside">
+        <div class="s">🔍 搜索</div>
+        <div class="li">▦ 销售进度监控–品...</div>
+        <div class="li">▦ 销售进度监控–店...</div>
+        <div class="li active">▦ 胡雪测试2</div>
+        <div class="li">▦ 未命名_0702_2</div>
+        <div class="li">▦ 库存模板666_副本...</div>
+        <div class="li">▦ 提数编辑文案展示...</div>
+      </div>
+
+      <div class="sheet-wrap">
+        <table class="ss" id="grid"></table>
+        <!-- AI hint popover -->
+        <div class="hint" id="hint" style="display:none;">
+          <div class="hh">✨ 检测到公式</div>
+          <div class="hb">该公式跨表汇总，行数较多、本地计算较重。<b style="color:#2f54eb;">AI 可将其转为 SQL 在后端计算</b>，更快且减轻本地压力。</div>
+          <div class="code"><span class="kw">SELECT</span> SUM(gmv) <span class="kw">FROM</span> 基础数据集 <span class="kw">WHERE</span> 主品牌id = C2</div>
+          <div class="hf">
+            <span class="b primary" onclick="convertColumn()">转为SQL计算（整列）</span>
+            <span class="b ghost" onclick="convertOne()">仅此单元格</span>
+            <span class="b plain" onclick="hideHint()">忽略</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheettabs">
+      <span class="st">基础数据集</span>
+      <span class="st active">昨日名下</span>
+      <span class="st">月至今名下</span>
+      <span class="st">昨日品牌</span>
+      <span class="st">月至今品牌</span>
+      <span class="st">昨…</span>
+    </div>
+    <div class="statusbar">就绪</div>
+
+    <div class="toast" id="toast"></div>
+    <div class="summary" id="summary"></div>
+  </div>
+
+<script>
+  const rows=[
+    ["owner","6051","滴露（Dettol）",1031181,-3.40,1067450],
+    ["owner","11380","立白",452293,8.56,416623],
+    ["owner","1314703","水卫士",404837,90.07,212989],
+    ["owner","17397","威猛先生（Mr Muscle）",370806,71.76,215886],
+    ["pop","6051","滴露（Dettol）",348960,148.85,140229],
+    ["owner","104717","老管家",336108,-6.26,358547],
+    ["owner","772222","沫檬",315662,114.13,147415],
+    ["owner","288493","榄菊",245284,13.12,216831],
+    ["owner","416504","亮碟（finish）",239750,14.67,209085],
+    ["owner","766987","巨奇（JUQI）",210873,43.11,147347],
+    ["owner","22986","白猫",203067,-22.60,262352],
+    ["owner","23019","花王（KAO）",198702,-4.56,208195],
+    ["owner","7140","AXE斧头牌",197584,2.04,193640],
+    ["owner","17390","威露士（Walch）",182663,-13.86,212054],
+    ["owner","10927","蓝月亮",164928,-0.09,165073],
+    ["owner","822030","希望树（XIWANGSHU）",153125,15.41,132683],
+    ["owner","936604","蔬果园",119112,87.26,63608],
+    ["owner","5343","超能",92908,11.69,83180],
+    ["owner","280910","网易严选",75011,6.57,70385],
+    ["owner","181441","超威（SUPERB）",73090,-8.33,79729],
+    ["owner","26855","绿金",67236,-48.41,130329],
+  ];
+  function yuan(n){ return '¥'+n.toLocaleString('en-US'); }
+  // mock quarterly cumulative (what SQL will return)
+  const cumul = rows.map((r,i)=> Math.round(r[3]*(3.4 + (i%5)*0.45)) );
+
+  function build(){
+    let h='<colgroup><col class="rownum"><col class="small"><col class="small"><col class="small"><col><col><col class="small"><col class="small"><col></colgroup>';
+    // letter header
+    h+='<tr><th class="rownum"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th></tr>';
+    // header row (row1)
+    h+='<tr class="hdr-row"><td class="rownum">1</td>'
+      +'<td>日期 <span class="fltr">▼</span></td><td>经营模式 <span class="fltr">▼</span></td><td>主品牌id <span class="fltr">▼</span></td><td>主品牌名称 <span class="fltr">▼</span></td>'
+      +'<td>Net GMV <span class="fltr">▼</span></td><td>Net GMV-同比 <span class="fltr">▼</span></td><td>Net GMV-同期 <span class="fltr">▼</span></td>'
+      +'<td class="hdr-hcol" id="hcolhdr">季度累计GMV</td></tr>';
+    // data rows -> spreadsheet rows 2..22
+    rows.forEach((r,i)=>{
+      const rn=i+2;
+      const yoyCls = r[4]<0?'neg':'pos';
+      const sel = (rn===2)?' selcell':'';
+      h+=`<tr><td class="rownum">${rn}</td>`
+        +`<td>2026-07-08</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>`
+        +`<td class="num">${yuan(r[3])}</td><td class="num ${yoyCls}">${r[4].toFixed(2)}%</td><td class="num">${yuan(r[5])}</td>`
+        +`<td class="hcol${sel}" id="h${rn}"></td></tr>`;
+    });
+    document.getElementById('grid').innerHTML=h;
+  }
+
+  function toast(msg, ok){ const t=document.getElementById('toast'); t.innerHTML=(ok?'<span class="ok">✓</span>':'<span class="spin"></span>')+'<span>'+msg+'</span>'; t.classList.add('show'); }
+  function hideToast(){ document.getElementById('toast').classList.remove('show'); }
+  function hideHint(){ document.getElementById('hint').style.display='none'; }
+  function showHint(){ const h=document.getElementById('hint'); h.style.display='block'; positionHint(); }
+  function positionHint(){ const cell=document.getElementById('h2'); const wrap=document.querySelector('.sheet-wrap'); const cr=cell.getBoundingClientRect(); const wr=wrap.getBoundingClientRect(); const h=document.getElementById('hint'); h.style.left=(cell.offsetLeft - 300)+'px'; h.style.top=(cell.offsetTop + cell.offsetHeight + 6)+'px'; }
+
+  function tagHeader(){ const hd=document.getElementById('hcolhdr'); if(!hd.querySelector('.b')){ hd.innerHTML='季度累计GMV <span class="b">⚡SQL</span>'; } }
+
+  function fillCell(rn){ const c=document.getElementById('h'+rn); c.classList.remove('selcell','pending'); c.classList.add('calc'); c.innerHTML=yuan(cumul[rn-2])+'<span class="badge">⚡</span>'; }
+
+  function convertOne(){
+    hideHint();
+    const c=document.getElementById('h2'); c.classList.add('pending'); c.textContent='计算中…';
+    toast('AI 正在把公式解析为 SQL 并在后端计算…', false);
+    setTimeout(()=>{ fillCell(2); tagHeader(); toast('已由 SQL 计算完成（本地无需逐格运算）', true); setTimeout(hideToast,1800); }, 900);
+  }
+
+  function convertColumn(){
+    hideHint();
+    toast('整列公式已转为 1 条 SQL，后端批量计算中…', false);
+    // set all pending
+    for(let rn=2; rn<=22; rn++){ const c=document.getElementById('h'+rn); c.classList.add('pending'); c.textContent='…'; }
+    setTimeout(()=>{
+      tagHeader();
+      let rn=2;
+      const timer=setInterval(()=>{ fillCell(rn); rn++; if(rn>22){ clearInterval(timer); toast('整列已由 SQL 计算完成', true); setTimeout(hideToast,1800); showSummary(); } }, 55);
+    }, 850);
+  }
+
+  function showSummary(){
+    const s=document.getElementById('summary');
+    s.innerHTML='⚡ <b>本列由 AI 转 SQL 在后端计算</b><br>21 行跨表汇总合并为 <b>1 次 SQL 查询</b>，本地无需逐格计算公式，编辑与滚动更流畅。<br><span style="color:#8a9099;">结果单元格标有 ⚡ 徽标，数据刷新时自动重算。</span>';
+    s.style.display='block';
+  }
+
+  function resetDemo(){
+    build();
+    document.getElementById('summary').style.display='none';
+    hideToast();
+    setTimeout(showHint, 120);
+  }
+
+  build();
+  window.addEventListener('load', ()=> setTimeout(showHint, 200));
+  window.convertOne=convertOne; window.convertColumn=convertColumn; window.hideHint=hideHint; window.resetDemo=resetDemo;
+</script>
+</body>
+</html>
