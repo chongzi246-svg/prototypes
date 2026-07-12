@@ -2,305 +2,380 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原型导航 · Prototypes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>原型 · Prototypes</title>
 <style>
   :root{
     color-scheme: light;
-    --bg:#FBFBFD; --ink:#16181D; --muted:#6B6B7B;
-    --accent:#5B4BE8; --accent-dark:#4536C4; --accent-soft:#EEEBFF;
-    --live:#12A150; --live-soft:#E4F5EC; --warn:#B4690E; --warn-soft:#FBF1E1;
-    --surface:#FFFFFF; --border:#E7E7EE; --border-strong:#D4D4DE;
-    --display:"Space Grotesk","PingFang SC","Microsoft YaHei",sans-serif;
-    --body:"Inter","PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
-    --mono:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,monospace;
+    --bg:#f5f5f7;
+    --ink:#1d1d1f;
+    --sub:#86868b;
+    --blue:#0066cc;
+    --blue-hover:#0077ed;
+    --card:#ffffff;
+    --hair:#d2d2d7;
+    --radius:22px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro SC","SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.47;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
 
-  header{
-    padding:64px 0 34px;
-    background:radial-gradient(1000px 360px at 85% -20%, var(--accent-soft), transparent 60%);
-    border-bottom:1px solid var(--border);
+  /* ---------- top nav ---------- */
+  .nav{
+    position:sticky;top:0;z-index:100;height:48px;
+    background:rgba(245,245,247,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid rgba(0,0,0,.08);
+    display:flex;align-items:center;
   }
-  .kicker{
-    font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--accent-dark);display:inline-flex;align-items:center;gap:8px;
-    padding:5px 12px;background:var(--surface);border:1px solid var(--border);border-radius:999px;margin-bottom:20px;
-  }
-  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 4px var(--live-soft)}
-  h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.5vw,42px);letter-spacing:-0.02em;line-height:1.1;margin-bottom:14px}
-  .lede{color:var(--muted);font-size:16.5px;max-width:600px}
+  .nav .inner{max-width:1024px;margin:0 auto;padding:0 22px;width:100%;display:flex;align-items:center;justify-content:space-between}
+  .nav .brand{font-size:19px;font-weight:600;letter-spacing:-0.02em}
+  .nav .n{font-size:13px;color:var(--sub);font-weight:400}
 
-  .baseurl{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:24px;
-    background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;
+  /* ---------- hero ---------- */
+  .hero{text-align:center;padding:72px 22px 40px}
+  .hero h1{font-size:clamp(38px,6vw,56px);font-weight:600;letter-spacing:-0.025em;line-height:1.05;margin-bottom:14px}
+  .hero p{font-size:clamp(19px,2.4vw,23px);color:var(--sub);font-weight:400;max-width:640px;margin:0 auto;letter-spacing:-0.01em}
+  .hero .site{
+    display:inline-flex;align-items:center;gap:8px;margin-top:26px;font-size:14px;color:var(--sub);
+    background:#fff;border:1px solid var(--hair);border-radius:999px;padding:7px 8px 7px 16px;max-width:92vw;
   }
-  .baseurl .tag{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .baseurl .val{font-family:var(--mono);font-size:13px;color:var(--accent-dark);flex:1;min-width:180px;word-break:break-all}
-  .baseurl.warn .val{color:var(--warn)}
-  .refresh{
-    background:none;border:1px solid var(--border-strong);border-radius:8px;cursor:pointer;
-    color:var(--muted);font-family:var(--body);font-size:12.5px;padding:5px 11px;display:inline-flex;align-items:center;gap:6px;
+  .hero .site code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hero .site .rf{border:none;background:#f5f5f7;border-radius:999px;padding:5px 12px;font-family:var(--font);font-size:12.5px;color:var(--blue);cursor:pointer;flex-shrink:0}
+  .hero .site .rf:hover{background:#ececee}
+
+  /* ---------- grid ---------- */
+  .grid{max-width:1024px;margin:0 auto;padding:20px 22px 40px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+  .tile{
+    background:var(--card);border-radius:var(--radius);overflow:hidden;
+    display:flex;flex-direction:column;
+    box-shadow:0 4px 20px -12px rgba(0,0,0,.18);
+    transition:transform .35s cubic-bezier(.28,.11,.32,1), box-shadow .35s;
   }
-  .refresh:hover{background:#F5F5F8;color:var(--ink)}
+  .tile:hover{transform:translateY(-4px);box-shadow:0 18px 40px -18px rgba(0,0,0,.28)}
 
-  main{padding:34px 0 20px;min-height:180px}
-  .count{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.04em;margin-bottom:18px}
+  .preview{position:relative;display:block;width:100%;aspect-ratio:16/10;overflow:hidden;background:#fbfbfd;border-bottom:1px solid rgba(0,0,0,.05)}
+  .preview iframe{position:absolute;top:0;left:0;width:1280px;height:800px;border:0;background:#fff;transform:scale(var(--s,.3));transform-origin:top left;pointer-events:none}
+  .preview .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:34px}
+  .preview .load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .spin{width:26px;height:26px;border:3px solid #e3e3e6;border-top-color:#b0b0b6;border-radius:50%;animation:sp .9s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
 
-  .card{
-    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-    background:var(--surface);border:1px solid var(--border);border-radius:14px;
-    padding:18px 20px;margin-bottom:14px;transition:border-color .15s,box-shadow .15s,transform .15s;
+  .info{padding:24px 22px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;flex:1}
+  .name-row{display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%}
+  .name{font-size:23px;font-weight:600;letter-spacing:-0.02em;line-height:1.2;max-width:100%;overflow-wrap:anywhere}
+  .edit{
+    flex-shrink:0;width:26px;height:26px;border-radius:50%;border:none;background:transparent;cursor:pointer;
+    color:var(--sub);display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s,background .2s;
   }
-  .card:hover{border-color:var(--border-strong);box-shadow:0 8px 26px -18px rgba(22,24,29,.35);transform:translateY(-1px)}
-  .card .idx{
-    font-family:var(--display);font-weight:600;font-size:14px;color:var(--accent);
-    width:30px;height:30px;flex-shrink:0;border-radius:8px;background:var(--accent-soft);
-    display:flex;align-items:center;justify-content:center;
+  .tile:hover .edit{opacity:1}
+  .edit:hover{background:#f0f0f2;color:var(--ink)}
+  .edit svg{width:15px;height:15px}
+  .name-input{
+    font-family:var(--font);font-size:22px;font-weight:600;letter-spacing:-0.02em;text-align:center;
+    border:none;border-bottom:2px solid var(--blue);background:transparent;color:var(--ink);
+    padding:0 2px 3px;max-width:100%;outline:none;
   }
-  .card .meta{flex:1;min-width:180px}
-  .card .name{font-family:var(--display);font-weight:600;font-size:16.5px;margin-bottom:3px;line-height:1.3}
-  .card .file{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
-  .card .actions{display:flex;gap:8px;flex-shrink:0}
+  .file{font-size:12.5px;color:var(--sub);margin-top:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
 
-  .btn{
-    display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-weight:600;font-size:13.5px;
-    border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--border-strong);
-    background:#fff;color:var(--ink);text-decoration:none;transition:background .15s,border-color .15s,color .15s;white-space:nowrap;
-  }
-  .btn:hover{background:#F5F5F8}
-  .btn.open{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn.open:hover{background:var(--accent-dark)}
-  .btn.copied{background:var(--live);color:#fff;border-color:var(--live)}
-  .btn svg{width:15px;height:15px;flex-shrink:0}
+  .links{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}
+  .lk{font-size:16px;color:var(--blue);text-decoration:none;background:none;border:none;cursor:pointer;font-family:var(--font);letter-spacing:-0.01em;display:inline-flex;align-items:center;gap:2px}
+  .lk:hover{color:var(--blue-hover);text-decoration:underline}
+  .lk .chev{font-size:15px}
+  .lk.copied{color:#1a9c50;text-decoration:none}
 
-  .state{
-    text-align:center;padding:46px 20px;color:var(--muted);font-size:15px;
-    border:1px dashed var(--border-strong);border-radius:14px;background:var(--surface);
-  }
-  .state .big{font-size:30px;display:block;margin-bottom:12px}
-  .state.err{border-color:#EAD4A8;background:var(--warn-soft);color:#6B4A14}
-  .state code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--border);padding:1px 6px;border-radius:5px}
-  .spinner{width:26px;height:26px;border:3px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  /* ---------- states ---------- */
+  .state{max-width:1024px;margin:0 auto;padding:60px 22px;text-align:center;color:var(--sub)}
+  .state .big{font-size:40px;display:block;margin-bottom:16px}
+  .state h2{font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;letter-spacing:-0.02em}
+  .state code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#fff;border:1px solid var(--hair);padding:2px 7px;border-radius:6px}
+  .state .center-spin{margin:0 auto 18px}
 
-  footer{padding:30px 0 60px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px}
+  /* ---------- footer ---------- */
+  footer{text-align:center;padding:20px 22px 60px;color:var(--sub);font-size:12px}
+  footer .exp{background:none;border:none;color:var(--blue);cursor:pointer;font-family:var(--font);font-size:12px}
+  footer .exp:hover{text-decoration:underline}
+  footer .sep{margin:0 8px;opacity:.5}
 
+  /* ---------- toast ---------- */
   .toast{
-    position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
-    background:var(--ink);color:#fff;font-size:14px;padding:11px 20px;border-radius:10px;
-    box-shadow:0 12px 30px -10px rgba(0,0,0,.4);opacity:0;pointer-events:none;
-    transition:opacity .2s,transform .2s;font-family:var(--body);z-index:50;max-width:88vw;
+    position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);
+    background:rgba(30,30,32,.94);backdrop-filter:blur(10px);color:#fff;font-size:14px;
+    padding:12px 20px;border-radius:14px;box-shadow:0 16px 40px -12px rgba(0,0,0,.45);
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;max-width:88vw;text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .toast .u{font-family:var(--mono);font-size:12px;color:#B9B3F5;display:block;margin-top:3px;word-break:break-all}
+  .toast .u{display:block;margin-top:3px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#9fc3ff;overflow-wrap:anywhere}
 
-  @media (max-width:560px){
-    .card{align-items:flex-start}
-    .card .actions{width:100%}
-    .btn{flex:1;justify-content:center}
+  @media (max-width:720px){
+    .grid{grid-template-columns:1fr;gap:18px}
+    .hero{padding:52px 22px 30px}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}.spinner{animation:none}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <span class="kicker"><span class="dot"></span>Prototypes · 原型导航</span>
-    <h1>交互原型索引</h1>
-    <p class="lede">本页会自动读取 GitHub 仓库里的所有原型,无需手动登记——新文件传上去,刷新即可见。点「复制链接」一键拿到完整可分享网址。</p>
+<nav class="nav">
+  <div class="inner">
+    <span class="brand">原型</span>
+    <span class="n" id="navCount"></span>
+  </div>
+</nav>
 
-    <div class="baseurl" id="baseBox">
-      <span class="tag">当前站点</span>
-      <span class="val" id="baseUrl">读取中…</span>
-      <button class="refresh" id="refreshBtn" title="重新读取仓库">↻ 刷新</button>
-    </div>
+<header class="hero">
+  <h1>交互原型集</h1>
+  <p>浏览、打开并分享全部原型。新发布的作品会自动出现在这里。</p>
+  <div class="hero site" id="siteBox">
+    <code id="siteUrl">读取中…</code>
+    <button class="rf" id="refreshBtn">刷新</button>
   </div>
 </header>
 
 <main>
-  <div class="wrap">
-    <p class="count" id="count"></p>
-    <div id="list"></div>
-  </div>
+  <div class="grid" id="grid"></div>
 </main>
 
-<footer>动态读取自 GitHub · 完整 URL 由当前地址自动生成</footer>
-
+<footer id="footer"></footer>
 <div class="toast" id="toast"></div>
 
 <script>
 /* =====================================================================
-   动态原型导航页
-   - 从当前 GitHub Pages 地址自动推断 owner / repo / 目录
-   - 用 GitHub 公开 API 列出仓库内所有 .html(index.html 除外)
-   - 完整 URL 由当前页面地址拼接,复制即分享
-   可选:若自动推断失败,可在下面手动填写 owner / repo
+   Apple 风格动态原型导航
+   - 从 GitHub Pages 地址自动推断 owner/repo,用公开 API 列出全部 .html
+   - 每张卡片:实时缩略预览 + 打开 + 复制完整链接 + 内联重命名
+   - 重命名:优先级 本地localStorage > 仓库 names.json > <title> > 文件名
+     本地改名即时生效(仅本机可见);点底部"复制名称配置"可导出 names.json
+     交给我发布,即可让所有人看到同样的名字。
 ===================================================================== */
-const MANUAL = { owner: "", repo: "", branch: "" };  // 一般留空即可
+const MANUAL = { owner:"", repo:"", branch:"" };
+const BASE_W = 1280;
 
-const baseHref = new URL(".", location.href).href;   // 当前目录绝对地址
-const host = location.hostname;                       // xxx.github.io
+const baseHref = new URL(".", location.href).href;
+const host = location.hostname;
 const parts = location.pathname.split("/").filter(Boolean);
-
-let owner = MANUAL.owner, repo = MANUAL.repo, dir = "";
-const branch = MANUAL.branch || "";                   // 空 = 用仓库默认分支
 const isPages = /\.github\.io$/i.test(host);
 
+let owner = MANUAL.owner, repo = MANUAL.repo, dir = "";
+const branch = MANUAL.branch || "";
 if (!owner && isPages) {
   owner = host.replace(/\.github\.io$/i, "");
-  if (parts.length === 0) {
-    // 用户主页仓库 owner.github.io,内容在该仓库根目录
-    repo = owner + ".github.io";
-    dir = "";
-  } else {
-    // 项目仓库 owner.github.io/repo/...
-    repo = parts[0];
-    dir = parts.slice(1).join("/");     // index.html 所在子目录(通常为空)
-  }
+  if (parts.length === 0) { repo = owner + ".github.io"; dir = ""; }
+  else { repo = parts[0]; dir = parts.slice(1).join("/"); }
 }
 
-const baseBox = document.getElementById("baseBox");
-const baseUrlEl = document.getElementById("baseUrl");
-const listEl = document.getElementById("list");
-const countEl = document.getElementById("count");
+const grid = document.getElementById("grid");
+const navCount = document.getElementById("navCount");
+const siteBox = document.getElementById("siteBox");
+const siteUrl = document.getElementById("siteUrl");
+const footer = document.getElementById("footer");
 document.getElementById("refreshBtn").addEventListener("click", load);
 
-const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-const openIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+const NKEY = "protonav:names:" + owner + "/" + repo;
+function loadLocalNames(){ try { return JSON.parse(localStorage.getItem(NKEY) || "{}"); } catch(e){ return {}; } }
+function saveLocalName(file, name){
+  const m = loadLocalNames();
+  if (name && name.trim()) m[file] = name.trim(); else delete m[file];
+  try { localStorage.setItem(NKEY, JSON.stringify(m)); } catch(e){}
+}
+let sharedNames = {};   // 来自仓库 names.json
 
-function setState(html, cls) {
-  listEl.innerHTML = '<div class="state ' + (cls || "") + '">' + html + '</div>';
+const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+
+function stateHTML(html){ grid.style.display="none"; footer.innerHTML=""; navCount.textContent="";
+  let s = document.getElementById("stateBox");
+  if (!s){ s=document.createElement("div"); s.id="stateBox"; s.className="state"; grid.parentNode.insertBefore(s, grid);}
+  s.innerHTML = html; s.style.display="block";
+}
+function clearState(){ const s=document.getElementById("stateBox"); if(s) s.style.display="none"; grid.style.display="grid"; }
+
+function resolveName(file, titleName){
+  const local = loadLocalNames();
+  if (local[file]) return local[file];
+  if (sharedNames[file]) return sharedNames[file];
+  if (titleName) return titleName;
+  return file.replace(/\.html?$/i, "");
 }
 
-// 顶部地址栏
-if (location.protocol === "file:") {
-  baseBox.classList.add("warn");
-  baseUrlEl.textContent = "本地预览(file://)——动态读取仅在 GitHub Pages 上生效";
-} else {
-  baseUrlEl.textContent = baseHref;
-}
+// 顶部地址
+if (location.protocol === "file:") siteUrl.textContent = "本地预览 — 上线后显示网址";
+else siteUrl.textContent = baseHref;
 
-async function load() {
-  if (location.protocol === "file:") {
-    setState('<span class="big">🖥️</span>当前是本地预览,无法读取 GitHub。<br>把本文件传到 GitHub Pages 打开后,会自动列出所有原型。');
-    countEl.textContent = "";
-    return;
-  }
-  if (!owner || !repo) {
-    setState('<span class="big">⚙️</span>无法自动识别仓库。<br>请在源码顶部的 <code>MANUAL</code> 里手动填写 owner 和 repo。', "err");
-    return;
-  }
-
-  setState('<div class="spinner"></div>正在读取 GitHub 仓库…');
-  countEl.textContent = "";
-
-  const api = "https://api.github.com/repos/" + owner + "/" + repo +
-              "/contents/" + (dir ? encodeURI(dir) : "") + (branch ? "?ref=" + branch : "");
-  let items;
-  try {
-    const res = await fetch(api, { headers: { "Accept": "application/vnd.github+json" } });
-    if (res.status === 403) throw new Error("rate");
-    if (!res.ok) throw new Error("http " + res.status);
-    items = await res.json();
-  } catch (e) {
-    const msg = e.message === "rate"
-      ? "GitHub API 访问频率超限了,请过几分钟再刷新。"
-      : "读取失败(" + e.message + ")。请确认仓库是公开的,且已开启 Pages。";
-    setState('<span class="big">⚠️</span>' + msg, "err");
-    return;
-  }
-
-  if (!Array.isArray(items)) {
-    setState('<span class="big">⚠️</span>返回数据异常,请确认仓库名和路径正确。', "err");
-    return;
-  }
-
-  const htmls = items.filter(f =>
-    f.type === "file" &&
-    /\.html?$/i.test(f.name) &&
-    f.name.toLowerCase() !== "index.html"
-  ).sort((a, b) => a.name.localeCompare(b.name));
-
-  if (htmls.length === 0) {
-    setState('<span class="big">📭</span>仓库里还没有原型文件。<br>上传一个 .html 后回来刷新即可。');
-    countEl.textContent = "";
-    return;
-  }
-
-  countEl.textContent = htmls.length + " 个原型 · 读取自 GitHub";
-  listEl.innerHTML = "";
-
-  htmls.forEach((f, i) => {
-    const fullUrl = new URL(f.name, baseHref).href;
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML =
-      '<div class="idx">' + String(i + 1).padStart(2, "0") + '</div>' +
-      '<div class="meta">' +
-        '<div class="name" data-name="' + f.name + '">' + f.name.replace(/\.html?$/i, "") + '</div>' +
-        '<div class="file">' + f.name + '</div>' +
-      '</div>' +
-      '<div class="actions">' +
-        '<button class="btn copy">' + copyIcon + '<span>复制链接</span></button>' +
-        '<a class="btn open" href="' + encodeURI(f.name) + '" target="_blank" rel="noopener">' + openIcon + '<span>打开</span></a>' +
-      '</div>';
-    card.querySelector(".copy").addEventListener("click", ev => copyUrl(fullUrl, ev.currentTarget));
-    listEl.appendChild(card);
-    fetchTitle(fullUrl, card.querySelector(".name"));
+function fitFrames(){
+  document.querySelectorAll(".preview").forEach(p=>{
+    p.style.setProperty("--s", (p.clientWidth / BASE_W).toString());
   });
 }
+let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(fitFrames, 120); });
 
-// 尝试从原型文件本身读取 <title> 作为显示名(走 Pages,不占 API 配额)
-async function fetchTitle(url, el) {
+async function load(){
+  if (location.protocol === "file:"){
+    stateHTML('<span class="big">🖥️</span><h2>本地预览中</h2><p>把本文件传到 GitHub Pages 打开后,会自动列出全部原型。</p>');
+    return;
+  }
+  if (!owner || !repo){
+    stateHTML('<span class="big">⚙️</span><h2>无法识别仓库</h2><p>请在源码顶部的 <code>MANUAL</code> 中填写 owner 和 repo。</p>');
+    return;
+  }
+  stateHTML('<div class="spin center-spin"></div><p>正在读取…</p>');
+
+  // 并行:列目录 + 读取共享名称表 names.json
+  const api = "https://api.github.com/repos/"+owner+"/"+repo+"/contents/"+(dir?encodeURI(dir):"")+(branch?"?ref="+branch:"");
+  let items;
   try {
-    const res = await fetch(url, { headers: { "Range": "bytes=0-2048" } });
+    const [listRes, nameRes] = await Promise.allSettled([
+      fetch(api, { headers:{ "Accept":"application/vnd.github+json" } }),
+      fetch(new URL("names.json", baseHref).href, { cache:"no-store" })
+    ]);
+    if (nameRes.status === "fulfilled" && nameRes.value.ok){
+      try { sharedNames = await nameRes.value.json(); } catch(e){ sharedNames = {}; }
+    }
+    if (listRes.status !== "fulfilled") throw new Error("network");
+    const res = listRes.value;
+    if (res.status === 403) throw new Error("rate");
+    if (!res.ok) throw new Error("http "+res.status);
+    items = await res.json();
+  } catch(e){
+    const msg = e.message==="rate" ? "GitHub API 访问频率超限,请过几分钟再刷新。"
+             : "读取失败。请确认仓库为公开且已开启 Pages。";
+    stateHTML('<span class="big">⚠️</span><h2>读取失败</h2><p>'+msg+'</p>');
+    return;
+  }
+  if (!Array.isArray(items)){ stateHTML('<span class="big">⚠️</span><h2>数据异常</h2><p>请确认仓库名与路径。</p>'); return; }
+
+  const htmls = items.filter(f=>f.type==="file" && /\.html?$/i.test(f.name) && f.name.toLowerCase()!=="index.html")
+                     .sort((a,b)=>a.name.localeCompare(b.name));
+  if (htmls.length === 0){
+    stateHTML('<span class="big">📭</span><h2>还没有原型</h2><p>发布一个 .html 后回来刷新即可。</p>');
+    return;
+  }
+
+  clearState();
+  grid.innerHTML = "";
+  navCount.textContent = htmls.length + " 个原型";
+
+  htmls.forEach(f=>{
+    const fullUrl = new URL(encodeURI(f.name), baseHref).href;
+    const tile = document.createElement("article");
+    tile.className = "tile";
+    tile.innerHTML =
+      '<a class="preview" href="'+encodeURI(f.name)+'" target="_blank" rel="noopener">'+
+        '<div class="load"><div class="spin"></div></div>'+
+        '<iframe loading="lazy" src="'+encodeURI(f.name)+'" title="预览" scrolling="no"></iframe>'+
+      '</a>'+
+      '<div class="info">'+
+        '<div class="name-row">'+
+          '<span class="name"></span>'+
+          '<button class="edit" title="重命名显示名称">'+editIcon+'</button>'+
+        '</div>'+
+        '<div class="file">'+f.name+'</div>'+
+        '<div class="links">'+
+          '<a class="lk" href="'+encodeURI(f.name)+'" target="_blank" rel="noopener">打开 <span class="chev">›</span></a>'+
+          '<button class="lk copy">复制链接 <span class="chev">›</span></button>'+
+        '</div>'+
+      '</div>';
+
+    const nameEl = tile.querySelector(".name");
+    const titleName = null;
+    nameEl.textContent = resolveName(f.name, titleName);
+
+    // 预览加载完成后隐藏 loading
+    const iframe = tile.querySelector("iframe");
+    const loadEl = tile.querySelector(".load");
+    iframe.addEventListener("load", ()=>{ loadEl.style.display="none"; fitFrames(); });
+    // 抓 <title> 作为默认名(仅当无自定义/共享名时)
+    fetchTitle(fullUrl, f.name, nameEl);
+
+    tile.querySelector(".copy").addEventListener("click", ev=>{ ev.preventDefault(); copyUrl(fullUrl, ev.currentTarget); });
+    tile.querySelector(".edit").addEventListener("click", ()=> beginRename(f.name, nameEl));
+
+    grid.appendChild(tile);
+  });
+  fitFrames();
+}
+
+async function fetchTitle(url, file, el){
+  const local = loadLocalNames();
+  if (local[file] || sharedNames[file]) return;   // 已有更高优先级的名字
+  try {
+    const res = await fetch(url, { headers:{ "Range":"bytes=0-4096" } });
     if (!res.ok) return;
     const text = await res.text();
     const m = text.match(/<title>([^<]*)<\/title>/i);
-    if (m && m[1].trim()) el.textContent = m[1].trim();
-  } catch (e) { /* 保持文件名即可 */ }
+    if (m && m[1].trim() && !loadLocalNames()[file] && !sharedNames[file]) el.textContent = m[1].trim();
+  } catch(e){}
+}
+
+function beginRename(file, el){
+  const row = el.parentNode;
+  const current = el.textContent;
+  const input = document.createElement("input");
+  input.className = "name-input";
+  input.value = current;
+  input.size = Math.max(current.length, 4);
+  row.replaceChild(input, el);
+  input.focus(); input.select();
+
+  let done = false;
+  const commit = (save)=>{
+    if (done) return; done = true;
+    if (save){
+      const v = input.value.trim();
+      saveLocalName(file, v);
+      el.textContent = v || file.replace(/\.html?$/i,"");
+    }
+    row.replaceChild(el, input);
+    if (save) { renderFooter(); showToast("已重命名(本机可见)· 需全局生效可导出配置", ""); }
+  };
+  input.addEventListener("keydown", e=>{
+    if (e.key==="Enter") commit(true);
+    else if (e.key==="Escape") commit(false);
+  });
+  input.addEventListener("blur", ()=> commit(true));
+}
+
+function renderFooter(){
+  const local = loadLocalNames();
+  const count = Object.keys(local).length;
+  footer.innerHTML = '动态读取自 GitHub · 完整链接由地址自动生成' +
+    (count ? '<span class="sep">·</span><button class="exp" id="expBtn">复制名称配置 (names.json)</button>' : '');
+  const b = document.getElementById("expBtn");
+  if (b) b.addEventListener("click", ()=>{
+    const merged = Object.assign({}, sharedNames, loadLocalNames());
+    const json = JSON.stringify(merged, null, 2);
+    navigator.clipboard && navigator.clipboard.writeText(json).catch(()=>{});
+    showToast("已复制 names.json 内容 · 发给我即可全局生效", "");
+  });
 }
 
 const toast = document.getElementById("toast");
 let toastTimer;
-function showToast(url) {
-  toast.innerHTML = "链接已复制 ✓<span class='u'>" + url + "</span>";
+function showToast(msg, url){
+  toast.innerHTML = msg + (url ? "<span class='u'>"+url+"</span>" : "");
   toast.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  toastTimer = setTimeout(()=> toast.classList.remove("show"), 2800);
 }
 
-function copyUrl(url, btn) {
-  const done = () => {
-    const label = btn.querySelector("span");
-    const old = label.textContent;
-    btn.classList.add("copied");
-    label.textContent = "已复制";
-    showToast(url);
-    setTimeout(() => { btn.classList.remove("copied"); label.textContent = old; }, 1800);
+function copyUrl(url, btn){
+  const done = ()=>{
+    const old = btn.innerHTML;
+    btn.classList.add("copied"); btn.textContent = "已复制 ✓";
+    showToast("链接已复制", url);
+    setTimeout(()=>{ btn.classList.remove("copied"); btn.innerHTML = old; }, 1800);
   };
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
-  } else {
-    fallbackCopy(url, done);
-  }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done).catch(()=>fallback(url,done));
+  else fallback(url, done);
 }
-function fallbackCopy(text, done) {
-  const ta = document.createElement("textarea");
-  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+function fallback(text, done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
   document.body.appendChild(ta); ta.select();
-  try { document.execCommand("copy"); done(); }
-  catch (e) { prompt("请手动复制链接:", text); }
+  try{ document.execCommand("copy"); done(); }catch(e){ prompt("复制链接:", text); }
   document.body.removeChild(ta);
 }
 
+renderFooter();
 load();
 </script>
 </body>
