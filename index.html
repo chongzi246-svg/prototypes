@@ -12,7 +12,7 @@
     color-scheme: light;
     --bg:#FBFBFD; --ink:#16181D; --muted:#6B6B7B;
     --accent:#5B4BE8; --accent-dark:#4536C4; --accent-soft:#EEEBFF;
-    --live:#12A150; --live-soft:#E4F5EC;
+    --live:#12A150; --live-soft:#E4F5EC; --warn:#B4690E; --warn-soft:#FBF1E1;
     --surface:#FFFFFF; --border:#E7E7EE; --border-strong:#D4D4DE;
     --display:"Space Grotesk","PingFang SC","Microsoft YaHei",sans-serif;
     --body:"Inter","PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
@@ -42,9 +42,14 @@
   }
   .baseurl .tag{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
   .baseurl .val{font-family:var(--mono);font-size:13px;color:var(--accent-dark);flex:1;min-width:180px;word-break:break-all}
-  .baseurl.local .val{color:var(--muted)}
+  .baseurl.warn .val{color:var(--warn)}
+  .refresh{
+    background:none;border:1px solid var(--border-strong);border-radius:8px;cursor:pointer;
+    color:var(--muted);font-family:var(--body);font-size:12.5px;padding:5px 11px;display:inline-flex;align-items:center;gap:6px;
+  }
+  .refresh:hover{background:#F5F5F8;color:var(--ink)}
 
-  main{padding:38px 0 20px}
+  main{padding:34px 0 20px;min-height:180px}
   .count{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.04em;margin-bottom:18px}
 
   .card{
@@ -74,14 +79,15 @@
   .btn.copied{background:var(--live);color:#fff;border-color:var(--live)}
   .btn svg{width:15px;height:15px;flex-shrink:0}
 
-  .hint{
-    display:flex;gap:12px;align-items:flex-start;margin-top:26px;
-    background:var(--accent-soft);border:1px solid #D9D3FA;border-radius:12px;padding:15px 18px;
-    font-size:14px;color:#3D338F;
+  .state{
+    text-align:center;padding:46px 20px;color:var(--muted);font-size:15px;
+    border:1px dashed var(--border-strong);border-radius:14px;background:var(--surface);
   }
-  .hint .ic{flex-shrink:0;font-size:16px;line-height:1.5}
-  .hint b{color:var(--accent-dark)}
-  .hint code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid #D9D3FA;padding:1px 6px;border-radius:5px}
+  .state .big{font-size:30px;display:block;margin-bottom:12px}
+  .state.err{border-color:#EAD4A8;background:var(--warn-soft);color:#6B4A14}
+  .state code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--border);padding:1px 6px;border-radius:5px}
+  .spinner{width:26px;height:26px;border:3px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
   footer{padding:30px 0 60px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px}
 
@@ -99,7 +105,7 @@
     .card .actions{width:100%}
     .btn{flex:1;justify-content:center}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}.spinner{animation:none}}
 </style>
 </head>
 <body>
@@ -108,11 +114,12 @@
   <div class="wrap">
     <span class="kicker"><span class="dot"></span>Prototypes · 原型导航</span>
     <h1>交互原型索引</h1>
-    <p class="lede">点「打开」直接查看原型;点「复制链接」一键拿到该原型的<b>完整可分享网址</b>,粘到文档里发给别人即可。链接由当前页面地址自动生成,无需手动拼接。</p>
+    <p class="lede">本页会自动读取 GitHub 仓库里的所有原型,无需手动登记——新文件传上去,刷新即可见。点「复制链接」一键拿到完整可分享网址。</p>
 
     <div class="baseurl" id="baseBox">
       <span class="tag">当前站点</span>
       <span class="val" id="baseUrl">读取中…</span>
+      <button class="refresh" id="refreshBtn" title="重新读取仓库">↻ 刷新</button>
     </div>
   </div>
 </header>
@@ -121,105 +128,180 @@
   <div class="wrap">
     <p class="count" id="count"></p>
     <div id="list"></div>
-
-    <div class="hint">
-      <span class="ic">💡</span>
-      <div>
-        <b>新增原型怎么办?</b> 把新的 .html 文件丢进这个文件夹,然后在本文件顶部的 <code>PROTOTYPES</code> 列表里加一行即可(照着已有的格式填 file 和 name)。<br>
-        <b>本地预览时</b>复制到的会是 <code>file:///…</code> 地址(只能自己打开);等这个文件夹传到 GitHub Pages 后,复制到的就是真正的 <code>https://…</code> 在线链接。
-      </div>
-    </div>
   </div>
 </main>
 
-<footer>原型导航页 · 由当前地址自动生成完整 URL</footer>
+<footer>动态读取自 GitHub · 完整 URL 由当前地址自动生成</footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ===================================================================
-     原型清单 —— 新增原型时,在这里照格式加一行即可
-     file: 文件名(和实际文件一致)   name: 显示名称
-  =================================================================== */
-  const PROTOTYPES = [
-    { file: "supertable-capabilities.html",        name: "超级大表 · 目标 / 阈值 / 圈选留言 能力设计" },
-    { file: "table_collaboration_prototype.html",  name: "表格协作 · 留言反馈 & 设置待办" },
-    { file: "jingme_push_drawer_prototype.html",   name: "京me 推送抽屉" },
-    { file: "formula_to_sql_prototype.html",       name: "公式转 SQL 计算" },
-  ];
-  /* =================================================================== */
+/* =====================================================================
+   动态原型导航页
+   - 从当前 GitHub Pages 地址自动推断 owner / repo / 目录
+   - 用 GitHub 公开 API 列出仓库内所有 .html(index.html 除外)
+   - 完整 URL 由当前页面地址拼接,复制即分享
+   可选:若自动推断失败,可在下面手动填写 owner / repo
+===================================================================== */
+const MANUAL = { owner: "", repo: "", branch: "" };  // 一般留空即可
 
-  // 计算当前目录的绝对地址(去掉 index.html 本身)
-  const baseHref = new URL(".", location.href).href;
-  const isLocal = location.protocol === "file:";
+const baseHref = new URL(".", location.href).href;   // 当前目录绝对地址
+const host = location.hostname;                       // xxx.github.io
+const parts = location.pathname.split("/").filter(Boolean);
 
-  // 顶部展示站点地址
-  const baseBox = document.getElementById("baseBox");
-  const baseUrlEl = document.getElementById("baseUrl");
-  if (isLocal) {
-    baseBox.classList.add("local");
-    baseUrlEl.textContent = "本地预览中(file://)— 传到 GitHub Pages 后这里会显示在线网址";
+let owner = MANUAL.owner, repo = MANUAL.repo, dir = "";
+const branch = MANUAL.branch || "";                   // 空 = 用仓库默认分支
+const isPages = /\.github\.io$/i.test(host);
+
+if (!owner && isPages) {
+  owner = host.replace(/\.github\.io$/i, "");
+  if (parts.length === 0) {
+    // 用户主页仓库 owner.github.io,内容在该仓库根目录
+    repo = owner + ".github.io";
+    dir = "";
   } else {
-    baseUrlEl.textContent = baseHref;
+    // 项目仓库 owner.github.io/repo/...
+    repo = parts[0];
+    dir = parts.slice(1).join("/");     // index.html 所在子目录(通常为空)
+  }
+}
+
+const baseBox = document.getElementById("baseBox");
+const baseUrlEl = document.getElementById("baseUrl");
+const listEl = document.getElementById("list");
+const countEl = document.getElementById("count");
+document.getElementById("refreshBtn").addEventListener("click", load);
+
+const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const openIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+function setState(html, cls) {
+  listEl.innerHTML = '<div class="state ' + (cls || "") + '">' + html + '</div>';
+}
+
+// 顶部地址栏
+if (location.protocol === "file:") {
+  baseBox.classList.add("warn");
+  baseUrlEl.textContent = "本地预览(file://)——动态读取仅在 GitHub Pages 上生效";
+} else {
+  baseUrlEl.textContent = baseHref;
+}
+
+async function load() {
+  if (location.protocol === "file:") {
+    setState('<span class="big">🖥️</span>当前是本地预览,无法读取 GitHub。<br>把本文件传到 GitHub Pages 打开后,会自动列出所有原型。');
+    countEl.textContent = "";
+    return;
+  }
+  if (!owner || !repo) {
+    setState('<span class="big">⚙️</span>无法自动识别仓库。<br>请在源码顶部的 <code>MANUAL</code> 里手动填写 owner 和 repo。', "err");
+    return;
   }
 
-  const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-  const openIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  setState('<div class="spinner"></div>正在读取 GitHub 仓库…');
+  countEl.textContent = "";
 
-  const list = document.getElementById("list");
-  document.getElementById("count").textContent = PROTOTYPES.length + " 个原型";
+  const api = "https://api.github.com/repos/" + owner + "/" + repo +
+              "/contents/" + (dir ? encodeURI(dir) : "") + (branch ? "?ref=" + branch : "");
+  let items;
+  try {
+    const res = await fetch(api, { headers: { "Accept": "application/vnd.github+json" } });
+    if (res.status === 403) throw new Error("rate");
+    if (!res.ok) throw new Error("http " + res.status);
+    items = await res.json();
+  } catch (e) {
+    const msg = e.message === "rate"
+      ? "GitHub API 访问频率超限了,请过几分钟再刷新。"
+      : "读取失败(" + e.message + ")。请确认仓库是公开的,且已开启 Pages。";
+    setState('<span class="big">⚠️</span>' + msg, "err");
+    return;
+  }
 
-  PROTOTYPES.forEach((p, i) => {
-    const fullUrl = new URL(p.file, baseHref).href;
+  if (!Array.isArray(items)) {
+    setState('<span class="big">⚠️</span>返回数据异常,请确认仓库名和路径正确。', "err");
+    return;
+  }
+
+  const htmls = items.filter(f =>
+    f.type === "file" &&
+    /\.html?$/i.test(f.name) &&
+    f.name.toLowerCase() !== "index.html"
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  if (htmls.length === 0) {
+    setState('<span class="big">📭</span>仓库里还没有原型文件。<br>上传一个 .html 后回来刷新即可。');
+    countEl.textContent = "";
+    return;
+  }
+
+  countEl.textContent = htmls.length + " 个原型 · 读取自 GitHub";
+  listEl.innerHTML = "";
+
+  htmls.forEach((f, i) => {
+    const fullUrl = new URL(f.name, baseHref).href;
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `
-      <div class="idx">${String(i + 1).padStart(2, "0")}</div>
-      <div class="meta">
-        <div class="name">${p.name}</div>
-        <div class="file">${p.file}</div>
-      </div>
-      <div class="actions">
-        <button class="btn copy">${copyIcon}<span>复制链接</span></button>
-        <a class="btn open" href="${p.file}" target="_blank" rel="noopener">${openIcon}<span>打开</span></a>
-      </div>`;
-    const copyBtn = card.querySelector(".copy");
-    copyBtn.addEventListener("click", () => copyUrl(fullUrl, copyBtn));
-    list.appendChild(card);
+    card.innerHTML =
+      '<div class="idx">' + String(i + 1).padStart(2, "0") + '</div>' +
+      '<div class="meta">' +
+        '<div class="name" data-name="' + f.name + '">' + f.name.replace(/\.html?$/i, "") + '</div>' +
+        '<div class="file">' + f.name + '</div>' +
+      '</div>' +
+      '<div class="actions">' +
+        '<button class="btn copy">' + copyIcon + '<span>复制链接</span></button>' +
+        '<a class="btn open" href="' + encodeURI(f.name) + '" target="_blank" rel="noopener">' + openIcon + '<span>打开</span></a>' +
+      '</div>';
+    card.querySelector(".copy").addEventListener("click", ev => copyUrl(fullUrl, ev.currentTarget));
+    listEl.appendChild(card);
+    fetchTitle(fullUrl, card.querySelector(".name"));
   });
+}
 
-  const toast = document.getElementById("toast");
-  let toastTimer;
-  function showToast(url) {
-    toast.innerHTML = "链接已复制 ✓<span class='u'>" + url + "</span>";
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
-  }
+// 尝试从原型文件本身读取 <title> 作为显示名(走 Pages,不占 API 配额)
+async function fetchTitle(url, el) {
+  try {
+    const res = await fetch(url, { headers: { "Range": "bytes=0-2048" } });
+    if (!res.ok) return;
+    const text = await res.text();
+    const m = text.match(/<title>([^<]*)<\/title>/i);
+    if (m && m[1].trim()) el.textContent = m[1].trim();
+  } catch (e) { /* 保持文件名即可 */ }
+}
 
-  function copyUrl(url, btn) {
-    const done = () => {
-      const label = btn.querySelector("span");
-      const old = label.textContent;
-      btn.classList.add("copied");
-      label.textContent = "已复制";
-      showToast(url);
-      setTimeout(() => { btn.classList.remove("copied"); label.textContent = old; }, 1800);
-    };
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
-    } else {
-      fallbackCopy(url, done);
-    }
+const toast = document.getElementById("toast");
+let toastTimer;
+function showToast(url) {
+  toast.innerHTML = "链接已复制 ✓<span class='u'>" + url + "</span>";
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+function copyUrl(url, btn) {
+  const done = () => {
+    const label = btn.querySelector("span");
+    const old = label.textContent;
+    btn.classList.add("copied");
+    label.textContent = "已复制";
+    showToast(url);
+    setTimeout(() => { btn.classList.remove("copied"); label.textContent = old; }, 1800);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+  } else {
+    fallbackCopy(url, done);
   }
-  function fallbackCopy(text, done) {
-    const ta = document.createElement("textarea");
-    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); done(); }
-    catch (e) { prompt("请手动复制链接:", text); }
-    document.body.removeChild(ta);
-  }
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); done(); }
+  catch (e) { prompt("请手动复制链接:", text); }
+  document.body.removeChild(ta);
+}
+
+load();
 </script>
 </body>
 </html>
