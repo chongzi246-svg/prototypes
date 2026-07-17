@@ -21,7 +21,6 @@
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{background:var(--cream);color:var(--ink);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.005em;position:relative}
 
-  /* film grain overlay */
   .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.10;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
   .nav{position:sticky;top:0;z-index:100;height:50px;background:rgba(241,236,220,.72);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-bottom:1px solid var(--line-soft);display:flex;align-items:center}
@@ -29,7 +28,6 @@
   .nav .brand{font-size:18px;font-weight:600;letter-spacing:.14em;padding-left:.14em}
   .nav .n{font-size:12.5px;color:var(--sub);letter-spacing:.02em}
 
-  /* hero with floating color blobs */
   .hero{position:relative;text-align:center;padding:84px 24px 40px;overflow:hidden}
   .blobs{position:absolute;inset:-40px 0 auto 0;height:340px;z-index:0;pointer-events:none}
   .blob{position:absolute;border-radius:50%;filter:blur(48px);opacity:.5;mix-blend-mode:multiply}
@@ -47,9 +45,11 @@
   .site code{font-family:var(--mono);font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .site .rf{border:none;background:rgba(120,100,66,.1);border-radius:999px;padding:5px 13px;font-family:var(--font);font-size:12.5px;color:var(--accent);cursor:pointer;flex-shrink:0}
   .site .rf:hover{background:rgba(120,100,66,.18)}
+  .site .rf:disabled{opacity:.5;cursor:default}
 
-  .toolbar{position:relative;z-index:2;max-width:1040px;margin:0 auto;padding:8px 24px 0;display:flex;justify-content:flex-end;align-items:center}
-  .seg{display:inline-flex;background:rgba(120,100,66,.12);border-radius:11px;padding:3px;gap:3px}
+  .toolbar{position:relative;z-index:2;max-width:1040px;margin:0 auto;padding:8px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:14px}
+  .updated{font-size:12.5px;color:var(--sub);letter-spacing:.01em}
+  .seg{display:inline-flex;background:rgba(120,100,66,.12);border-radius:11px;padding:3px;gap:3px;flex-shrink:0}
   .seg button{border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--ink);cursor:pointer;padding:6px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;transition:background .2s,box-shadow .2s;letter-spacing:.01em}
   .seg button svg{width:15px;height:15px}
   .seg button.active{background:var(--cream-soft);box-shadow:0 1px 4px rgba(90,70,40,.16);font-weight:600}
@@ -83,7 +83,6 @@
   .lk .chev{font-size:15px}
   .lk.copied{color:var(--green);text-decoration:none}
 
-  /* list view */
   .grid.list{display:flex;flex-direction:column;gap:14px}
   .grid.list .tile{flex-direction:row;align-items:stretch}
   .grid.list .tile:hover{transform:none;box-shadow:0 16px 34px -20px rgba(90,70,40,.45)}
@@ -100,6 +99,8 @@
   .state h2{font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px}
   .state code{font-family:var(--mono);font-size:13px;background:var(--cream-soft);border:1px solid var(--line);padding:2px 7px;border-radius:6px}
   .state .center-spin{margin:0 auto 18px}
+  .state .btn{margin-top:18px;border:1px solid var(--line);background:var(--cream-soft);color:var(--accent);font-family:var(--font);font-size:14px;padding:9px 20px;border-radius:999px;cursor:pointer}
+  .state .btn:hover{background:#fff}
 
   footer{position:relative;z-index:2;text-align:center;padding:20px 24px 64px;color:var(--sub);font-size:12px}
   footer .exp{background:none;border:none;color:var(--accent);cursor:pointer;font-family:var(--font);font-size:12px}
@@ -130,7 +131,7 @@
   <div class="hero-in">
     <div class="eyebrow">Prototypes</div>
     <h1>交互原型集</h1>
-    <p>浏览、打开并分享全部原型。新发布的作品会自动出现在这里。</p>
+    <p>浏览、打开并分享全部原型。新发布的作品点「刷新」后出现。</p>
     <div class="site" id="siteBox">
       <code id="siteUrl">读取中…</code>
       <button class="rf" id="refreshBtn">刷新</button>
@@ -139,6 +140,7 @@
 </header>
 
 <div class="toolbar" id="toolbar" style="display:none">
+  <span class="updated" id="updated"></span>
   <div class="seg" role="tablist" aria-label="视图切换">
     <button id="viewGrid" data-view="grid" aria-label="图标视图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>图标
@@ -156,11 +158,10 @@
 
 <script>
 /* =====================================================================
-   动态原型导航(Маніфест 配色)
-   - 自动从 GitHub Pages 地址推断 owner/repo,公开 API 列出全部 .html
-   - 卡片:实时预览 + 打开 + 复制完整链接 + 内联重命名 + 更新时间
-   - 视图:图标 / 列表 可切换(存 localStorage)
-   - 更新时间:该文件最近一次提交时间,按 sha 缓存以减少 API 请求
+   动态原型导航(超级大表 · 缓存优先)
+   - 平时打开只读本地缓存,不调用 GitHub API(避免匿名 60 次/小时限流)
+   - 仅"首次无缓存"或用户点「刷新」时才真正拉取 GitHub 并更新缓存
+   - 更新时间按文件 sha 缓存,标题从 Pages 抓取(不占 API 额度)
    - 重命名优先级:本地 localStorage > 仓库 names.json > <title> > 文件名
 ===================================================================== */
 const MANUAL = { owner:"", repo:"", branch:"" };
@@ -184,8 +185,11 @@ const navCount = document.getElementById("navCount");
 const siteUrl = document.getElementById("siteUrl");
 const footer = document.getElementById("footer");
 const toolbar = document.getElementById("toolbar");
-document.getElementById("refreshBtn").addEventListener("click", load);
+const updatedEl = document.getElementById("updated");
+const refreshBtn = document.getElementById("refreshBtn");
+refreshBtn.addEventListener("click", ()=>fetchFresh(true));
 
+/* ---- 视图切换 ---- */
 const VKEY = "protonav:view";
 function getView(){ try { return localStorage.getItem(VKEY) === "list" ? "list" : "grid"; } catch(e){ return "grid"; } }
 function applyView(v){
@@ -198,6 +202,7 @@ function applyView(v){
 document.getElementById("viewGrid").addEventListener("click", ()=>applyView("grid"));
 document.getElementById("viewList").addEventListener("click", ()=>applyView("list"));
 
+/* ---- 名称(重命名)---- */
 const NKEY = "protonav:names:" + owner + "/" + repo;
 function loadLocalNames(){ try { return JSON.parse(localStorage.getItem(NKEY) || "{}"); } catch(e){ return {}; } }
 function saveLocalName(file, name){
@@ -214,12 +219,18 @@ function resolveName(file, titleName){
   return file.replace(/\.html?$/i, "");
 }
 
+/* ---- 缓存 ---- */
+const CKEY = "protonav:cache:" + owner + "/" + repo;
+function loadCache(){ try { return JSON.parse(localStorage.getItem(CKEY) || "null"); } catch(e){ return null; } }
+function saveCache(items){ try { localStorage.setItem(CKEY, JSON.stringify({ ts: Date.now(), items, sharedNames })); } catch(e){} }
+
 const editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 
 function stateHTML(html){ grid.style.display="none"; toolbar.style.display="none"; footer.innerHTML=""; navCount.textContent="";
   let s = document.getElementById("stateBox");
   if (!s){ s=document.createElement("div"); s.id="stateBox"; s.className="state"; grid.parentNode.insertBefore(s, grid); }
   s.innerHTML = html; s.style.display="block";
+  const rb = document.getElementById("stateRetry"); if (rb) rb.addEventListener("click", ()=>fetchFresh(true));
 }
 function clearState(){ const s=document.getElementById("stateBox"); if(s) s.style.display="none"; grid.style.display=""; }
 
@@ -229,74 +240,27 @@ else siteUrl.textContent = baseHref;
 function fitFrames(){ document.querySelectorAll(".preview").forEach(p=> p.style.setProperty("--s",(p.clientWidth/BASE_W).toString())); }
 let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(fitFrames,120); });
 
-function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"); return y+"-"+m+"-"+day; }
-
-async function fetchDate(rpath, sha, el){
-  const ck = "protonav:date:" + sha;
-  let iso = null;
-  try { iso = localStorage.getItem(ck); } catch(e){}
-  if (!iso){
-    try {
-      const u = "https://api.github.com/repos/"+owner+"/"+repo+"/commits?path="+encodeURIComponent(rpath)+"&per_page=1"+(branch?"&sha="+branch:"");
-      const r = await fetch(u, { headers:{ "Accept":"application/vnd.github+json" } });
-      if (!r.ok) return;
-      const arr = await r.json();
-      if (Array.isArray(arr) && arr[0]) iso = arr[0].commit.committer.date;
-      if (iso){ try { localStorage.setItem(ck, iso); } catch(e){} }
-    } catch(e){ return; }
-  }
-  if (iso) el.textContent = "更新于 " + fmtDate(iso);
+function pad(n){ return String(n).padStart(2,"0"); }
+function fmtDate(iso){ const d=new Date(iso); if(isNaN(d)) return ""; return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function fmtStamp(ts){ const d=new Date(ts); if(isNaN(d)) return ""; return pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+function setUpdated(ts, fromCache){
+  if (!ts){ updatedEl.textContent=""; return; }
+  updatedEl.textContent = (fromCache ? "缓存于 " : "已更新 ") + fmtStamp(ts) + " · 点「刷新」获取最新";
 }
 
-async function fetchTitle(url, file, el){
-  if (loadLocalNames()[file] || sharedNames[file]) return;
-  try {
-    const res = await fetch(url, { headers:{ "Range":"bytes=0-4096" } });
-    if (!res.ok) return;
-    const text = await res.text();
-    const m = text.match(/<title>([^<]*)<\/title>/i);
-    if (m && m[1].trim() && !loadLocalNames()[file] && !sharedNames[file]) el.textContent = m[1].trim();
-  } catch(e){}
-}
-
-async function load(){
-  if (location.protocol === "file:"){ stateHTML('<span class="big">🖥️</span><h2>本地预览中</h2><p>把本文件传到 GitHub Pages 打开后,会自动列出全部原型。</p>'); return; }
-  if (!owner || !repo){ stateHTML('<span class="big">⚙️</span><h2>无法识别仓库</h2><p>请在源码顶部 <code>MANUAL</code> 中填写 owner 和 repo。</p>'); return; }
-  stateHTML('<div class="spin center-spin"></div><p>正在读取…</p>');
-
-  const api = "https://api.github.com/repos/"+owner+"/"+repo+"/contents/"+(dir?encodeURI(dir):"")+(branch?"?ref="+branch:"");
-  let items;
-  try {
-    const [listRes, nameRes] = await Promise.allSettled([
-      fetch(api, { headers:{ "Accept":"application/vnd.github+json" } }),
-      fetch(new URL("names.json", baseHref).href, { cache:"no-store" })
-    ]);
-    if (nameRes.status === "fulfilled" && nameRes.value.ok){ try { sharedNames = await nameRes.value.json(); } catch(e){ sharedNames = {}; } }
-    if (listRes.status !== "fulfilled") throw new Error("network");
-    const res = listRes.value;
-    if (res.status === 403) throw new Error("rate");
-    if (!res.ok) throw new Error("http "+res.status);
-    items = await res.json();
-  } catch(e){
-    const msg = e.message==="rate" ? "GitHub API 访问频率超限,请过几分钟再刷新。" : "读取失败。请确认仓库为公开且已开启 Pages。";
-    stateHTML('<span class="big">⚠️</span><h2>读取失败</h2><p>'+msg+'</p>'); return;
-  }
-  if (!Array.isArray(items)){ stateHTML('<span class="big">⚠️</span><h2>数据异常</h2><p>请确认仓库名与路径。</p>'); return; }
-
-  const htmls = items.filter(f=>f.type==="file" && /\.html?$/i.test(f.name) && f.name.toLowerCase()!=="index.html")
-                     .sort((a,b)=>a.name.localeCompare(b.name));
-  if (htmls.length === 0){ stateHTML('<span class="big">📭</span><h2>还没有原型</h2><p>发布一个 .html 后回来刷新即可。</p>'); return; }
-
+/* ---- 渲染 ---- */
+let hasRendered = false;
+function renderItems(items){
   clearState();
   toolbar.style.display = "flex";
   applyView(getView());
   grid.innerHTML = "";
-  navCount.textContent = htmls.length + " 个原型";
+  navCount.textContent = items.length + " 个原型";
+  hasRendered = items.length > 0;
 
-  htmls.forEach(f=>{
-    const enc = encodeURI(f.name);
+  items.forEach(it=>{
+    const enc = encodeURI(it.name);
     const fullUrl = new URL(enc, baseHref).href;
-    const rpath = (dir && dir!=="null" ? dir+"/" : "") + f.name;
     const tile = document.createElement("article");
     tile.className = "tile";
     tile.innerHTML =
@@ -307,29 +271,115 @@ async function load(){
       '<div class="info">'+
         '<div class="info-main">'+
           '<div class="head"><span class="name"></span><button class="edit" title="重命名显示名称">'+editIcon+'</button></div>'+
-          '<div class="meta"><span class="file">'+f.name+'</span><span class="date"></span></div>'+
+          '<div class="meta"><span class="file">'+it.name+'</span><span class="date">'+(it.date?("更新于 "+fmtDate(it.date)):"")+'</span></div>'+
         '</div>'+
         '<div class="links">'+
           '<a class="lk" href="'+enc+'" target="_blank" rel="noopener">打开 <span class="chev">›</span></a>'+
           '<button class="lk copy">复制链接 <span class="chev">›</span></button>'+
         '</div>'+
       '</div>';
-
     const nameEl = tile.querySelector(".name");
-    nameEl.textContent = resolveName(f.name, null);
+    nameEl.textContent = resolveName(it.name, it.title);
     const loadEl = tile.querySelector(".load");
     tile.querySelector("iframe").addEventListener("load", ()=>{ loadEl.style.display="none"; fitFrames(); });
-
-    fetchTitle(fullUrl, f.name, nameEl);
-    fetchDate(rpath, f.sha, tile.querySelector(".date"));
-
     tile.querySelector(".copy").addEventListener("click", ev=>{ ev.preventDefault(); copyUrl(fullUrl, ev.currentTarget); });
-    tile.querySelector(".edit").addEventListener("click", ()=> beginRename(f.name, nameEl));
+    tile.querySelector(".edit").addEventListener("click", ()=> beginRename(it.name, nameEl));
     grid.appendChild(tile);
   });
   fitFrames();
+  renderFooter();
 }
 
+/* ---- 拉取(仅首次无缓存或点刷新时)---- */
+async function resolveMeta(it){
+  // 更新时间:按 sha 缓存,仅新文件调用 commits API
+  const dk = "protonav:date:" + it.sha;
+  let d=null; try { d=localStorage.getItem(dk); } catch(e){}
+  if (!d){
+    try {
+      const rp = (dir && dir!=="null" ? dir+"/" : "") + it.name;
+      const u = "https://api.github.com/repos/"+owner+"/"+repo+"/commits?path="+encodeURIComponent(rp)+"&per_page=1"+(branch?"&sha="+branch:"");
+      const r = await fetch(u, { headers:{ "Accept":"application/vnd.github+json" } });
+      if (r.ok){ const a=await r.json(); if(Array.isArray(a)&&a[0]) d=a[0].commit.committer.date; if(d){ try{localStorage.setItem(dk,d);}catch(e){} } }
+    } catch(e){}
+  }
+  it.date = d || "";
+  // 标题:从 Pages 抓取(不占 API 额度),按 sha 缓存
+  const tk = "protonav:title:" + it.sha;
+  let t=null; try { t=localStorage.getItem(tk); } catch(e){}
+  if (!t){
+    try {
+      const r = await fetch(new URL(encodeURI(it.name), baseHref).href, { headers:{ "Range":"bytes=0-4096" } });
+      if (r.ok){ const text=await r.text(); const m=text.match(/<title>([^<]*)<\/title>/i); if(m&&m[1].trim()){ t=m[1].trim(); try{localStorage.setItem(tk,t);}catch(e){} } }
+    } catch(e){}
+  }
+  it.title = t || "";
+}
+
+async function fetchFresh(userTriggered){
+  if (location.protocol === "file:"){ stateHTML('<span class="big">🖥️</span><h2>本地预览中</h2><p>把本文件传到 GitHub Pages 打开后,点刷新即可列出全部原型。</p>'); return; }
+  if (!owner || !repo){ stateHTML('<span class="big">⚙️</span><h2>无法识别仓库</h2><p>请在源码顶部 <code>MANUAL</code> 中填写 owner 和 repo。</p>'); return; }
+
+  refreshBtn.disabled = true;
+  const prevText = refreshBtn.textContent;
+  refreshBtn.textContent = "刷新中…";
+  if (!hasRendered) stateHTML('<div class="spin center-spin"></div><p>正在读取…</p>');
+
+  const api = "https://api.github.com/repos/"+owner+"/"+repo+"/contents/"+(dir?encodeURI(dir):"")+(branch?"?ref="+branch:"");
+  try {
+    const [listRes, nameRes] = await Promise.allSettled([
+      fetch(api, { headers:{ "Accept":"application/vnd.github+json" } }),
+      fetch(new URL("names.json", baseHref).href, { cache:"no-store" })
+    ]);
+    if (nameRes.status === "fulfilled" && nameRes.value.ok){ try { sharedNames = await nameRes.value.json(); } catch(e){ sharedNames = {}; } }
+    if (listRes.status !== "fulfilled") throw new Error("network");
+    const res = listRes.value;
+    if (res.status === 403) throw new Error("rate");
+    if (!res.ok) throw new Error("http "+res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error("shape");
+
+    const items = data.filter(f=>f.type==="file" && /\.html?$/i.test(f.name) && f.name.toLowerCase()!=="index.html")
+                      .sort((a,b)=>a.name.localeCompare(b.name))
+                      .map(f=>({ name:f.name, sha:f.sha, title:"", date:"" }));
+
+    if (items.length === 0){ stateHTML('<span class="big">📭</span><h2>还没有原型</h2><p>发布一个 .html 后点刷新即可。</p>'); saveCache([]); setUpdated(Date.now(), false); return; }
+
+    await Promise.all(items.map(resolveMeta));
+    saveCache(items);
+    renderItems(items);
+    setUpdated(Date.now(), false);
+    if (userTriggered) showToast("已刷新 ✓", "");
+  } catch(e){
+    const cache = loadCache();
+    const msg = e.message==="rate" ? "GitHub API 访问频率超限,过几分钟再刷新。" : "刷新失败,请稍后再试。";
+    if (cache && Array.isArray(cache.items) && cache.items.length){
+      // 有缓存:保留当前显示,仅提示
+      showToast(msg + " 仍在显示上次缓存。", "");
+    } else {
+      stateHTML('<span class="big">⚠️</span><h2>读取失败</h2><p>'+msg+'</p><button class="btn" id="stateRetry">重试</button>');
+    }
+  } finally {
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = prevText;
+  }
+}
+
+/* ---- 初始化:优先渲染缓存,不自动调 API ---- */
+function init(){
+  if (location.protocol === "file:"){ stateHTML('<span class="big">🖥️</span><h2>本地预览中</h2><p>把本文件传到 GitHub Pages 打开后,点刷新即可列出全部原型。</p>'); return; }
+  if (!owner || !repo){ stateHTML('<span class="big">⚙️</span><h2>无法识别仓库</h2><p>请在源码顶部 <code>MANUAL</code> 中填写 owner 和 repo。</p>'); return; }
+  const c = loadCache();
+  if (c && Array.isArray(c.items)){
+    sharedNames = c.sharedNames || {};
+    if (c.items.length){ renderItems(c.items); setUpdated(c.ts, true); }
+    else { stateHTML('<span class="big">📭</span><h2>还没有原型</h2><p>发布一个 .html 后点刷新即可。</p>'); }
+  } else {
+    fetchFresh(false);   // 首次无缓存,拉一次
+  }
+}
+
+/* ---- 重命名 ---- */
 function beginRename(file, el){
   const row = el.parentNode;
   const current = el.textContent;
@@ -349,7 +399,7 @@ function beginRename(file, el){
 
 function renderFooter(){
   const count = Object.keys(loadLocalNames()).length;
-  footer.innerHTML = '动态读取自 GitHub · 完整链接由地址自动生成' +
+  footer.innerHTML = '缓存优先 · 点刷新拉取最新' +
     (count ? '<span class="sep">·</span><button class="exp" id="expBtn">复制名称配置 (names.json)</button>' : '');
   const b = document.getElementById("expBtn");
   if (b) b.addEventListener("click", ()=>{
@@ -380,7 +430,7 @@ function fallback(text, done){
 }
 
 renderFooter();
-load();
+init();
 </script>
 </body>
 </html>
