@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>采销工作台 - 选择报表 / 查看报告 交互原型</title>
+<style>
+  :root { color-scheme: light; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#c9ccd4; color:#1f2329; display:flex; justify-content:center; padding:14px; }
+  .app { width:1600px; height:1000px; background:#f4f5f7; border-radius:12px; overflow:hidden; box-shadow:0 12px 50px rgba(0,0,0,.2); display:flex; flex-direction:column; position:relative; }
+
+  .chrome { display:flex; align-items:center; gap:10px; background:linear-gradient(90deg,#e7dcc9,#e9e2f2); padding:8px 14px; }
+  .lights { display:flex; gap:7px; } .lights i { width:12px; height:12px; border-radius:50%; display:inline-block; } .l1{background:#ff5f57;}.l2{background:#febc2e;}.l3{background:#28c840;}
+  .btab { display:flex; align-items:center; gap:7px; background:#fff; border-radius:8px 8px 0 0; padding:7px 16px; font-size:13px; color:#333; margin-bottom:-8px; } .btab.active { font-weight:600; } .btab .lg { width:16px;height:16px;border-radius:3px;background:#e5202e;color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700;} .btab.dim { background:#efe9de; color:#666; }
+  .chrome .sp { flex:1; } .chrome .ava { width:26px;height:26px;border-radius:50%;background:#c9902b;}
+  .toolbar { display:flex; align-items:center; gap:12px; background:#fff; padding:8px 16px; border-bottom:1px solid #eef0f2; }
+  .toolbar .nav { color:#9aa0a6; font-size:15px; display:flex; gap:12px; } .toolbar .search { flex:1; display:flex; align-items:center; gap:10px; border:1px solid #eceef1; border-radius:20px; padding:7px 16px; font-size:13px; color:#888; } .toolbar .search .ai { color:#7b5bff; font-weight:700; } .toolbar .search .div { color:#ddd; } .toolbar .icons { display:flex; gap:14px; color:#9aa0a6; font-size:15px; }
+  .subnav { display:flex; gap:22px; background:#fff; padding:7px 16px; font-size:13px; color:#555; border-bottom:1px solid #eef0f2; }
+
+  .layout { flex:1; display:flex; min-height:0; }
+  .lnav { width:126px; background:#fff; border-right:1px solid #eef0f2; padding:10px 0; font-size:13px; color:#555; overflow-y:auto; flex-shrink:0; }
+  .lnav .it { display:flex; align-items:center; gap:9px; padding:9px 16px; cursor:pointer; } .lnav .it.active { color:#2f54eb; font-weight:600; background:#f2f5ff; border-right:2px solid #2f54eb; } .lnav .sub { font-size:12px; color:#9aa0a6; padding:4px 16px 8px 38px; }
+  .content { flex:1; overflow-y:auto; padding:16px; }
+  .rpanel { width:300px; background:#fff; border-left:1px solid #eef0f2; padding:16px; flex-shrink:0; overflow-y:auto; }
+  .rpanel .rh { font-size:16px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .rp-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:14px 0; } .rp-op { border:1px solid #eef0f2; border-radius:8px; padding:12px 6px; text-align:center; font-size:12px; color:#555; } .rp-op .i { font-size:16px; display:block; margin-bottom:6px; color:#7b5bff; }
+  .rp-news { font-size:12px; color:#8a9099; margin:14px 0 8px; } .news-card { border:1px solid #eef0f2; border-radius:10px; padding:12px; margin-bottom:12px; } .news-card .t { font-size:14px; font-weight:600; } .news-card .tag { font-size:11px; color:#8a9099; margin:6px 0; } .news-card .d { font-size:12px; color:#666; line-height:1.5; } .news-card .lk { margin-top:8px; background:#f5f6f8; border-radius:6px; padding:7px 10px; font-size:12px; color:#666; display:flex; justify-content:space-between; }
+  .chatbox { border:1px solid #eef0f2; border-radius:10px; padding:12px; margin-top:14px; font-size:13px; color:#aab0b8; height:120px; }
+
+  .hdrcard { background:linear-gradient(90deg,#fff,#f7efe0); border-radius:12px; padding:14px 18px; margin-bottom:14px; } .hdr-top { display:flex; align-items:center; gap:12px; } .hdr-top .name { font-size:18px; font-weight:700; } .boss { background:#333; color:#f5d073; font-size:10px; border-radius:3px; padding:1px 5px; } .hdr-top .dept { color:#555; font-size:13px; margin-left:20px; } .ann { display:flex; align-items:center; gap:12px; margin-top:12px; font-size:13px; color:#8a6a3a; overflow:hidden; white-space:nowrap; } .ann .an { color:#333; } .ann .dt { color:#b58f5a; }
+  .card { background:#fff; border-radius:12px; padding:16px 18px; margin-bottom:14px; } .card .ch { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; } .card .ch .t { font-size:16px; font-weight:700; } .card .ch .r { font-size:13px; color:#2f54eb; }
+  .appr { display:flex; gap:8px; } .appr .a { flex:1; } .appr .a .k { font-size:12px; color:#8a9099; } .appr .a .v { font-size:24px; font-weight:700; margin-top:4px; }
+  .rep-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; } .rep-head .t { font-size:16px; font-weight:700; } .rep-head .seg { display:flex; gap:4px; background:#f2f3f5; border-radius:7px; padding:3px; } .rep-head .seg .s { padding:5px 12px; font-size:12px; border-radius:5px; color:#555; cursor:pointer;} .rep-head .seg .s.on { background:#fff; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08); } .rep-head .sp { flex:1; } .rep-head .drop { border:1px solid #e3e6ea; border-radius:6px; padding:5px 10px; font-size:12px; color:#555; } .rep-head .time { font-size:12px; color:#9aa0a6; } .rep-head .choose { font-size:13px; color:#2f54eb; cursor:pointer; }
+  .rep-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  .rep-card { border:1px solid #eef0f2; border-radius:10px; padding:16px; } .rep-card .rc-t { display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:600; margin-bottom:14px; } .rep-card .rc-t .arrow { color:#9aa0a6; cursor:pointer; font-size:16px; padding:2px 6px; border-radius:5px;} .rep-card .rc-t .arrow:hover { background:#eef1ff; color:#2f54eb; }
+  .rep-metrics { display:flex; gap:8px; } .rep-metrics .m { flex:1; } .rep-metrics .mk { font-size:12px; color:#8a9099; } .rep-metrics .mv { font-size:20px; font-weight:700; margin:5px 0; } .rep-metrics .mv .u { font-size:12px; font-weight:400; } .rep-metrics .my { font-size:12px; } .pos { color:#26a65b; } .neg { color:#e5484d; } .flat { color:#8a9099; }
+  .rep-foot { display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:1px solid #f2f3f5; font-size:12px; } .rep-foot .risk { color:#7b5bff; } .rep-foot .risk b { color:#fa8c16; } .rep-foot .view { color:#8a9099; cursor:pointer; }
+  .team-metrics { display:flex; gap:14px; margin-top:10px; } .tm { border:1px solid #eef0f2; border-radius:10px; padding:14px 16px; } .tm .k { font-size:12px; color:#8a9099; } .tm .v { font-size:20px; font-weight:700; margin-top:6px; } .tm.big { flex:1; }
+
+  /* modals */
+  .overlay { position:absolute; inset:0; background:rgba(15,20,30,.4); display:none; align-items:center; justify-content:center; z-index:100; } .overlay.show { display:flex; }
+  .modal2 { width:1180px; height:900px; background:#fff; border-radius:14px; box-shadow:0 24px 70px rgba(0,0,0,.3); display:flex; flex-direction:column; overflow:hidden; }
+  .m2-head { display:flex; align-items:center; justify-content:space-between; padding:20px 26px 6px; } .m2-head h2 { font-size:19px; font-weight:700; } .m2-head .x { color:#9aa0a6; font-size:20px; cursor:pointer; }
+  .m2-steps { display:flex; align-items:center; gap:16px; padding:8px 26px 16px; } .m2-steps .s { font-size:15px; color:#2f54eb; font-weight:700; } .m2-steps .line { flex:0 0 320px; height:1px; background:#dfe3e8; position:relative; } .m2-steps .line::after { content:"→"; position:absolute; right:-4px; top:-10px; color:#c4c9d0; }
+  .m2-body { flex:1; display:flex; gap:18px; padding:0 26px; min-height:0; }
+  .m2-left { flex:1; display:flex; flex-direction:column; min-height:0; } .m2-left .ltabs { display:flex; background:#f2f3f5; border-radius:8px; padding:3px; width:200px; margin-bottom:12px; } .m2-left .ltabs .lt { flex:1; text-align:center; padding:7px 0; font-size:13px; color:#666; border-radius:6px; cursor:pointer; } .m2-left .ltabs .lt.on { background:#fff; color:#2f54eb; font-weight:600; } .m2-left .lsearch { border:1px solid #dfe3e8; border-radius:8px; padding:9px 12px; font-size:13px; color:#aab0b8; margin-bottom:12px; }
+  .rlist { flex:1; overflow-y:auto; padding-right:4px; } .rli { display:flex; align-items:center; gap:12px; border:1px solid #eef0f2; border-radius:9px; padding:14px; margin-bottom:10px; cursor:pointer; } .rli:hover { border-color:#b9c4f7; } .rli .cb { width:18px; height:18px; border:1.5px solid #c4c9d0; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; } .rli.on .cb { background:#2f54eb; border-color:#2f54eb; } .rli.on .cb::after { content:"✓"; color:#fff; font-size:11px; } .rli .rn { font-size:15px; font-weight:500; flex:1; } .rli .who { display:flex; align-items:center; gap:8px; font-size:13px; color:#9aa0a6; } .rli .who .av { width:20px; height:20px; border-radius:50%; background:#e5533d; }
+  .m2-right { width:440px; background:#f7f8fa; border-radius:10px; padding:16px; overflow-y:auto; } .m2-right .rt { font-size:14px; color:#61666d; margin-bottom:12px; }
+  .rcard { background:#fff; border:1px solid #eef0f2; border-radius:10px; padding:14px; margin-bottom:14px; } .rcard .rc-h { display:flex; align-items:center; justify-content:space-between; font-size:15px; font-weight:600; margin-bottom:14px; } .rcard .rc-h .g { display:flex; align-items:center; gap:7px; } .rcard .rc-h .ic { color:#26a65b; } .rcard .rc-h .del { color:#b6bcc4; cursor:pointer; } .rcard .rc-h .del:hover { color:#e5484d; }
+  .rc-ms { display:flex; gap:8px; } .rc-ms .m { flex:1; } .rc-ms .mn { font-size:12px; color:#8a9099; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .rc-ms .mv { font-size:18px; font-weight:700; margin:4px 0; } .rc-ms .mv .u{font-size:11px;font-weight:400;} .rc-ms .my { font-size:11px; } .rc-ms .m.empty { border:1px dashed #dfe3e8; border-radius:6px; min-height:64px; display:flex; align-items:center; justify-content:center; color:#c4c9d0; font-size:12px; }
+  .modbtn { width:100%; border:1px solid #c3cffb; color:#2f54eb; background:#fff; border-radius:8px; padding:9px; font-size:13px; cursor:pointer; margin-top:12px; } .modbtn:hover { background:#f2f5ff; }
+  .slot-empty { border:1px dashed #d6dae0; border-radius:10px; min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#b6bcc4; font-size:13px; margin-bottom:14px; } .slot-empty .p { font-size:22px; }
+  .m2-foot { display:flex; justify-content:flex-end; gap:12px; padding:16px 26px; }
+  .b-ok { background:#2f54eb; color:#fff; border:none; border-radius:8px; padding:10px 30px; font-size:14px; cursor:pointer; } .b-cancel { background:#fff; border:1px solid #d0d3d9; border-radius:8px; padding:10px 26px; font-size:14px; color:#3a3f45; cursor:pointer; }
+
+  .modal3 { width:760px; max-height:760px; background:#fff; border-radius:14px; box-shadow:0 24px 70px rgba(0,0,0,.3); display:flex; flex-direction:column; overflow:hidden; }
+  .m3-head { display:flex; align-items:center; justify-content:space-between; padding:20px 26px 12px; } .m3-head h2 { font-size:19px; font-weight:700; } .m3-head .x { color:#9aa0a6; font-size:20px; cursor:pointer; }
+  .m3-body { flex:1; overflow-y:auto; padding:0 26px; } .m3-search { background:#f4f6f8; border-radius:8px; padding:11px 14px; font-size:14px; color:#aab0b8; margin-bottom:16px; } .m3-cat { font-size:16px; font-weight:700; margin:14px 0 12px; } .m3-grid { display:flex; flex-wrap:wrap; gap:14px 24px; }
+  .mchk { display:inline-flex; align-items:center; gap:8px; font-size:14px; color:#3a3f45; cursor:pointer; } .mchk .b { width:16px; height:16px; border:1.5px solid #c4c9d0; border-radius:4px; position:relative; } .mchk.on .b { background:#2f54eb; border-color:#2f54eb; } .mchk.on .b::after { content:"✓"; color:#fff; font-size:10px; position:absolute; left:2px; top:-1px; } .mchk.dis { color:#c4c9d0; cursor:not-allowed; }
+  .m3-selbar { position:sticky; bottom:0; background:#f5f7ff; border-top:1px solid #e7ebff; padding:12px 26px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px -26px 0; } .m3-selbar .lbl { font-size:13px; color:#61666d; } .m3-selbar .lbl .req{color:#e5484d;} .m3-selbar .lbl b { color:#2f54eb; } .chip { background:#eef1ff; color:#2f54eb; border-radius:6px; padding:5px 10px; font-size:13px; display:inline-flex; align-items:center; gap:7px; } .chip .h { color:#9aabf0; cursor:grab; } .chip .x { cursor:pointer; }
+  .m3-foot { display:flex; justify-content:flex-end; gap:12px; padding:14px 26px; }
+
+  /* 查看报告 页面 */
+  #reportPage { position:absolute; inset:0; background:#fff; z-index:90; display:none; flex-direction:column; } #reportPage.show { display:flex; }
+  .r2-top { display:flex; align-items:center; gap:14px; padding:10px 18px; border-bottom:1px solid #eef0f2; font-size:14px; } .r2-top .logo { display:flex; align-items:center; gap:6px; font-weight:700; cursor:pointer; } .r2-top .logo .lg { width:20px;height:20px;border-radius:4px;background:#e5202e;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;} .r2-top .search { flex:0 0 640px; display:flex; align-items:center; gap:10px; border:1px solid #eceef1; border-radius:20px; padding:7px 16px; font-size:13px; color:#999; } .r2-top .search .ai { color:#7b5bff; font-weight:700; } .r2-top .rmenu { display:flex; gap:18px; margin-left:auto; font-size:13px; color:#555; align-items:center;} .r2-top .rmenu .ai { color:#7b5bff; font-weight:700; }
+  .r2-title { display:flex; align-items:center; gap:12px; padding:9px 18px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555; } .r2-title .fn { font-size:15px; font-weight:700; color:#1f2329; } .r2-title .sp { flex:1; }
+  .r2-ribtabs { display:flex; gap:22px; padding:7px 18px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555; } .r2-ribtabs .rt.on { color:#2f54eb; font-weight:600; }
+  .r2-rib { height:56px; border-bottom:1px solid #f2f3f5; background:#fbfbfc; display:flex; align-items:center; gap:22px; padding:0 18px; color:#9aa0a6; font-size:12px; }
+  .r2-fbar { display:flex; align-items:center; gap:10px; padding:6px 18px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#3a3f45; } .r2-fbar .cr { border:1px solid #e5e7eb; border-radius:4px; padding:3px 12px; width:80px; }
+  .r2-main { flex:1; display:flex; min-height:0; } .r2-sheetwrap { flex:1; overflow:auto; }
+  table.r2ss { border-collapse:collapse; table-layout:fixed; font-size:11px; } table.r2ss th, table.r2ss td { border:1px solid #d9dde2; height:20px; padding:1px 5px; white-space:nowrap; overflow:hidden; text-align:right; } table.r2ss th { background:#f4f6f8; color:#8a9099; text-align:center; font-weight:500; } table.r2ss th.rn, table.r2ss td.rn { width:30px; background:#f4f6f8; color:#8a9099; text-align:center; } table.r2ss col { width:78px; } table.r2ss col.rn { width:30px; }
+  .r2ss td.tx { text-align:left; } .r2ss .dim { background:#fdf6d8; font-weight:600; text-align:center; } .r2ss .by { background:#d6ebe0; color:#2f5d47; font-weight:600; text-align:center; } .r2ss .bb { background:#d9e6ff; color:#2f4a7d; font-weight:600; text-align:center; } .r2ss .ch { background:#eaf3ee; font-weight:600; text-align:center; } .r2ss .chb { background:#e6eefc; font-weight:600; text-align:center; } .r2ss .pos { color:#22a06b; } .r2ss .neg { color:#e5484d; } .r2ss .err { color:#c0392b; } .r2ss td.sel { outline:2px solid #217346; outline-offset:-2px; }
+  .r2-tabs { display:flex; align-items:center; gap:2px; border-top:1px solid #eef0f2; padding:5px 10px; font-size:12px; background:#fafbfc; } .r2-tabs .st { padding:6px 12px; border-radius:5px 5px 0 0; color:#555; } .r2-tabs .st.on { color:#217346; font-weight:600; border-bottom:2px solid #217346; } .r2-tabs .st.orange { background:#f0a94e; color:#fff; }
+  .r2-status { border-top:1px solid #eef0f2; padding:5px 16px; font-size:12px; color:#8a9099; }
+  .r2-ai { width:400px; border-left:1px solid #eef0f2; display:flex; flex-direction:column; flex-shrink:0; } .r2-ai .ah { display:flex; align-items:center; gap:8px; padding:16px 18px 10px; font-size:17px; font-weight:800; } .r2-ai .ah .ico { margin-left:auto; display:flex; gap:14px; color:#9aa0a6; font-size:15px; font-weight:400; }
+  .r2-ai .abody { flex:1; overflow-y:auto; padding:0 18px; } .r2-ai .q { font-size:13px; color:#3a3f45; margin:6px 0 14px; } .r2-ai .plan { display:flex; align-items:center; gap:8px; font-size:13px; color:#22a06b; } .r2-ai .plan .g{color:#8a9099;} .r2-ai .planhint { font-size:12px; color:#8a9099; margin:6px 0 14px 24px; } .r2-ai .think { font-size:13px; color:#3a3f45; margin-bottom:10px; } .r2-ai .ans { font-size:13.5px; color:#2b2f36; line-height:1.9; } .r2-ai .ans b { color:#e5484d; } .r2-ai .ans .blue { color:#2f54eb; }
+  .r2-ai .fcard { border:1px solid #eef0f2; border-radius:10px; padding:12px; margin:16px 0; display:flex; align-items:center; gap:10px; } .r2-ai .fcard .ic { width:30px;height:30px;border-radius:6px;background:#e9f7ec;color:#26a65b;display:flex;align-items:center;justify-content:center;} .r2-ai .fcard .n { font-size:13px; font-weight:600; } .r2-ai .fcard .s { font-size:11px; color:#9aa0a6; } .r2-ai .fcard .th { margin-left:auto; width:70px; height:44px; background:#f5f7ff; border-radius:6px; }
+  .r2-ai .done { font-size:13px; color:#3a3f45; margin:10px 0; } .r2-ai .askmore { font-size:14px; font-weight:600; margin:14px 0 10px; } .r2-ai .acts { display:flex; gap:16px; color:#9aa0a6; font-size:15px; margin-bottom:16px; } .r2-ai .promo { border:1px solid #eef0f2; border-radius:10px; padding:12px; font-size:13px; color:#61666d; line-height:1.6; } .r2-ai .promo b { color:#2f54eb; } .r2-ai .chat { border:1px solid #eef0f2; border-radius:10px; padding:12px; margin:12px 18px; color:#aab0b8; font-size:13px; height:80px; } .r2-ai .foot { text-align:center; font-size:11px; color:#b6bcc4; padding-bottom:12px; }
+  .r2-back { border:1px solid #d0d3d9; border-radius:7px; padding:6px 14px; font-size:13px; color:#2f54eb; cursor:pointer; }
+  /* reveal animation for AI panel */
+  .r2-ai .rv { opacity:0; transform:translateY(8px); transition:opacity .35s ease, transform .35s ease; } .r2-ai .rv.in { opacity:1; transform:none; }
+  .r2-ai .sp { width:12px; height:12px; border:2px solid #c7d0f5; border-top-color:#2f54eb; border-radius:50%; display:inline-block; animation:spin .7s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .r2-ai .typing { display:inline-flex; gap:4px; } .r2-ai .typing i { width:6px; height:6px; border-radius:50%; background:#c4c9d0; display:inline-block; animation:blink 1s infinite; } .r2-ai .typing i:nth-child(2){animation-delay:.2s;} .r2-ai .typing i:nth-child(3){animation-delay:.4s;} @keyframes blink { 0%,80%,100%{opacity:.3;} 40%{opacity:1;} }
+  .r2-ai .think-typing { font-size:13px; color:#8a9099; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- chrome -->
+    <div class="chrome">
+      <div class="lights"><i class="l1"></i><i class="l2"></i><i class="l3"></i></div>
+      <div class="btab active"><span class="lg">采</span>采销工作台</div>
+      <div class="btab dim"><span class="lg" style="background:#7b5bff;">Ai</span>AI经营中心</div>
+      <div class="btab dim"><span class="lg">采</span>商品管理</div>
+      <div class="btab dim"><span class="lg">采</span>订单管理</div>
+      <div class="btab dim">＋</div><div class="sp"></div><div class="ava"></div>
+    </div>
+    <div class="toolbar">
+      <div class="nav"><span>←</span><span>→</span><span>⟳</span><span>⌂</span></div>
+      <div class="search"><span class="ai">Ai搜索</span><span class="div">|</span><span>只需4步！一键发爆品</span></div>
+      <div class="icons"><span>⤓</span><span>🗔</span><span>🔔</span><span>✎</span><span>▦</span></div>
+    </div>
+    <div class="subnav"><span>▢ 商品批量工具</span><span>▢ 供应商待办</span><span>◲ 门店管理</span><span>◈ 商机选品</span><span>▤ 企业档案</span><span style="color:#e5202e;">京麦</span></div>
+
+    <div class="layout">
+      <div class="lnav">
+        <div class="it active">🏠 首页 <span style="margin-left:auto;font-size:11px;color:#9aa0a6;border:1px solid #e3e6ea;border-radius:4px;padding:0 4px;">管理</span></div>
+        <div class="it">📋 任务</div><div class="sub">我派出的 · 我关注的</div>
+        <div class="it">💬 质询</div><div class="it">👥 供应商</div><div class="it">📦 商品</div><div class="it">🛒 采购</div>
+        <div class="it">🗄 库存</div><div class="it">📣 营销</div><div class="it">🏷 价格</div><div class="it">📄 内容</div>
+        <div class="it">🌐 全渠道</div><div class="it">📢 推广</div><div class="it">🧾 订单</div><div class="it">📊 数据</div>
+        <div class="it">💰 财务</div><div class="it">⚠ 风险</div><div class="it">⚙ 配置</div>
+      </div>
+
+      <div class="content">
+        <div class="hdrcard">
+          <div class="hdr-top"><span class="name">苏晓彤</span><span class="boss">BOSS</span><span style="color:#2f54eb;">›</span><span class="dept">选择部门 ⓘ 家电家居事业群–厨具业务部 ▾</span></div>
+          <div class="ann"><span class="an">📢 公告</span><span>以旧换新释放千亿红利，品牌持续升级以旧换新…</span><span class="dt">06-08</span><span>家电行业结构变化与增长路径分析以旧换新…</span><span class="dt">06-06</span><span>618 大促重点品类资以旧换新释放千亿红利…</span><span class="dt">06-04</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="t">待我审批 <span style="font-weight:400;color:#8a9099;font-size:13px;margin-left:10px;">我的申请 12</span></span><span class="r">审批中心 ›</span></div>
+          <div class="appr">
+            <div class="a"><div class="k">商品</div><div class="v">112</div></div><div class="a"><div class="k">供应链</div><div class="v">54</div></div><div class="a"><div class="k">营销/价促</div><div class="v">54</div></div><div class="a"><div class="k">财务</div><div class="v">12</div></div><div class="a"><div class="k">供应商/商家</div><div class="v">54</div></div><div class="a"><div class="k">综合审批</div><div class="v">12</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="rep-head">
+            <span class="t">经营报表</span>
+            <div class="seg"><span class="s">🟡 黄金眼</span><span class="s on">▦ 超级大表</span></div>
+            <div class="sp"></div>
+            <span class="drop">部门 ▾</span><span class="drop">厨具业务部 ▾</span><span class="drop">同比 ▾</span>
+            <span class="time">数据时间：2025-12-31 12:00</span>
+            <span class="choose" onclick="openM2()">选择报表 ›</span>
+          </div>
+          <div class="rep-grid" id="repGrid"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="t">团队运营</span></div>
+          <div style="display:flex;align-items:center;gap:10px;"><b style="font-size:15px;">敌大我小专项</b><span style="background:#eef1ff;color:#2f54eb;border-radius:5px;font-size:11px;padding:2px 8px;">👤 C1重点关注</span></div>
+          <div style="font-size:12px;color:#8a9099;margin:6px 0 4px;">打造孵化标杆，精细化运营、广告投放、营销联动等</div>
+          <div class="team-metrics">
+            <div class="tm"><div class="k">重磅新品总数</div><div class="v">4250</div><div class="k" style="margin-top:8px;">黑标期内成交数量</div><div class="v">6423</div></div>
+            <div class="tm"><div class="k">黑标期内成交金额</div><div class="v">185万元</div><div class="k" style="margin-top:8px;">黑标期内-商详PV</div><div class="v">6734</div></div>
+            <div class="tm big"><div style="display:flex;justify-content:space-between;align-items:center;"><div><b>重磅新品成交额</b><div class="k" style="margin-top:10px;">达成情况 达成3600万元 <span class="pos">近7天+3489</span></div><div class="k" style="margin-top:6px;">任务目标 9000万元</div></div><div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#2f54eb;">20%</div><div class="k">C1下排名 8/10 ›</div></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rpanel">
+        <div class="rh">✦ 超级助手</div>
+        <div style="font-size:14px;font-weight:600;margin:14px 0 10px;">需要我进行什么操作？</div>
+        <div class="rp-grid">
+          <div class="rp-op"><span class="i">📑</span>财报解读</div><div class="rp-op"><span class="i">🔥</span>站外热搜</div><div class="rp-op"><span class="i">📈</span>质询分析</div>
+          <div class="rp-op"><span class="i">💡</span>引品建议</div><div class="rp-op"><span class="i">▦</span>品类网格</div><div class="rp-op"><span class="i">›</span>去技能库</div>
+        </div>
+        <div class="rp-news">以下是我给你整理的本周资讯 2026.06.13–06.18</div>
+        <div class="news-card"><div class="t">品类消费趋势</div><div class="tag">分析范围 家居家电 ✎</div><div class="d">厨卫刚需品类市场受地产低迷和人口增长乏力影响，整体表现低级。预计2026年市场规模将突破…</div><div class="lk"><span>‹› 查看完整分析报告 06.13 10:09</span><span>›</span></div></div>
+        <div class="news-card"><div class="t">行业咨询分析</div><div class="tag">分析范围 厨卫电器 ✎</div><div class="d">头部竞品本周加大促销力度，主要集中在小家电板块。同时，新兴内容电商渠道的竞争加剧，传统…</div><div class="lk"><span>‹› 查看完整分析报告 06.13 10:09</span><span>›</span></div></div>
+        <div class="chatbox">发消息或输入/选择技能</div>
+      </div>
+    </div>
+
+    <!-- ===== 查看报告 页面 ===== -->
+    <div id="reportPage">
+      <div class="r2-top">
+        <div class="logo" onclick="closeReport()"><span class="lg">采</span>采销工作台</div>
+        <div class="search"><span class="ai">Ai搜索</span><span style="color:#ddd;">|</span><span>创建批量任务</span></div>
+        <div class="rmenu"><span class="ai">Ai 经营中心</span><span style="color:#7b5bff;font-weight:700;">超级运营</span><span>🔔 消息</span><span>🧰 工具箱</span><span>🖥 客户端</span></div>
+      </div>
+      <div class="r2-title"><span>▢</span><span class="fn">销售进度监控–品牌维度_副本5444_17…</span> ✎ <span>本人编辑中</span><span class="sp"></span><span>📝 反馈</span><span>🕘 报表刷新时间 15:12:44 <span style="color:#2f54eb;">刷新</span></span><span>⤢ 全屏</span><span>⋯</span><span class="r2-back" onclick="closeReport()">‹ 返回工作台</span></div>
+      <div class="r2-ribtabs"><span class="rt">文件</span><span class="rt on">开始</span><span class="rt">插入</span><span class="rt">页面布局</span><span class="rt">公式</span><span class="rt">数据</span><span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span></div>
+      <div class="r2-rib"><span>↺ 撤销</span><span>📋 粘贴</span><span>B I U</span><span>百分比 ▾</span><span>合并后居中 ▾</span><span>条件格式</span><span>套用表格样式</span><span>单元格样式</span></div>
+      <div class="r2-fbar"><span class="cr">S9 ▾</span><span style="color:#999;">fx</span></div>
+      <div class="r2-main">
+        <div class="r2-sheetwrap"><table class="r2ss" id="r2grid"></table></div>
+        <div class="r2-ai">
+          <div class="ah">✦ 超级助手 <span class="ico">↻ ☰ ⤢ ×</span></div>
+          <div class="abody">
+            <div class="q rv" id="ai-q">已收到提问“帮我总结分析表中的数据”</div>
+            <div class="plan rv" id="ai-plan"><span class="pk"><span class="sp"></span></span> 规划 <span class="g">›</span></div>
+            <div class="planhint rv" id="ai-planhint">总结分析当前 Excel 表中的数据</div>
+            <div class="think-typing rv" id="ai-typing"><span class="typing"><i></i><i></i><i></i></span> 正在阅读并总结表格数据…</div>
+            <div class="think rv" id="ai-think">已完成思考 ﹀</div>
+            <div class="ans rv" id="ai-ans">基于 2026 年 8 月 1 日数据，品牌销售整体 GMV 为 <b>4,456.48 元</b>，远低于月度目标 <b>1,300 万元</b>，目标达成率仅 <b>0.034%</b>，严重落后于时间进度（3.23%），差距达 <b>–3.19 个百分点</b>。经营模式中，POP 贡献主要 GMV（4,466.66 元），而自营模式 GMV 为 <b>–10.18 元</b>。剩余 30 天需日均完成 <b>43.32 万元</b>以弥补目标缺口。</div>
+            <div class="fcard rv" id="ai-fcard"><span class="ic">📊</span><div><div class="n">销售进度监控…</div><div class="s">html</div></div><div class="th"></div></div>
+            <div class="done rv" id="ai-done">分析已完成，详细解读请直接查看上方的对话内容。</div>
+            <div class="askmore rv" id="ai-askmore">需要我帮你进行深度 ✦ 分析吗？ ﹀</div>
+            <div class="acts rv" id="ai-acts"><span>↻</span><span>📋</span><span>💬</span><span>👍</span><span>👎</span></div>
+          </div>
+          <div class="promo" style="margin:12px 18px;"><b>超级大表</b> 我可以帮你查数建表、解读分析、生成公式。试试输入：帮我生成当前 sheet 页的分析解读</div>
+          <div class="foot">内容由AI生成，仅供参考</div>
+        </div>
+      </div>
+      <div class="r2-tabs">
+        <span class="st on">品牌汇总</span><span class="st">Sheet11</span><span class="st">Sheet12</span><span class="st">sku下探</span>
+        <span class="st orange">GMV目标维护</span><span class="st" style="background:#eceef0;">基础数据集</span>
+        <span class="st" style="background:#eceef0;">昨日名下</span><span class="st" style="background:#eceef0;">月至今名下</span>
+        <span class="st" style="background:#eceef0;">昨日品牌</span><span class="st" style="background:#eceef0;">月至今…</span><span class="st">＋</span>
+      </div>
+      <div class="r2-status">就绪</div>
+    </div>
+
+    <!-- ===== 图2 modal ===== -->
+    <div class="overlay" id="ov2">
+      <div class="modal2">
+        <div class="m2-head"><h2>选择报表到首页</h2><span class="x" onclick="closeM2()">×</span></div>
+        <div class="m2-steps"><span class="s">Step1 选择报表</span><span class="line"></span><span class="s">Step2 设置指标</span></div>
+        <div class="m2-body">
+          <div class="m2-left">
+            <div class="ltabs"><span class="lt" data-tab="mine">我创建的</span><span class="lt on" data-tab="recv">我收到的</span></div>
+            <div class="lsearch">🔍 请输入关键词搜索</div>
+            <div class="rlist" id="rlist"></div>
+          </div>
+          <div class="m2-right"><div class="rt">已选报表</div><div id="cards"></div></div>
+        </div>
+        <div class="m2-foot"><button class="b-ok" onclick="closeM2()">确定</button><button class="b-cancel" onclick="closeM2()">取消</button></div>
+      </div>
+    </div>
+
+    <!-- ===== 图3 修改指标 ===== -->
+    <div class="overlay" id="ov3" style="z-index:120;">
+      <div class="modal3">
+        <div class="m3-head"><h2>修改指标</h2><span class="x" onclick="closeM3(false)">×</span></div>
+        <div class="m3-body">
+          <div class="m3-search">🔍 搜索指标</div>
+          <div class="m3-cat">价格</div><div class="m3-grid" id="grid-price"></div>
+          <div class="m3-cat">财务</div><div class="m3-grid" id="grid-fin"></div>
+          <div class="m3-selbar"><span class="lbl"><span class="req">*</span> 已选指标 <b id="selcnt">0</b>/3</span><span id="chips"></span></div>
+        </div>
+        <div class="m3-foot"><button class="b-ok" onclick="closeM3(true)">确定</button><button class="b-cancel" onclick="closeM3(false)">取消</button></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const sleep = ms => new Promise(r=>setTimeout(r, ms));
+  const MAX_REPORTS=3, MAX_METRICS=3;
+  const reportsRecv=[
+    {name:"销售分析",who:"郑宇雅",dt:"2026-06-30 21:35"},{name:"流量分析",who:"赵艳",dt:"2026-06-30 19:26"},{name:"流量分析",who:"赵雾瑕",dt:"2026-06-30 05:22"},
+    {name:"SKU异常分析",who:"郑文钧",dt:"2026-06-29 10:53"},{name:"店铺维度销售日报",who:"李菁",dt:"2026-06-29 09:10"},{name:"品牌维度销售日报",who:"何艳丽",dt:"2026-06-28 07:11"},
+    {name:"SKU异常分析",who:"吴敏",dt:"2026-06-27 17:03"},{name:"主图商品点击率",who:"冯毅芫",dt:"2026-06-27 19:29"},{name:"库存大表",who:"吴美兴",dt:"2026-06-27 20:20"},
+    {name:"品牌维度销售日报",who:"冯思敏",dt:"2026-06-26 17:59"},{name:"店铺维度销售日报",who:"王玲娟",dt:"2026-06-26 18:42"},{name:"SKU异常分析",who:"王江",dt:"2026-06-27 04:29"},{name:"流量分析",who:"何柄",dt:"2026-06-27 13:09"},
+  ];
+  const PRICE=["价格星级","普惠到手价","完美凑单价","PLUS专享价","618到手价","双十一到手价","平均仓报价","件单价-成交","客单价-成交","采购价","京东价","站外最低价","站内最低价","大客户协议价A","大客户协议价B","1号店会员价","学生价","企业会员价","秒杀价"];
+  const FIN=["Net GMV","Net GMV（正向）","Net GMV（逆向）","Net REV","综合毛利率","综合毛利额","销售毛利率","广告毛利额"];
+  const metricVals={
+    "Net GMV":{v:"¥420",u:"万",y:"+2.76%",c:"pos"},"Net GMV（正向）":{v:"¥440",u:"万",y:"+2.10%",c:"pos"},"Net GMV（逆向）":{v:"¥20",u:"万",y:"-1.30%",c:"neg"},"Net REV":{v:"¥380",u:"万",y:"+3.20%",c:"pos"},
+    "综合毛利率":{v:"21.3",u:"%",y:"+2.10%",c:"pos"},"综合毛利额":{v:"¥77.7",u:"万",y:"+8.93%",c:"pos"},"销售毛利率":{v:"18.5",u:"%",y:"-5.76%",c:"neg"},"广告毛利额":{v:"¥12.4",u:"万",y:"-2.00%",c:"neg"},
+    "价格星级":{v:"4.6",u:"分",y:"+0.10",c:"pos"},"客单价-成交":{v:"¥86.5",u:"",y:"+3.40%",c:"pos"},"件单价-成交":{v:"¥42.3",u:"",y:"-1.20%",c:"neg"},"京东价":{v:"¥59.0",u:"",y:"持平",c:"flat"},"采购价":{v:"¥28.6",u:"",y:"+1.50%",c:"pos"},"秒杀价":{v:"¥33.3",u:"",y:"-5.10%",c:"neg"},
+  };
+  function mval(name){ return metricVals[name] || {v:"128",u:"",y:"+1.20%",c:"pos"}; }
+  let selected=[
+    {name:"销售分析", metrics:["Net GMV","综合毛利率","综合毛利额"], _src:0, risk:'报表中有 <b>1</b> 个风险需关注'},
+    {name:"流量分析", metrics:["Net REV","销售毛利率","广告毛利额"], _src:1, risk:'报表中有 <b>1</b> 个待关注的问题点'},
+    {name:"SKU异常分析", metrics:["价格星级","客单价-成交","件单价-成交"], _src:3, risk:'报表中有 <b>2</b> 个待我关注的问题点'},
+  ];
+
+  function renderDashboardCards(){
+    const g=document.getElementById('repGrid'); g.innerHTML='';
+    selected.forEach(s=>{
+      let ms='';
+      for(let k=0;k<3;k++){ const name=s.metrics[k]; if(name){ const d=mval(name); ms+=`<div class="m"><div class="mk">${name}</div><div class="mv">${d.v}<span class="u">${d.u}</span></div><div class="my ${d.c}">同比 ${d.y}</div></div>`; } else ms+=`<div class="m"><div class="mk">—</div><div class="mv">—</div><div class="my"></div></div>`; }
+      g.innerHTML+=`<div class="rep-card"><div class="rc-t"><span>📊 ${s.name}</span><span class="arrow" onclick="openM2()">›</span></div><div class="rep-metrics">${ms}</div><div class="rep-foot"><span class="risk">✦ ${s.risk||'报表中有 <b>1</b> 个待关注的问题点'}</span><span class="view" onclick="openReport()">📄 查看报告</span></div></div>`;
+    });
+    if(selected.length===0) g.innerHTML='<div style="color:#b6bcc4;font-size:13px;padding:30px;text-align:center;">暂未选择报表，点击右上「选择报表 ›」添加</div>';
+  }
+
+  function renderList(){
+    const wrap=document.getElementById('rlist'); wrap.innerHTML='';
+    reportsRecv.forEach((r,i)=>{
+      const isOn=selected.some(s=>s._src===i);
+      const li=document.createElement('div'); li.className='rli'+(isOn?' on':'');
+      li.innerHTML=`<span class="cb"></span><span class="rn">${r.name}</span><span class="who"><span class="av"></span>${r.who}　${r.dt}</span>`;
+      li.onclick=()=>toggleReport(i); wrap.appendChild(li);
+    });
+  }
+  function toggleReport(i){
+    const idx=selected.findIndex(s=>s._src===i);
+    if(idx>=0) selected.splice(idx,1);
+    else { if(selected.length>=MAX_REPORTS){ alert('最多添加 '+MAX_REPORTS+' 个报表到首页'); return; } selected.push({name:reportsRecv[i].name, metrics:[], _src:i}); }
+    renderList(); renderCards();
+  }
+  function renderCards(){
+    const wrap=document.getElementById('cards'); wrap.innerHTML='';
+    selected.forEach((s,idx)=>{
+      const card=document.createElement('div'); card.className='rcard';
+      let ms='';
+      for(let k=0;k<3;k++){ const name=s.metrics[k]; if(name){ const d=mval(name); ms+=`<div class="m"><div class="mn">${name}</div><div class="mv">${d.v}<span class="u">${d.u}</span></div><div class="my ${d.c}">同比 ${d.y}</div></div>`; } else ms+=`<div class="m empty">指标${k+1}</div>`; }
+      card.innerHTML=`<div class="rc-h"><span class="g"><span class="ic">📊</span>${s.name}</span><span class="del" title="移除">🗑</span></div><div class="rc-ms">${ms}</div><button class="modbtn">✎ 修改指标</button>`;
+      card.querySelector('.del').onclick=()=>{ const j=selected.indexOf(s); selected.splice(j,1); renderList(); renderCards(); };
+      card.querySelector('.modbtn').onclick=()=>openM3(idx);
+      wrap.appendChild(card);
+    });
+    for(let k=selected.length;k<MAX_REPORTS;k++){ const e=document.createElement('div'); e.className='slot-empty'; e.innerHTML='<span class="p">＋</span>勾选左侧报表'; wrap.appendChild(e); }
+  }
+  function openM2(){ renderList(); renderCards(); document.getElementById('ov2').classList.add('show'); }
+  function closeM2(){ document.getElementById('ov2').classList.remove('show'); renderDashboardCards(); }
+  window.openM2=openM2; window.closeM2=closeM2;
+
+  let editIdx=null, tempSel=[];
+  function openM3(idx){ editIdx=idx; tempSel=[...selected[idx].metrics]; buildGrid('grid-price',PRICE); buildGrid('grid-fin',FIN); renderChips(); document.getElementById('ov3').classList.add('show'); }
+  function buildGrid(id,arr){ const g=document.getElementById(id); g.innerHTML=''; arr.forEach(name=>{ const on=tempSel.includes(name); const dis=!on&&tempSel.length>=MAX_METRICS; const el=document.createElement('span'); el.className='mchk'+(on?' on':'')+(dis?' dis':''); el.innerHTML=`<span class="b"></span>${name}`; el.onclick=()=>{ if(el.classList.contains('dis'))return; toggleMetric(name); }; g.appendChild(el); }); }
+  function toggleMetric(name){ const i=tempSel.indexOf(name); if(i>=0)tempSel.splice(i,1); else { if(tempSel.length>=MAX_METRICS)return; tempSel.push(name); } buildGrid('grid-price',PRICE); buildGrid('grid-fin',FIN); renderChips(); }
+  function renderChips(){ document.getElementById('selcnt').textContent=tempSel.length; const c=document.getElementById('chips'); c.innerHTML=''; tempSel.forEach(name=>{ const s=document.createElement('span'); s.className='chip'; s.innerHTML=`<span class="h">⠿</span>${name}<span class="x">×</span>`; s.querySelector('.x').onclick=()=>toggleMetric(name); c.appendChild(s); }); }
+  function closeM3(save){ if(save&&editIdx!==null){ selected[editIdx].metrics=[...tempSel]; renderCards(); } document.getElementById('ov3').classList.remove('show'); editIdx=null; }
+  window.openM3=openM3; window.closeM3=closeM3;
+  document.querySelectorAll('.m2-left .ltabs .lt').forEach(t=> t.onclick=()=>{ document.querySelectorAll('.m2-left .ltabs .lt').forEach(x=>x.classList.remove('on')); t.classList.add('on'); });
+
+  /* ===== 查看报告 页面 ===== */
+  function colLetter(n){ return n<=26?String.fromCharCode(64+n):'A'+String.fromCharCode(64+n-26); }
+  const brandRows=[
+    ["0","未知","1,937","695%","22%","12","-98%","1,925","702%","58,110","680%","22%","1,874"],
+    ["19447","依云（evian）","896","12%","10%","410","8%","486","16%","26,880","14%","10%","867"],
+    ["11742","鲁花","487","6%","6%","203","-3%","284","13%","14,610","9%","6%","471"],
+    ["11736","泸州老窖（LUZHOU）","188","2%","2%","96","1%","92","4%","5,640","3%","2%","182"],
+    ["35247","无品牌","188","2%","2%","70","-5%","118","7%","5,640","2%","2%","182"],
+    ["9429","金龙鱼","154","-8%","2%","88","-12%","66","3%","4,620","-6%","2%","149"],
+    ["90192","佳沛（zespri）","152","31%","2%","40","10%","112","41%","4,560","28%","2%","147"],
+    ["20190","悠诗诗（UCC）","133","82%","1%","33","20%","100","110%","3,990","76%","1%","129"],
+    ["8319","红牛","128","-4%","1%","70","-9%","58","3%","3,840","-3%","1%","124"],
+    ["26734","上好佳","123","5%","1%","55","2%","68","8%","3,690","4%","1%","119"],
+    ["17669","味全","98","1606%","1%","8","-","90","1720%","2,940","1580%","1%","95"],
+    ["18019","喜力","92","3%","1%","44","-2%","48","8%","2,760","2%","1%","89"],
+    ["10504","可口可乐（Coca）","89","101%","1%","20","30%","69","130%","2,670","98%","1%","86"],
+    ["14590","农夫山泉","86","-15%","1%","50","-20%","36","-6%","2,580","-12%","1%","83"],
+    ["33210","百事可乐","74","24%","1%","18","5%","56","33%","2,220","21%","1%","72"],
+    ["45120","蒙牛","68","-9%","1%","40","-14%","28","2%","2,040","-7%","1%","66"],
+    ["51230","伊利","61","7%","0%","38","3%","23","15%","1,830","6%","0%","59"],
+    ["60110","康师傅","52","-22%","0%","30","-28%","22","-10%","1,560","-19%","0%","50"],
+    ["71220","统一","47","13%","0%","25","6%","22","22%","1,410","11%","0%","45"],
+    ["80330","王老吉","39","-3%","0%","19","-8%","20","2%","1,170","-2%","0%","38"],
+  ];
+  const headersCW=["成交金额","同比","同比贡献","今日目标","目标达成率","目标缺口","自营","同比","POP","GMV","同比","同比贡献","自营GMV","同比","POPGMV","同比","","累计GMV","同比","同比贡献","日均达成"];
+  function pctCls(v){ if(!v||v==='/'||v==='0%'||v==='-'||v==='持平') return ''; return v.startsWith('-')?'neg':'pos'; }
+  function buildReportSheet(){
+    const NCOL=23; let h='<colgroup><col class="rn"><col class="nm" style="width:130px">';
+    for(let c=3;c<=NCOL;c++)h+='<col>'; h+='</colgroup>';
+    h+='<tr><th class="rn"></th>'; for(let c=1;c<=NCOL;c++)h+=`<th>${colLetter(c)}</th>`; h+='</tr>';
+    h+='<tr><td class="rn">1</td><td class="tx" style="font-weight:600;">本月已过天数</td><td>21</td>'+'<td></td>'.repeat(NCOL-2)+'</tr>';
+    h+='<tr><td class="rn">2</td><td class="tx" style="font-weight:600;">本月总天数</td><td>31</td>'+'<td></td>'.repeat(NCOL-2)+'</tr>';
+    h+='<tr><td class="rn">3</td>'+'<td></td>'.repeat(NCOL)+'</tr>';
+    const band=(n)=>`<tr><td class="rn">${n}</td><td class="dim">维度</td><td class="by" colspan="9">昨日</td><td class="bb" colspan="12">月至今</td></tr>`;
+    h+=band(4);
+    h+='<tr><td class="rn">5</td><td class="dim"></td><td class="by" colspan="3">整体</td><td class="by" colspan="6">分经营模式</td><td class="bb" colspan="4">整体</td><td class="bb" colspan="8">目标达成情况</td></tr>';
+    h+='<tr><td class="rn">6</td><td class="ch tx">名下合计</td>'+headersCW.slice(0,21).map(x=>`<td class="ch">${x}</td>`).join('')+'</tr>';
+    const n=x=>parseInt(String(x).replace(/,/g,''))||0;
+    const fmt=v=>v.toLocaleString('en-US');
+    const cellCls=v=>{ const s=String(v); if(s.includes('%')) return pctCls(s); if(s==='#REF!') return 'err'; if(s.startsWith('-')&&s!=='-') return 'neg'; return ''; };
+    const totals=["6,393","-20%","/","7,200","89%","-807","-10","-100%","6,403","6,393","-20%","/","#REF!","/","192,090","43%","-","#REF!","14%","/","3,048"];
+    h+='<tr><td class="rn">7</td><td class="tx">/</td>'+totals.map(v=>`<td class="${cellCls(v)}">${v}</td>`).join('')+'<td></td></tr>';
+    h+='<tr><td class="rn">8</td>'+'<td></td>'.repeat(NCOL)+'</tr>';
+    h+='<tr><td class="rn">9</td>'+Array.from({length:NCOL},(_,i)=>`<td class="${colLetter(i+1)==='L'?'sel':''}"></td>`).join('')+'</tr>';
+    h+=band(10);
+    h+='<tr><td class="rn">11</td><td class="dim"></td><td class="by" colspan="3">整体</td><td class="by" colspan="6">分经营模式</td><td class="bb" colspan="4">整体</td><td class="bb" colspan="8">目标达成情况</td></tr>';
+    h+='<tr><td class="rn">12</td><td class="ch tx">主品牌id / 名称</td>'+headersCW.slice(0,21).map(x=>`<td class="ch">${x}</td>`).join('')+'</tr>';
+    function genRow(r,idx){
+      const [id,nm,gmv,yoy,contrib,self,selfyoy,pop,popyoy,cum,cumyoy,cumc,avg]=r;
+      const g=n(gmv), mult=1.05+(idx%5)*0.07, target=Math.round(g*mult), gap=g-target, rate=Math.round(g/target*100)+'%';
+      return [gmv,yoy,contrib, fmt(target),rate,fmt(gap), self,(selfyoy||'/'),pop, gmv,yoy,contrib, fmt(n(self)*30),cumyoy,fmt(n(pop)*30),popyoy, '-', cum,cumyoy,cumc,avg];
+    }
+    brandRows.forEach((r,idx)=>{
+      const rn=idx+13; const vals=genRow(r,idx);
+      h+=`<tr><td class="rn">${rn}</td><td class="tx">${r[0]} ${r[1]}</td>`+vals.map(v=>`<td class="${cellCls(v)}">${v}</td>`).join('')+'<td></td></tr>';
+    });
+    for(let rn=33;rn<=38;rn++){ h+=`<tr><td class="rn">${rn}</td>`+'<td></td>'.repeat(NCOL)+'</tr>'; }
+    document.getElementById('r2grid').innerHTML=h;
+  }
+
+  let reportBuilt=false;
+  function openReport(){ if(!reportBuilt){ buildReportSheet(); reportBuilt=true; } document.getElementById('reportPage').classList.add('show'); runReportAI(); }
+  function closeReport(){ document.getElementById('reportPage').classList.remove('show'); }
+  window.openReport=openReport; window.closeReport=closeReport;
+
+  /* ===== 右侧超级助手 动态执行 ===== */
+  async function runReportAI(){
+    const ids=['ai-q','ai-plan','ai-planhint','ai-typing','ai-think','ai-ans','ai-fcard','ai-done','ai-askmore','ai-acts'];
+    ids.forEach(id=>document.getElementById(id).classList.remove('in'));
+    document.getElementById('ai-plan').querySelector('.pk').innerHTML='<span class="sp"></span>';
+    const body=document.querySelector('#reportPage .abody');
+    const show=id=>{ document.getElementById(id).classList.add('in'); body.scrollTop=body.scrollHeight; };
+    await sleep(300);  show('ai-q');
+    await sleep(500);  show('ai-plan');                        // 规划(spinner)
+    await sleep(300);  show('ai-planhint');
+    await sleep(700);  document.getElementById('ai-plan').querySelector('.pk').textContent='✓';   // 规划完成
+    await sleep(200);  show('ai-typing');                       // 思考中…
+    await sleep(1400); document.getElementById('ai-typing').classList.remove('in'); show('ai-think');
+    await sleep(300);  show('ai-ans');                          // 分析结论
+    await sleep(500);  show('ai-fcard');
+    await sleep(400);  show('ai-done');
+    await sleep(300);  show('ai-askmore');
+    await sleep(200);  show('ai-acts');
+  }
+
+  renderDashboardCards();
+</script>
+</body>
+</html>
