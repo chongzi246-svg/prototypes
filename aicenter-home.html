@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 经营中心 · 首屏</title>
+<style>
+  :root{color-scheme:light;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;background:#f5f6fa;color:#1a1a1a;font-size:13px;-webkit-font-smoothing:antialiased;}
+  .app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+  /* ===== top bar ===== */
+  .topbar{display:flex;align-items:center;gap:14px;height:52px;padding:0 18px;background:#fff;border-bottom:1px solid #eceef2;flex-shrink:0;}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;}
+  .logo .m{width:26px;height:26px;border-radius:7px;background:#e1251b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .aisearch{display:flex;align-items:center;gap:10px;flex:1;max-width:600px;background:#f4f5f7;border-radius:9px;padding:8px 14px;color:#b7bbc4;}
+  .aisearch .ai{color:#2f6bff;font-weight:700;}
+  .topnav{margin-left:auto;display:flex;align-items:center;gap:16px;color:#555;font-size:12.5px;}
+  .topnav .grad{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;}
+  .topnav .u{display:flex;align-items:center;gap:5px;font-weight:600;color:#1a1a1a;}
+
+  .body{flex:1;display:flex;min-height:0;}
+
+  /* ===== left sidebar ===== */
+  .side{width:210px;background:#fff;border-right:1px solid #eef0f3;display:flex;flex-direction:column;padding:14px 12px;flex-shrink:0;}
+  .side .brand{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;font-weight:800;font-size:17px;}
+  .side .brand .g{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .side .brand .col{margin-left:auto;color:#c7cad1;}
+  .side .ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#444;font-size:13.5px;margin-bottom:2px;}
+  .side .ni.on{background:#eef1ff;color:#2f4bff;font-weight:600;}
+  .side .ni .rd{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#f5222d;}
+  .side .ni .ar{margin-left:auto;color:#c7cad1;}
+  .side .cap{color:#9aa0ab;font-size:12px;padding:14px 12px 6px;}
+  .side .hist{margin-top:14px;border-top:1px solid #f2f3f6;padding-top:12px;overflow-y:auto;flex:1;}
+  .side .hist .ht{color:#9aa0ab;font-size:12px;padding:0 12px 8px;}
+  .side .hist .hi{display:flex;align-items:center;padding:7px 12px;color:#5a5f68;font-size:12.5px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .side .hist .hi .rd{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#f5222d;flex-shrink:0;}
+  .side .hist .hi .tg{margin-left:auto;background:#fdecec;color:#e14b4b;border-radius:5px;font-size:11px;padding:0 6px;flex-shrink:0;}
+  .side .allrec{border:1px solid #e6e8ec;border-radius:9px;padding:9px;text-align:center;color:#666;font-size:12.5px;margin-top:8px;}
+
+  /* ===== main scroll ===== */
+  .main{flex:1;overflow-y:auto;padding:20px 26px 40px;min-width:0;}
+  .wrap{max-width:1380px;margin:0 auto;}
+
+  /* hero */
+  .hero{position:relative;border-radius:18px;background:linear-gradient(120deg,#eef1fe 0%,#f3eefe 55%,#eaf0ff 100%);padding:34px 34px 26px;overflow:hidden;}
+  .hero .htitle{display:flex;align-items:center;gap:16px;font-size:34px;font-weight:900;}
+  .hero .htitle .g{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;display:flex;align-items:center;gap:8px;}
+  .hero .htitle .ai{width:34px;height:34px;}
+  .hero .htitle .sub{color:#1c2340;}
+  .hero .robot{position:absolute;right:26px;top:6px;width:220px;height:190px;display:flex;align-items:flex-end;justify-content:center;}
+  .hero .robot .fig{font-size:120px;filter:drop-shadow(0 10px 20px rgba(80,60,160,.2));}
+  .hero .spark{position:absolute;right:20px;top:70px;color:#a78bff;font-size:26px;}
+
+  .chips{display:flex;gap:12px;margin:26px 0 16px;flex-wrap:wrap;}
+  .chip{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #eae6fb;border-radius:11px;padding:10px 18px;font-size:14px;color:#444;box-shadow:0 2px 8px rgba(90,70,180,.05);}
+  .chip .i{color:#2f6bff;}
+
+  .inputbox{background:#fff;border-radius:16px;box-shadow:0 6px 22px rgba(80,60,160,.08);padding:18px 20px 14px;}
+  .inputbox .ph{color:#9aa0ab;font-size:15px;min-height:40px;}
+  .inputbox .tools{display:flex;align-items:center;gap:20px;color:#555;font-size:13px;margin-top:20px;}
+  .inputbox .tools .t{display:flex;align-items:center;gap:5px;}
+  .inputbox .tools .kb{color:#2f6bff;}
+  .inputbox .tools .send{margin-left:auto;width:34px;height:34px;border-radius:50%;background:#dfe4f0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+
+  /* ===== 运营日报 floor (replaced content) ===== */
+  .report{margin-top:22px;border-radius:18px;background:linear-gradient(150deg,#eef1fe,#f5f2fe 40%,#f7f8fc);padding:20px 22px 24px;border:1px solid #eae7fb;}
+  .rhead{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .rhead b{font-size:22px;font-weight:900;color:#2b2f5a;}
+  .rhead .date{background:rgba(255,255,255,.75);border-radius:8px;padding:3px 10px;color:#5a5f68;font-size:12.5px;}
+  .rhead .join{background:rgba(255,255,255,.75);border-radius:8px;padding:3px 10px;color:#5a5f68;font-size:12.5px;}
+  .rhead .medals{display:flex;gap:3px;} .rhead .medals span{width:17px;height:17px;border-radius:50%;}
+  .rhead .medals .r{background:#e14b4b;} .rhead .medals .b{background:#2f6bff;} .rhead .medals .y{background:#f0b429;} .rhead .medals .g{background:#3ba55d;} .rhead .medals .p{background:#8a5cf0;}
+  .rhead .exp{margin-left:auto;color:#9aa0ab;font-size:16px;}
+
+  .summary{background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 4px 18px rgba(60,60,120,.05);}
+  .sumhd{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;}
+  .sumhd .pie{width:26px;height:26px;border-radius:7px;background:#eef1ff;color:#2f6bff;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .tabs{display:flex;gap:26px;border-bottom:1px solid #f0f1f4;margin:16px 0 18px;}
+  .tabs .tb{padding:0 0 11px;color:#8a8f99;font-size:14px;border-bottom:2px solid transparent;cursor:pointer;}
+  .tabs .tb.on{color:#2f6bff;font-weight:700;border-bottom-color:#2f6bff;}
+  .sumbody{display:grid;grid-template-columns:400px 1fr;gap:26px;}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .mbox{background:#f7f8fa;border-radius:12px;padding:15px 16px;}
+  .mbox .mrow{display:flex;align-items:baseline;justify-content:space-between;}
+  .mbox .mk{color:#5a5f68;font-size:13.5px;} .mbox .mv{font-size:22px;font-weight:800;}
+  .mbox .md{margin-top:9px;font-size:12.5px;}
+  .mbox .md.up{color:#e14b4b;} .mbox .md.down{color:#2fae6a;}
+  .analysis{color:#3a3f47;font-size:13.5px;line-height:1.95;}
+  .analysis .greet{margin-bottom:4px;}
+  .analysis p{margin-bottom:2px;} .analysis .ind{text-indent:2em;}
+  .analysis .neg{color:#e14b4b;font-weight:600;}
+  .detaillink{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:#f4f7ff;border:1px solid #cdd9ff;color:#2f6bff;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+  .detaillink:hover{background:#e9f0ff;} .detaillink .ar{color:#8aa5ff;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+  .gcard{background:#fff;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(60,60,120,.05);}
+  .gcard .gh{display:flex;align-items:center;font-size:16px;font-weight:800;} .gcard .gh .r{margin-left:auto;color:#9aa0ab;font-size:12px;font-weight:400;}
+  .list{margin-top:14px;display:flex;flex-direction:column;gap:12px;}
+  .opp{border:1px solid #f0f1f4;border-radius:12px;padding:12px 14px;}
+  .opp .ot{display:flex;align-items:center;gap:8px;}
+  .opp .ot .tag{background:#fdecec;color:#e14b4b;border-radius:5px;font-size:11px;padding:1px 7px;}
+  .opp .ot .tag.b{background:#eaf3ff;color:#2f6bff;}
+  .opp .ot b{font-size:13.5px;} .opp .ot .dt{margin-left:auto;color:#b7bbc4;font-size:12px;}
+  .opp .od{color:#6b7280;font-size:12.5px;margin-top:6px;line-height:1.55;}
+  .opp .more{color:#2f6bff;font-size:12px;text-align:right;margin-top:6px;}
+  .task{border:1px solid #f0f1f4;border-radius:12px;padding:12px 14px;}
+  .task .tt{display:flex;align-items:center;gap:8px;}
+  .task .tt .tg{background:#eef1ff;color:#2f4bff;border-radius:5px;font-size:11px;padding:1px 7px;}
+  .task .tt b{font-size:13px;} .task .tt .go{margin-left:auto;color:#f59e0b;font-size:12px;}
+  .task .tm{color:#9aa0ab;font-size:12px;margin:7px 0;display:flex;align-items:center;gap:6px;}
+  .task .tm .watch{margin-left:auto;color:#8a8f99;}
+  .task .prog{display:flex;align-items:center;gap:10px;}
+  .task .prog .bar{flex:1;height:6px;background:#eef0f3;border-radius:3px;overflow:hidden;}
+  .task .prog .bar i{display:block;height:100%;background:#2f6bff;border-radius:3px;}
+  .task .prog .pct{color:#2f6bff;font-size:12px;font-weight:600;}
+  .task .prog .btn{background:#2f6bff;color:#fff;border-radius:7px;padding:5px 12px;font-size:12px;}
+  .news{display:flex;gap:11px;border:1px solid #f0f1f4;border-radius:12px;padding:12px 14px;}
+  .news .ni{width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:#f2f6ff;color:#2f6bff;}
+  .news .ni.hot{background:#fff2ec;color:#f5641e;}
+  .news .nt{font-size:13px;font-weight:600;} .news .nd{color:#8a8f99;font-size:12px;margin-top:4px;line-height:1.5;}
+  .risk{margin-top:14px;display:flex;flex-direction:column;gap:10px;}
+  .rk{display:flex;gap:12px;border:1px solid #f0f1f4;border-radius:12px;padding:12px 14px;}
+  .rk .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+  .rk .ic.red{background:#fdecec;color:#e14b4b;} .rk .ic.blue{background:#eaf3ff;color:#2f6bff;}
+  .rk .rt{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px;}
+  .rk .rt .tag{background:#fdecec;color:#e14b4b;border-radius:5px;font-size:11px;padding:1px 7px;font-weight:400;}
+  .rk .rt .tag.b{background:#eaf3ff;color:#2f6bff;}
+  .rk .rd{color:#6b7280;font-size:12.5px;margin-top:5px;line-height:1.5;} .rk .rd b{color:#e14b4b;}
+
+  /* ===== 技能推荐 ===== */
+  .skillhd{font-size:19px;font-weight:800;margin:26px 0 14px;}
+  .skills{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .skill{background:#fff;border:1px solid #f0f1f4;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(60,60,120,.04);}
+  .skill .st{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;}
+  .skill .st .c2m{background:#fff2ec;color:#f5641e;border-radius:6px;font-size:11px;padding:2px 8px;font-weight:600;}
+  .skill .sd{color:#8a8f99;font-size:12.5px;margin-top:10px;line-height:1.6;}
+  .skill .sf{display:flex;align-items:center;gap:16px;margin-top:14px;color:#9aa0ab;font-size:12px;}
+
+  /* ========================================================= */
+  /* ===============  超级大表 view (in-page)  =============== */
+  /* ========================================================= */
+  .hidden{display:none !important;}
+  .topnav .it{display:flex;align-items:center;gap:5px;}
+
+  .smain{flex:1;display:flex;min-height:0;}
+
+  .railicons{width:44px;background:#fff;border-right:1px solid #eceef2;display:flex;flex-direction:column;align-items:center;gap:20px;padding:14px 0;color:#9aa0ab;flex-shrink:0;}
+  .railicons .ri{font-size:17px;} .railicons .ri.on{color:#2f6bff;} .railicons .ri.click{cursor:pointer;}
+  .rail{width:190px;background:#fff;border-right:1px solid #eceef2;padding:14px 12px;overflow-y:auto;flex-shrink:0;}
+  .rail .search{background:#f4f5f7;border-radius:8px;padding:7px 11px;color:#a7abb4;margin-bottom:14px;font-size:12px;}
+  .rail .sec{display:flex;align-items:center;font-weight:700;color:#333;margin:12px 2px 8px;font-size:13px;}
+  .rail .sec .r{margin-left:auto;color:#bbb;font-weight:400;}
+  .rail .badge{background:#f5222d;color:#fff;border-radius:10px;font-size:11px;padding:0 6px;margin-left:6px;}
+  .rail .li{display:flex;align-items:center;gap:7px;padding:6px 6px;border-radius:7px;color:#555;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rail .li .dot{color:#3ba55d;} .rail .li.on{background:#eef1ff;color:#2f4bff;font-weight:600;}
+  .rail .more{color:#2f6bff;padding:5px 6px;font-size:12.5px;}
+  .rail .newrow{display:flex;gap:8px;margin-top:12px;}
+  .rail .newrow .b{flex:1;text-align:center;border-radius:8px;padding:7px 0;font-size:12.5px;}
+  .rail .newrow .b.p{background:#2f6bff;color:#fff;} .rail .newrow .b.g{background:#f1f2f5;color:#555;}
+  .rail .foot{margin-top:14px;color:#666;font-size:12.5px;}
+
+  .sheetwrap{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;}
+  .filebar{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #eef0f3;white-space:nowrap;overflow-x:auto;}
+  .filebar .ficon{font-size:16px;color:#3ba55d;flex-shrink:0;}
+  .filebar .fn{font-weight:700;font-size:14px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px;}
+  .filebar .edit{color:#c2c6cd;flex-shrink:0;}
+  .filebar .st{color:#2fae6a;font-size:12px;background:#eafaf0;border:1px solid #d3f0de;border-radius:7px;padding:3px 10px;white-space:nowrap;flex-shrink:0;}
+  .filebar .right{margin-left:auto;display:flex;align-items:center;gap:16px;color:#5a5f68;font-size:12.5px;white-space:nowrap;flex-shrink:0;padding-left:16px;}
+  .filebar .right .mi{display:flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer;}
+  .filebar .right .mi:hover{color:#2f6bff;}
+  .filebar .right .btn{border:1px solid #e2e5ea;border-radius:8px;padding:6px 13px;white-space:nowrap;color:#444;display:flex;align-items:center;gap:5px;cursor:pointer;}
+  .filebar .right .btn.o{border-color:#cdd9ff;color:#2f6bff;background:#f4f7ff;}
+  .filebar .right .btn.p{background:#2f6bff;border-color:#2f6bff;color:#fff;}
+  .ribbon-tabs{display:flex;gap:24px;padding:0 18px;border-bottom:1px solid #eef0f3;}
+  .ribbon-tabs .rt{padding:10px 0;color:#5a5f68;font-size:13px;border-bottom:2px solid transparent;cursor:pointer;}
+  .ribbon-tabs .rt.on{color:#1a1a1a;font-weight:600;border-bottom-color:#2f6bff;}
+  .toolbar{display:flex;align-items:stretch;gap:0;padding:8px 10px;border-bottom:1px solid #eef0f3;color:#555;font-size:11.5px;overflow-x:auto;background:#fcfcfd;}
+  .tgrp{display:flex;flex-direction:column;align-items:center;padding:0 12px;border-right:1px solid #eef0f3;justify-content:space-between;white-space:nowrap;flex-shrink:0;gap:5px;}
+  .tgrp .tr{display:flex;align-items:center;gap:9px;color:#5a5f68;font-size:14px;}
+  .tgrp .tr .btn{padding:3px 4px;border-radius:5px;cursor:pointer;}
+  .tgrp .tr .btn:hover{background:#eef1ff;color:#2f6bff;}
+  .tgrp .lab{color:#a3a8b2;font-size:11px;}
+  .tgrp .field{border:1px solid #e2e5ea;border-radius:6px;padding:3px 8px;font-size:12px;display:flex;align-items:center;gap:8px;color:#444;background:#fff;}
+  .tgrp .st-list{display:flex;gap:4px;font-size:12px;color:#5a5f68;}
+  .tgrp .st-list span{border:1px solid #eef0f3;border-radius:6px;padding:4px 8px;background:#fff;cursor:pointer;}
+  .tgrp .st-list span:hover{border-color:#cdd9ff;color:#2f6bff;}
+  .formula{display:flex;align-items:center;gap:10px;padding:5px 12px;border-bottom:1px solid #f0f1f4;font-size:12.5px;}
+  .formula .namebox{border:1px solid #e0e2e8;border-radius:5px;padding:3px 12px;min-width:64px;text-align:center;color:#444;}
+  .formula .fx{color:#9aa0ab;} .formula .bar{flex:1;border-bottom:1px solid transparent;}
+  .grid{flex:1;overflow:auto;}
+  table.sheet{border-collapse:collapse;font-size:11.5px;white-space:nowrap;}
+  table.sheet th,table.sheet td{border:1px solid #e6e8ec;padding:2px 6px;height:22px;color:#333;}
+  table.sheet th{background:#f7f8fa;color:#8a8f99;font-weight:600;text-align:center;position:sticky;top:0;z-index:1;}
+  table.sheet td.rownum{background:#f7f8fa;color:#8a8f99;text-align:center;font-weight:600;position:sticky;left:0;}
+  .hd{background:#e9f7ef !important;font-weight:700;text-align:center;color:#2b7a4b;}
+  .hd2{background:#eaf3ff !important;font-weight:700;text-align:center;color:#2f6bff;}
+  .hd3{background:#fff8e6 !important;font-weight:700;text-align:center;color:#a9791b;}
+  table.sheet td.neg{color:#e14b4b;} table.sheet td.pos{color:#2fae6a;}
+  .cellbadge{background:#fdecec;} .ctr{text-align:center;}
+  .sheettabs{display:flex;align-items:center;gap:2px;padding:5px 12px;border-top:1px solid #f0f1f4;background:#fafbfc;overflow-x:auto;flex-shrink:0;}
+  .sheettabs .st{padding:5px 12px;border-radius:6px 6px 0 0;color:#666;font-size:12px;white-space:nowrap;background:none;box-shadow:none;}
+  .sheettabs .st.on{background:#3ba55d;color:#fff;font-weight:600;}
+  .sheettabs .st.gt{background:#e9f7ef;color:#2b7a4b;}
+  .sheettabs .add{color:#9aa0ab;padding:0 6px;}
+  .statusbar{display:flex;align-items:center;padding:4px 14px;border-top:1px solid #f0f1f4;color:#9aa0ab;font-size:12px;background:#fff;flex-shrink:0;}
+
+  .assistant{width:376px;background:#fff;border-left:1px solid #eceef2;display:flex;flex-direction:column;flex-shrink:0;}
+  .ah{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #f2f3f6;}
+  .ah .title{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;}
+  .ah .sparkt{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ah .icons{margin-left:auto;display:flex;gap:14px;color:#9aa0ab;font-size:15px;}
+  .ah .icons span{cursor:pointer;}
+  .abody{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+  .userq{align-self:flex-end;max-width:85%;background:#eef1ff;color:#1a2b6b;border-radius:12px 12px 4px 12px;padding:10px 14px;font-size:13.5px;line-height:1.5;}
+  .step{opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease;}
+  .step.show{opacity:1;transform:none;}
+  .recv{color:#5a5f68;font-size:13px;line-height:1.55;} .recv b{color:#1a1a1a;}
+  .plan{border:1px solid #eef0f3;border-radius:12px;overflow:hidden;}
+  .plan .ph{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#f7f8fa;font-weight:600;color:#333;}
+  .plan .ph .ok{color:#2fae6a;} .plan .ph .ch{margin-left:auto;color:#b7bbc4;}
+  .plan .pbody{padding:6px 14px 12px;display:flex;flex-direction:column;gap:8px;}
+  .plan .ptitle{color:#8a8f99;font-size:12.5px;margin:4px 0 2px;}
+  .chipstep{display:flex;align-items:center;gap:9px;border:1px solid #eef0f3;border-radius:9px;padding:9px 12px;font-size:13px;color:#444;}
+  .chipstep .ic{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .chipstep .ch{margin-left:auto;color:#c2c6cd;}
+  .spinner{width:14px;height:14px;border:2px solid #d8def0;border-top-color:#2f6bff;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .done-check{color:#2fae6a;font-weight:700;}
+  .thinkline{display:flex;align-items:center;gap:6px;color:#333;font-weight:600;font-size:13px;}
+  .thinkline .ok{color:#2fae6a;} .thinkline .ch{margin-left:auto;color:#b7bbc4;font-weight:400;}
+  .interp{color:#3a3f47;font-size:13px;line-height:1.7;}
+  .interp .neg{color:#e14b4b;font-weight:600;} .interp .hl{color:#1a1a1a;font-weight:600;} .interp .pos{color:#2fae6a;font-weight:600;}
+  .caret{display:inline-block;width:7px;height:15px;background:#2f6bff;vertical-align:-2px;margin-left:1px;animation:blink .8s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .filecard{display:flex;align-items:center;gap:12px;border:1px solid #eef0f3;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(60,60,120,.04);}
+  .filecard .fi{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#eef1ff,#f6f0ff);display:flex;align-items:center;justify-content:center;color:#2f6bff;font-size:18px;}
+  .filecard .ft b{font-size:13.5px;} .filecard .ft .s{color:#9aa0ab;font-size:12px;margin-top:2px;}
+  .doneline{display:flex;align-items:center;gap:6px;color:#333;font-weight:600;font-size:13px;}
+  .followup{color:#3a3f47;font-size:13px;line-height:1.6;}
+  /* 结束后的两个圆角对话框，样式统一 */
+  .hintcard{border:1px solid #e6e8ec;background:#fff;border-radius:12px;padding:14px 16px;color:#3a3f47;font-size:13.5px;line-height:1.7;box-shadow:0 2px 10px rgba(60,60,120,.04);}
+  .hintcard b{color:#2f6bff;font-weight:800;}
+  .ainput{padding:0 16px 16px;}
+  .ainput .box{border:1px solid #e6e8ec;background:#fff;border-radius:12px;padding:14px 16px;color:#b7bbc4;font-size:13.5px;min-height:76px;box-shadow:0 2px 10px rgba(60,60,120,.04);}
+</style>
+</head>
+<body>
+<div class="app" id="homeView">
+
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="logo"><span class="m">采</span>采销工作台</div>
+    <div class="aisearch"><span class="ai">Ai搜索</span><span>找货？就上商机中心！ &#128293;</span></div>
+    <div class="topnav">
+      <span class="grad">Ai 经营中心</span><span class="grad">超级运营</span>
+      <span>&#128276; 消息</span><span>&#129520; 工具箱</span><span>&#128421; 客户端</span>
+      <span>&#128172; 反馈</span><span>&#128200; 采销成长</span><span class="grad">&#10022;</span>
+      <span class="u">&#128100; 葛芸冲 &#9662;</span>
+    </div>
+  </div>
+
+  <div class="body">
+    <!-- sidebar -->
+    <div class="side">
+      <div class="brand"><span>&#129302;</span> <span class="g">经营中心</span> <span class="col">&#9707;</span></div>
+      <div class="ni on">&#10227; 新对话</div>
+      <div class="ni">&#127919; AI作战室</div>
+      <div class="ni">&#10022; AI技能库</div>
+      <div class="ni">&#9881; 自动化任务</div>
+      <div class="ni">&#128193; AI档案库</div>
+      <div class="cap">超级工具</div>
+      <div class="ni">&#128200; 超级运营</div>
+      <div class="ni">&#128203; 超级大表 <span class="rd"></span></div>
+      <div class="ni">&#128101; 协同任务 <span class="ar">&#9662;</span></div>
+      <div class="hist">
+        <div class="ht">历史记录</div>
+        <div class="hi">参考当前sheet的公式...</div>
+        <div class="hi">- 类目：汽车用品 - 对...</div>
+        <div class="hi">帮我总结分析表中的... <span class="rd"></span></div>
+        <div class="hi">帮我查询月至昨日GM...</div>
+        <div class="hi">采购单巡检 <span class="tg">异常</span></div>
+        <div class="allrec">&#128336; 全部记录</div>
+      </div>
+    </div>
+
+    <!-- main -->
+    <div class="main">
+      <div class="wrap">
+
+        <!-- hero -->
+        <div class="hero">
+          <div class="robot"><span class="fig">&#129489;&#8205;&#128188;</span></div>
+          <div class="spark">&#10022;</div>
+          <div class="htitle"><span class="g"><span>&#10022;</span>Ai 经营中心</span><span class="sub">全场景覆盖，全链路智能</span></div>
+
+          <div class="chips">
+            <span class="chip"><span class="i">&#128717;</span>选品</span>
+            <span class="chip"><span class="i">&#128230;</span>商品</span>
+            <span class="chip"><span class="i">&#128202;</span>数据</span>
+            <span class="chip"><span class="i">&#128178;</span>调价</span>
+            <span class="chip"><span class="i">&#128226;</span>营销</span>
+            <span class="chip"><span class="i">&#127981;</span>库存</span>
+            <span class="chip"><span class="i">&#128722;</span>采购</span>
+            <span class="chip"><span class="i">&#128100;</span>商家</span>
+          </div>
+
+          <div class="inputbox">
+            <div class="ph">检查商家待办任务</div>
+            <div class="tools">
+              <span class="t">&#10022; 技能 &#9662;</span>
+              <span class="t">&#9889; 自动 &#9662;</span>
+              <span class="t kb">&#128218; 知识库</span>
+              <span class="t" style="margin-left:auto;">&#127760;</span>
+              <span class="t">&#127908;</span>
+              <span class="send">&#8593;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 运营日报 floor：替换为之前生成的内容 ===== -->
+        <div class="report">
+          <div class="rhead">
+            <b>运营日报</b>
+            <span class="date">2026.8.4</span>
+            <span class="join">已入职 2003 天</span>
+            <span class="medals"><span class="r"></span><span class="b"></span><span class="y"></span><span class="g"></span><span class="p"></span><span class="r"></span></span>
+            <span class="exp">&#9974;</span>
+          </div>
+
+          <!-- 经营总结 -->
+          <div class="summary">
+            <div class="sumhd"><span class="pie">&#128202;</span> 经营总结</div>
+            <div class="tabs"><span class="tb on">经营数据</span><span class="tb">AI操盘</span></div>
+            <div class="sumbody">
+              <div class="metrics">
+                <div class="mbox"><div class="mrow"><span class="mk">成交金额</span><span class="mv">¥45,678</span></div><div class="md up">&#8593; 日环比 +5.2%</div></div>
+                <div class="mbox"><div class="mrow"><span class="mk">成交数量</span><span class="mv">1,234</span></div><div class="md down">&#8595; 日环比 -2.1%</div></div>
+                <div class="mbox"><div class="mrow"><span class="mk">商详UV</span><span class="mv">12,345</span></div><div class="md up">&#8593; 日环比 +10.5%</div></div>
+                <div class="mbox"><div class="mrow"><span class="mk">成交用户数</span><span class="mv">890</span></div><div class="md down">&#8595; 日环比 -0.8%</div></div>
+              </div>
+              <div class="analysis">
+                <div class="greet">hi，秦哥，根据您的盯盘模板，今日盯盘分析如下：</div>
+                <p class="ind">月至今GMV销售稍差，<span class="neg">同比-10%</span>，核心原因为<span class="neg">得力、野兽派</span>等5个品牌同比下滑<span class="neg">5%-10%</span>，其中野兽派下滑最大，下探分析是因为流量下滑，<span class="neg">广告投入降低3%</span>，搜索流量同比降4%，5个SKU需要重点关注。</p>
+                <p class="ind">重点品分析，GMV同比+5%，得力2B铅笔等20个SKU同比增3%-8%，需重点关注营销活动报名。</p>
+                <div class="detaillink" onclick="openDetail()">&#128203; 查看具体明细 <span class="ar">&#8250;</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 经营机会 / 待办任务 / 热点资讯 / 经营风险 -->
+          <div class="grid2">
+            <div class="gcard">
+              <div class="gh">经营机会 <span class="r">&#8250;</span></div>
+              <div class="list">
+                <div class="opp">
+                  <div class="ot"><span class="tag">置顶</span><b>保温杯品类消费趋势报告</b><span class="dt">2026-04-26</span></div>
+                  <div class="od">保温杯市场已进入"全材质进化与多场景兼容"的体验升级阶段，产品策略应围绕"纯钛健康内胆＋无尾真空技术＋全场景饮用兼容"三大核心。</div>
+                  <div class="more">查看详情 &#8250;</div>
+                </div>
+                <div class="opp">
+                  <div class="ot"><span class="tag b">报告</span><b>近期流行色预测：年度紫色系</b><span class="dt">2026-04-24</span></div>
+                  <div class="od">消费者对家居用品的色彩偏好上移，紫色系在厨房小家电与餐厨用品中渗透率同比提升 12%，建议提前储备主推色。</div>
+                  <div class="more">查看详情 &#8250;</div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard">
+              <div class="gh">待办任务 <span class="r">查看全部（共50条）&#8250;</span></div>
+              <div class="list">
+                <div class="task">
+                  <div class="tt"><span class="tg">BOSS任务</span><b>20个商品流量转化异常跟进</b><span class="go">进行中</span></div>
+                  <div class="tm">&#128197; 2026.05.10 - 2026.05.12 <span class="watch">&#128101; 178人关注</span></div>
+                  <div class="prog"><span style="color:#8a8f99;font-size:12px;">完成进度</span><div class="bar"><i style="width:40%;"></i></div><span class="pct">40% (8/20)</span><span class="btn">立即处理</span></div>
+                </div>
+                <div class="task">
+                  <div class="tt"><span class="tg">综管任务</span><b>1个商品评价负面预警跟进</b><span class="go">进行中</span></div>
+                  <div class="tm">&#128197; 2026.05.11 - 2026.05.15 <span class="watch">&#128101; 56人关注</span></div>
+                  <div class="prog"><span style="color:#8a8f99;font-size:12px;">完成进度</span><div class="bar"><i style="width:10%;"></i></div><span class="pct">10% (1/10)</span><span class="btn">立即处理</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard">
+              <div class="gh">热点资讯 <span class="r">&#8250;</span></div>
+              <div class="list">
+                <div class="news">
+                  <div class="ni hot">&#128293;</div>
+                  <div><div class="nt">品类消费趋势 · 家居家电</div><div class="nd">厨卫刚需品类受地产低迷与人口增长乏力影响，整体表现承压，预计2026年市场规模将突破新的关口，需关注结构性机会。</div></div>
+                </div>
+                <div class="news">
+                  <div class="ni">&#128202;</div>
+                  <div><div class="nt">行业咨询分析 · 厨房电器</div><div class="nd">头部竞品本周加大促销力度，主要集中在小家电板块；新兴内容电商渠道竞争加剧，传统货架流量被进一步分流。</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard">
+              <div class="gh">经营风险 <span class="r">&#8592; &#8594;</span></div>
+              <div class="risk">
+                <div class="rk">
+                  <div class="ic red">&#165;</div>
+                  <div><div class="rt">价高预警 <span class="tag">实时事件</span></div><div class="rd">您名下共有 <b>4014</b> 个重点货盘价高商品，价高时长已超过2h的商品有 <b>3946</b> 个...</div></div>
+                </div>
+                <div class="rk">
+                  <div class="ic blue">&#127981;</div>
+                  <div><div class="rt">库存巡检 <span class="tag b">AI巡检</span></div><div class="rd">您当前名下暂无库存异常商品，请继续保持~</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 技能推荐 ===== -->
+        <div class="skillhd">技能推荐</div>
+        <div class="skills">
+          <div class="skill">
+            <div class="st">品类消费趋势 <span class="c2m">&#128296; 助力C2M</span></div>
+            <div class="sd">用于品类消费趋势、细分市场及商机研判，可开展站内品类分析、爆品洞察与选品建议输出。</div>
+            <div class="sf"><span>&#128077; 185</span><span>&#128172; 24</span><span>&#11088; 收藏</span></div>
+          </div>
+          <div class="skill">
+            <div class="st">消费者订单状态查询</div>
+            <div class="sd">用于单/批量查询活动订单全流转节点状态，可筛选智停、退款、异常等场景，快速定位问题订单。</div>
+            <div class="sf"><span>&#128077; 132</span><span>&#128172; 18</span><span>&#11088; 收藏</span></div>
+          </div>
+          <div class="skill">
+            <div class="st">供应链诊断分析</div>
+            <div class="sd">覆盖 16 类供应链分析场景，支持诊断、定价、预测补货，帮助识别缺货与滞销风险并给出行动建议。</div>
+            <div class="sf"><span>&#128077; 98</span><span>&#128172; 11</span><span>&#11088; 收藏</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ===============  超级大表 view (in-page)  =========== -->
+<!-- ===================================================== -->
+<div class="app hidden" id="tableView">
+  <div class="topbar">
+    <div class="logo"><span class="m">采</span>采销工作台</div>
+    <div class="aisearch"><span class="ai">Ai搜索</span><span>产品线审核入口</span></div>
+    <div class="topnav">
+      <span class="it grad">Ai 经营中心</span><span class="it grad">超级运营</span>
+      <span class="it">&#128276; 消息</span><span class="it">&#129520; 工具箱</span><span class="it">&#128421; 客户端</span>
+      <span class="it">&#128172; 反馈</span><span class="it">&#128200; 采销成长</span><span class="it grad">&#10022;</span>
+      <span class="u">&#128100; 葛芸冲 &#9662;</span>
+    </div>
+  </div>
+
+  <div class="smain">
+    <div class="railicons">
+      <span class="ri click" onclick="backHome()" title="返回">&#8617;</span>
+      <span class="ri">&#128444;</span><span class="ri">&#10022;</span>
+      <span class="ri">&#128193;</span><span class="ri on">&#128203;</span><span class="ri">&#128200;</span>
+      <span class="ri">&#128101;</span><span class="ri" style="margin-top:auto;">&#128339;</span>
+    </div>
+
+    <div class="rail">
+      <div class="search">&#128269; 搜索</div>
+      <div class="sec">模板库 <span class="r">&#9662;</span></div>
+      <div class="li"><span class="dot">&#128203;</span>销售进度监控-品牌维度</div>
+      <div class="li"><span class="dot">&#128203;</span>销售进度监控-店铺维度</div>
+      <div class="more">更多模板 &#8250;</div>
+      <div class="sec">我收到的 <span class="badge">30</span></div>
+      <div class="sec">我创建的 <span class="r">&#9662; +</span></div>
+      <div class="li"><span class="dot">&#128203;</span>销售进度监控-品...</div>
+      <div class="li">&#8862; sku调价决策分析</div>
+      <div class="li"><span class="dot">&#128203;</span>未命名_0731_2</div>
+      <div class="li">&#8862; 价促场趋势分析-...</div>
+      <div class="li"><span class="dot">&#128203;</span>未命名_0724_2</div>
+      <div class="li on"><span>&#128203;</span>销售进度监控-品...</div>
+      <div class="li">&#8862; 价促场趋势分析-...</div>
+      <div class="li"><span class="dot">&#128203;</span>提数中心测试2_副...</div>
+      <div class="li"><span class="dot">&#128203;</span>提数中心测试111...</div>
+      <div class="newrow"><span class="b p">＋ 新建</span><span class="b g">&#8593; 导入</span></div>
+      <div class="foot">&#8599; 外发文件管理</div>
+    </div>
+
+    <div class="sheetwrap">
+      <div class="filebar">
+        <span class="ficon">&#128203;</span>
+        <span class="fn">销售进度监控-品牌维度_副本5444_1784890480868</span>
+        <span class="edit">&#9998;</span>
+        <span class="st">&#9679; 本人编辑中</span>
+        <span class="right">
+          <span class="mi">&#128172; 反馈</span>
+          <span class="mi">&#128336; 报表刷新时间 19:08:15</span>
+          <span class="mi">&#10227; 刷新</span>
+          <span class="mi">&#8598; 全屏</span>
+          <span class="btn o">&#9998; 批量修改查询规则</span>
+          <span class="btn p">&#128190; 保存 &#9662;</span>
+        </span>
+      </div>
+      <div class="ribbon-tabs">
+        <span class="rt">文件</span><span class="rt on">开始</span><span class="rt">插入</span>
+        <span class="rt">页面布局</span><span class="rt">公式</span><span class="rt">数据</span>
+        <span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span>
+      </div>
+      <div class="toolbar">
+        <div class="tgrp"><div class="tr"><span class="btn">&#8630;</span><span class="btn">&#8631;</span></div><div class="lab">撤销</div></div>
+        <div class="tgrp"><div class="tr"><span class="btn">&#128203;</span><span class="btn">&#9986;</span><span class="btn">&#128459;</span></div><div class="lab">剪贴板</div></div>
+        <div class="tgrp">
+          <div class="tr"><span class="field">jingdonglang2 &#9662;</span><span class="field">12 &#9662;</span></div>
+          <div class="lab">字体</div>
+        </div>
+        <div class="tgrp">
+          <div class="tr"><span class="btn"><b>B</b></span><span class="btn"><i>I</i></span><span class="btn"><u>U</u></span><span class="btn">A</span><span class="btn">&#128396;</span></div>
+          <div class="lab">字形</div>
+        </div>
+        <div class="tgrp"><div class="tr"><span class="btn">&#8801;</span><span class="btn">&#8803;</span><span class="btn">&#8802;</span><span class="btn">&#8863; 合并后居中 &#9662;</span></div><div class="lab">对齐方式</div></div>
+        <div class="tgrp"><div class="tr"><span class="field">百分比 &#9662;</span><span class="btn">%</span><span class="btn">&#8240;</span><span class="btn">.00</span></div><div class="lab">数字</div></div>
+        <div class="tgrp"><div class="st-list"><span>条件格式</span><span>套用表格样式</span><span>单元格样式</span><span>单元格模板</span></div><div class="lab">样式</div></div>
+        <div class="tgrp"><div class="tr"><span class="btn">插入</span><span class="btn">删除</span><span class="btn">格式</span></div><div class="lab">单元格</div></div>
+        <div class="tgrp" style="border:none;"><div class="tr"><span class="btn">&#931; 求和</span><span class="btn">填充</span><span class="btn">清除</span></div><div class="lab">编辑</div></div>
+      </div>
+      <div class="formula">
+        <span class="namebox">S9</span><span>&#9662;</span><span class="fx"><i>fx</i></span><span class="bar"></span>
+      </div>
+      <div class="grid">
+        <table class="sheet">
+          <thead>
+            <tr><th style="min-width:30px;"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th><th>J</th><th>K</th><th>L</th><th>M</th><th>N</th><th>O</th><th>P</th><th>Q</th><th>R</th></tr>
+          </thead>
+          <tbody id="grid"></tbody>
+        </table>
+      </div>
+      <div class="sheettabs">
+        <span>&#9776;</span>
+        <span class="st on">品牌汇总</span><span class="st">Sheet11</span><span class="st">Sheet12</span>
+        <span class="st">sku下探</span><span class="st gt">GMV目标维护</span><span class="st gt">基础数据集</span>
+        <span class="st gt">昨日名下</span><span class="st gt">月至今名下</span><span class="st gt">昨日品牌</span>
+        <span class="st gt">月至今</span><span class="st gt">昨日sku</span><span class="st gt">月至今sku</span>
+        <span class="st">Sheet1</span><span class="add">&#8853;</span>
+      </div>
+      <div class="statusbar">就绪</div>
+    </div>
+
+    <div class="assistant">
+      <div class="ah">
+        <div class="title"><span class="sparkt">&#10022;</span> 超级助手</div>
+        <div class="icons"><span>&#10227;</span><span>&#9776;</span><span>&#8598;</span><span onclick="backHome()">&#10005;</span></div>
+      </div>
+      <div class="abody" id="abody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- 视图切换 ---------- */
+var homeView = document.getElementById('homeView');
+var tableView = document.getElementById('tableView');
+var abody = document.getElementById('abody');
+var hasRun = false;
+
+function openDetail(){
+  // 查看具体明细 → 页内切换到超级大表视图，并模拟 AI 动态执行
+  homeView.classList.add('hidden');
+  tableView.classList.remove('hidden');
+  if(!hasRun){ hasRun = true; run(); }
+}
+function backHome(){
+  tableView.classList.add('hidden');
+  homeView.classList.remove('hidden');
+}
+
+/* ---------- spreadsheet data ---------- */
+function gridRows(){
+  var b = document.getElementById('grid');
+  var rows = [
+    ['1','本月已过天数','3'],
+    ['2','本月总天数','31'],
+    ['3','','','','','','','','','','','','','','','','',''],
+    ['4',{c:'维度',cls:'hd'},'',{c:'昨日',cls:'hd',span:5},'','','','',{c:'月至今',cls:'hd2',span:7},'','','','','','',{c:'GMV目标',cls:'hd3'}],
+    ['5',{c:'名下合计',cls:'hd'},'',{c:'GMV',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'同比贡献',cls:'ctr'},{c:'自营GMV',cls:'ctr'},{c:'POPGMV',cls:'ctr'},{c:'累计GMV',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'日均GMV',cls:'ctr'},{c:'累计',cls:'ctr'},{c:'POP累计',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'目标达成',cls:'ctr'}],
+    ['6','','',{c:'3,322'},{c:'-65%',cls:'neg cellbadge'},{c:'',},{c:'67'},{c:'3,254'},{c:'#REF!'},{c:'',},{c:'#REF!'},{c:'#REF!'},{c:'#REF!'},{c:'',},{c:'500,000,000'}],
+    ['7','','','','','','','','','','','','','','',''],
+    ['8',{c:'维度',cls:'hd'},'',{c:'昨日',cls:'hd',span:5},'','','','',{c:'月至今',cls:'hd2',span:7},'','','','','','',{c:'GMV目标',cls:'hd3'}],
+    ['9',{c:'主品牌id',cls:'ctr'},{c:'主品牌名称',cls:'ctr'},{c:'GMV',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'同比贡献',cls:'ctr'},{c:'自营GMV',cls:'ctr'},{c:'POPGMV',cls:'ctr'},{c:'累计GMV',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'日均GMV',cls:'ctr'},{c:'POP累计',cls:'ctr'},{c:'同比',cls:'ctr'},{c:'GMV目标',cls:'ctr'},{c:'目标达...',cls:'ctr'}],
+  ];
+  var data = [
+    ['0','未知','460',['-47%','neg'],['-5%','neg'],'/','460','3,784',['117%','pos'],'1,261','3,784',['-190%','neg'],'500,000'],
+    ['19447','依云 (evian)','991',['632%','pos'],['10%','pos'],'/','991','3,190',['2256%','pos'],'1,063','3,190',['-1625%','neg'],'#N/A'],
+    ['35247','无品牌','31',['244%','pos'],['5%','pos'],'/','31','761',['2631%','pos'],'254','761',['-2620%','neg'],'#N/A'],
+    ['11742','鲁花','',['-100%','neg'],['-12%','neg'],'/','','737',['-45%','neg'],'246','737',['-55%','neg'],'#N/A'],
+    ['9429','金龙鱼','146',['2%','pos'],'','/','146','610',['526%','pos'],'203','610',['-476%','neg'],'#N/A'],
+    ['17669','味全','146',['27%','pos'],'','/','146','271',['124%','pos'],'90','271',['-103%','neg'],'#N/A'],
+    ['90192','佳沛 (zespri)','112','','','/','112','264','','88','264',['-262%','neg'],'#N/A'],
+    ['267385','优诺 (yoplait)','121',['310%','pos'],'','/','121','217',['490%','pos'],'72','217',['-262%','neg'],'#N/A'],
+    ['15853','石库门','207','','','/','207','207','','69','207','','#N/A'],
+    ['13877','潘婷 (PANTEN)','','','','/','','206',['210%','pos'],'69','206',['-310%','neg'],'#N/A'],
+    ['10504','可口可乐 (Coc','14','','','/','14','199',['320%','pos'],'66','199',['-390%','neg'],'#N/A'],
+    ['11736','泸州老窖 (LUZ','','','','/','','188','','63','188','','#N/A'],
+    ['19306','伊利','39',['-70%','neg'],['-1%','neg'],'/','39','157',['-14%','neg'],'52','157',['-65%','neg'],'#N/A'],
+    ['26734','上好佳','23',['418%','pos'],'','/','23','146',['3191%','pos'],'49','146',['-2773%','neg'],'#N/A'],
+    ['14232','麒麟','45','','','/','45','146','','49','146','','#N/A'],
+    ['20190','悠诗诗 (UCC)','','','','/','','133',['7%','pos'],'44','133',['-107%','neg'],'#N/A'],
+    ['32708','和路雪','',['-100%','neg'],['-1%','neg'],'/','','130',['-5%','neg'],'43','130',['-95%','neg'],'#N/A'],
+    ['55567','农夫山泉','28',['-75%','neg'],['-1%','neg'],'/','28','129',['-31%','neg'],'43','129',['-54%','neg'],'#N/A'],
+    ['8319','红牛','','','','/','','128','','43','128','','#N/A'],
+    ['18477','心相印 (Mind','25',['75%','pos'],'','/','25','108',['112%','pos'],'36','108',['-162%','neg'],'#N/A'],
+    ['826368','椰树牌 (YE SH','','','','/','','104','','35','104','','#N/A'],
+    ['16024','舒肤佳','91',['284%','pos'],'','/','91','104',['137%','pos'],'35','104',['-85%','neg'],'#N/A'],
+  ];
+  var html = '';
+  rows.forEach(function(r){
+    html += '<tr><td class="rownum">'+r[0]+'</td>';
+    for(var i=1;i<r.length;i++){
+      var cell=r[i];
+      if(cell&&typeof cell==='object'){
+        html += '<td'+(cell.span?' colspan="'+cell.span+'"':'')+(cell.cls?' class="'+cell.cls+'"':'')+'>'+cell.c+'</td>';
+      } else { html += '<td>'+(cell||'')+'</td>'; }
+    }
+    html += '</tr>';
+  });
+  var rn = 10;
+  data.forEach(function(d){
+    rn++;
+    html += '<tr><td class="rownum">'+rn+'</td>';
+    html += '<td>'+d[0]+'</td><td>'+d[1]+'</td>';
+    for(var i=2;i<d.length;i++){
+      var v=d[i];
+      if(Array.isArray(v)){ html += '<td class="'+v[1]+' cellbadge ctr">'+v[0]+'</td>'; }
+      else { html += '<td class="ctr">'+(v||'-')+'</td>'; }
+    }
+    html += '</tr>';
+  });
+  b.innerHTML = html;
+}
+gridRows();
+
+/* ---------- AI execution animation ---------- */
+var S = {
+  query: '查看今天运营日报的详细分析报告',
+  planTitle: '解读今日运营日报数据',
+  steps: ['导出 xlsx 上传 OSS','拿到 ossUrl','基于 ossUrl 解读'],
+  interp: '基于销售进度监控分析，月至今（2026年8月）Net GMV 为 <span class="hl">15,887.99</span>，较同期 23,513.46 <span class="neg">大幅下降 32.43%</span>，销售表现承压。昨日（2026-08-03）Net GMV 为 <span class="hl">3,321.57</span>，成交金额 5,104.39。品牌维度上，"未知"品牌 GMV 最高（3,783.60），其次为"依云 (evian)"（3,190.20）。经营模式以 POP 为主（占比约 90%）。核心下滑来自<span class="neg">得力、野兽派</span>等 5 个品牌同比下滑 5%-10%，主因流量下滑与广告投入降低 3%，5 个 SKU 需重点关注；重点品 GMV 同比 <span class="pos">+5%</span>，得力 2B 铅笔等 20 个 SKU 需关注营销活动报名。',
+  file: {t:'运营日报详细分析...', s:'html'},
+  followup: '需要我帮你进行深度下探分析吗？',
+  hint: {t:'超级大表', d:'我可以帮你查数建表、解读分析、生成公式。试试输入：帮我生成当前 sheet 页的分析解读'}
+};
+
+function el(html){var d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function add(node){abody.appendChild(node);requestAnimationFrame(function(){node.classList.add('show');});abody.scrollTop=abody.scrollHeight;return node;}
+
+async function typeInto(node, html, speed){
+  var tmp=document.createElement('div');tmp.innerHTML=html;
+  var full=tmp.innerHTML;
+  var i=0;
+  var caret='<span class="caret"></span>';
+  while(i<full.length){
+    if(full[i]==='<'){var j=full.indexOf('>',i);i=(j===-1?full.length:j+1);}
+    else{i++;}
+    node.innerHTML=full.slice(0,i)+caret;
+    abody.scrollTop=abody.scrollHeight;
+    await sleep(speed);
+  }
+  node.innerHTML=full;
+}
+
+async function run(){
+  add(el('<div class="userq step">'+S.query+'</div>'));
+  await sleep(650);
+  add(el('<div class="recv step">已收到提问"<b>'+S.query+'</b>"</div>'));
+  await sleep(700);
+  var plan = add(el(
+    '<div class="plan step">'+
+      '<div class="ph"><span class="ok">&#10003;</span> 规划 <span class="ch">&#9662;</span></div>'+
+      '<div class="pbody"><div class="ptitle">'+S.planTitle+'</div></div>'+
+    '</div>'
+  ));
+  var pbody = plan.querySelector('.pbody');
+  await sleep(500);
+  for(var k=0;k<S.steps.length;k++){
+    var chip = el('<div class="chipstep step"><span class="ic"><span class="spinner"></span></span>'+S.steps[k]+'<span class="ch">&#9662;</span></div>');
+    pbody.appendChild(chip);
+    requestAnimationFrame(function(c){return function(){c.classList.add('show');};}(chip));
+    abody.scrollTop=abody.scrollHeight;
+    await sleep(900);
+    chip.querySelector('.ic').innerHTML='<span class="done-check">&#10003;</span>';
+    await sleep(350);
+  }
+  await sleep(400);
+  add(el('<div class="thinkline step"><span class="ok">&#10003;</span> 已完成思考 <span class="ch">&#9662;</span></div>'));
+  await sleep(500);
+  var interp = add(el('<div class="interp step"></div>'));
+  await sleep(200);
+  await typeInto(interp, S.interp, 14);
+  await sleep(500);
+  add(el(
+    '<div class="filecard step"><div class="fi">&#128203;</div>'+
+    '<div class="ft"><b>'+S.file.t+'</b><div class="s">'+S.file.s+'</div></div></div>'
+  ));
+  await sleep(600);
+  add(el('<div class="doneline step"><span style="color:#2fae6a;">&#10003;</span> 数据解读已完成。</div>'));
+  await sleep(500);
+  add(el('<div class="followup step">'+S.followup+'</div>'));
+  await sleep(500);
+  add(el('<div class="hintcard step"><b>'+S.hint.t+'</b> '+S.hint.d+'</div>'));
+}
+</script>
+</body>
+</html>
