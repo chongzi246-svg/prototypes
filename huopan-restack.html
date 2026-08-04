@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>操盘中心 · 手机配件货盘分堆</title>
+<style>
+:root{color-scheme:light;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f5f8;color:#1d2129;font-size:14px;}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* top bar */
+.topbar{height:60px;background:#fff;border-bottom:1px solid #eef0f4;display:flex;align-items:center;padding:0 24px;gap:24px;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;white-space:nowrap;}
+.logo .mk{width:34px;height:34px;border-radius:8px;background:#e1251b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;}
+.search{flex:1;max-width:560px;height:38px;border:1px solid #e5e7ee;border-radius:19px;display:flex;align-items:center;padding:0 16px;gap:10px;color:#8a909e;background:#fafbfc;}
+.search .ai{color:#7a5bff;font-weight:700;}
+.search .sep{color:#dfe2ea;}
+.topnav{margin-left:auto;display:flex;align-items:center;gap:22px;font-size:14px;color:#4a4f5c;white-space:nowrap;}
+.topnav .act{color:#7a5bff;font-weight:700;}
+.user{display:flex;align-items:center;gap:8px;margin-left:6px;}
+.user .av{width:34px;height:34px;border-radius:50%;background:#f5511e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.user .un{font-weight:700;font-size:13px;}
+.user .tag{font-size:11px;color:#f5511e;border:1px solid #f7c4b4;border-radius:4px;padding:0 4px;display:inline-block;margin-top:2px;}
+
+/* body */
+.body{flex:1;display:flex;overflow:hidden;}
+
+/* sidebar */
+.side{width:186px;background:#fff;border-right:1px solid #eef0f4;padding:16px 12px;flex-shrink:0;overflow-y:auto;}
+.side .ttl{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;padding:4px 8px 12px;}
+.side .ttl .ai{color:#7a5bff;}
+.newchat{border:1px solid #e5e7ee;border-radius:8px;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;color:#4a4f5c;font-weight:600;cursor:pointer;margin-bottom:14px;}
+.newchat:hover{border-color:#7a5bff;color:#7a5bff;}
+.menu{display:flex;flex-direction:column;gap:2px;}
+.mi{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:#4a4f5c;cursor:pointer;font-size:13.5px;position:relative;}
+.mi:hover{background:#f4f5f8;}
+.mi.on{background:#f0edff;color:#7a5bff;font-weight:700;}
+.mi .dot{width:6px;height:6px;border-radius:50%;background:#e1251b;position:absolute;right:12px;top:50%;transform:translateY(-50%);}
+.grp{font-size:12px;color:#a3a8b3;padding:16px 10px 6px;}
+.hist{font-size:12.5px;color:#8a909e;padding:8px 10px;line-height:1.5;cursor:pointer;border-radius:6px;}
+.hist:hover{background:#f4f5f8;color:#4a4f5c;}
+.allrec{margin-top:14px;border:1px solid #eef0f4;border-radius:8px;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;color:#8a909e;font-size:13px;cursor:pointer;}
+
+/* main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f4f5f8;}
+.mhead{background:#fff;border-bottom:1px solid #eef0f4;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.pill{background:#f0edff;color:#7a5bff;font-weight:700;border-radius:6px;padding:3px 10px;font-size:13px;}
+.mhead .pname{font-weight:700;font-size:15px;}
+.steps{display:flex;align-items:center;gap:8px;color:#a3a8b3;font-size:13px;}
+.steps .s{display:flex;align-items:center;gap:5px;}
+.steps .s.on{color:#7a5bff;font-weight:700;}
+.steps .s .n{width:18px;height:18px;border-radius:50%;background:#eceef3;color:#a3a8b3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.steps .s.on .n{background:#7a5bff;color:#fff;}
+.steps .arw{color:#cdd1da;}
+.mhead .rt{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.btnw{border:1px solid #e5e7ee;background:#fff;border-radius:8px;height:34px;padding:0 14px;font-size:13px;color:#4a4f5c;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.btnw.red{color:#e1251b;border-color:#f6cfca;}
+.btnw:hover{border-color:#7a5bff;color:#7a5bff;}
+.btnw.dark{background:#2b2f3a;color:#fff;border-color:#2b2f3a;font-weight:600;}
+
+/* chat area */
+.chatwrap{flex:1;display:flex;overflow:hidden;}
+.chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.msgs{flex:1;overflow-y:auto;padding:20px 24px;}
+.aihdr{color:#7a5bff;font-weight:700;font-size:13px;margin-bottom:8px;}
+.card{background:#fff;border:1px solid #eef0f4;border-radius:14px;padding:20px 22px;box-shadow:0 1px 3px rgba(20,30,60,.03);max-width:920px;}
+.card p{line-height:1.75;color:#2b2f3a;}
+.card .hl{color:#7a5bff;font-weight:700;}
+.dtable{width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #eef0f4;border-radius:10px;overflow:hidden;}
+.dtable th{background:#f7f8fb;text-align:left;padding:11px 14px;font-size:13px;color:#6b7280;font-weight:600;border-bottom:1px solid #eef0f4;}
+.dtable td{padding:12px 14px;border-bottom:1px solid #f2f3f7;vertical-align:top;font-size:13px;line-height:1.6;}
+.dtable tr:last-child td{border-bottom:none;}
+.dtable .stack{font-weight:700;white-space:nowrap;}
+.dtable .num{font-weight:800;font-size:15px;}
+.dtable .num .box{display:inline-block;border:2px solid #f5824a;border-radius:6px;padding:2px 10px;color:#1d2129;}
+.rowgreen{background:#f2fbf6;}
+.rowgreen td{color:#1f9d57;}
+.rowgreen .stack{color:#1f9d57;}
+.warn{color:#e1251b;font-weight:600;}
+.viewlink{display:inline-flex;align-items:center;gap:6px;color:#2f6bff;font-weight:700;cursor:pointer;font-size:13px;margin-left:8px;padding:2px 8px;border-radius:6px;}
+.viewlink:hover{background:#eef3ff;}
+.qbox{margin-top:6px;}
+.qbox .qt{font-weight:700;margin:12px 0 6px;}
+.qbox .qi{color:#3a3f4c;line-height:1.75;margin-bottom:4px;}
+.qbox .qi b{color:#1d2129;}
+
+.chips{display:flex;gap:10px;flex-wrap:wrap;padding:12px 24px 0;}
+.chip{border:1px solid #e5e7ee;background:#fff;border-radius:18px;padding:7px 14px;font-size:13px;color:#4a4f5c;cursor:pointer;}
+.chip:hover{border-color:#7a5bff;color:#7a5bff;}
+.chip.amber{border-color:#f2c66b;color:#c98a15;}
+.composer{padding:12px 24px 18px;display:flex;gap:12px;align-items:center;}
+.inp{flex:1;height:52px;border:1px solid #e5e7ee;border-radius:12px;padding:0 16px;font-size:14px;color:#1d2129;background:#fff;}
+.inp::placeholder{color:#a3a8b3;}
+.send{width:120px;height:52px;border:none;border-radius:12px;background:linear-gradient(135deg,#8a6bff,#6b57ff);color:#fff;font-weight:700;font-size:16px;cursor:pointer;}
+.tokens{text-align:right;padding:0 24px 10px;color:#a3a8b3;font-size:12px;}
+
+/* right strategy panel */
+.rpanel{width:400px;background:#fff;border-left:1px solid #eef0f4;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.rtabs{display:flex;gap:26px;padding:16px 20px 0;border-bottom:1px solid #eef0f4;}
+.rtab{padding-bottom:12px;color:#8a909e;font-weight:600;cursor:pointer;font-size:14px;border-bottom:2px solid transparent;}
+.rtab.on{color:#7a5bff;border-bottom-color:#7a5bff;}
+.rlist{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.scard{border:1px solid #eef0f4;border-radius:12px;overflow:hidden;}
+.scard .sh{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fafbfd;}
+.scard .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.scard .st{font-weight:700;font-size:14px;}
+.scard .su{font-size:12px;color:#8a909e;margin-top:2px;}
+.scard .cnt{margin-left:auto;font-size:12px;color:#2f6bff;background:#eef3ff;border-radius:6px;padding:3px 8px;font-weight:600;white-space:nowrap;}
+.srow{padding:11px 14px;border-top:1px solid #f2f3f7;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.55;color:#3a3f4c;}
+.badge{font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
+.b-done{background:#e8f7ee;color:#1f9d57;}
+.b-wait{background:#fff2e0;color:#d98a12;}
+.b-signed{background:#eef3ff;color:#2f6bff;}
+.b-go{background:#f0edff;color:#7a5bff;}
+
+/* drawer */
+.mask{position:fixed;inset:0;background:rgba(20,26,45,.38);opacity:0;pointer-events:none;transition:.25s;z-index:40;}
+.mask.show{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:1040px;max-width:94vw;background:#f4f5f8;box-shadow:-8px 0 30px rgba(20,30,60,.16);transform:translateX(100%);transition:transform .28s cubic-bezier(.22,.61,.36,1);z-index:50;display:flex;flex-direction:column;}
+.drawer.show{transform:translateX(0);}
+.dh{background:#fff;padding:16px 22px;border-bottom:1px solid #eef0f4;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.dh .dt{font-size:17px;font-weight:700;}
+.dh .dsub{font-size:12.5px;color:#8a909e;}
+.dh .x{margin-left:auto;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a909e;cursor:pointer;font-size:20px;}
+.dh .x:hover{background:#f2f3f7;}
+.dfilter{background:#fff;border-bottom:1px solid #eef0f4;padding:12px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+.fchip{border:1px solid #e5e7ee;background:#fff;border-radius:16px;padding:6px 14px;font-size:13px;color:#4a4f5c;cursor:pointer;white-space:nowrap;}
+.fchip.on{background:#7a5bff;border-color:#7a5bff;color:#fff;font-weight:600;}
+.fsearch{margin-left:auto;height:34px;border:1px solid #e5e7ee;border-radius:8px;padding:0 12px;font-size:13px;width:220px;}
+.editnote{font-size:12px;color:#8a909e;display:flex;align-items:center;gap:6px;}
+.dbody{flex:1;overflow:auto;padding:16px 22px;}
+.gtable{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #eef0f4;border-radius:10px;overflow:hidden;font-size:13px;}
+.gtable th{position:sticky;top:0;background:#f7f8fb;text-align:left;padding:10px 12px;font-size:12.5px;color:#6b7280;font-weight:600;border-bottom:1px solid #eef0f4;white-space:nowrap;z-index:2;}
+.gtable td{padding:8px 12px;border-bottom:1px solid #f4f5f8;white-space:nowrap;color:#2b2f3a;}
+.gtable tr:hover td{background:#fafbff;}
+.gtable .pos{color:#1f9d57;font-weight:600;}
+.gtable .neg{color:#e14b4b;font-weight:600;}
+.gtable .prod{white-space:normal;min-width:190px;}
+.gtable .edited td{background:#fffdf3!important;}
+.gsel{border:1px solid #e5e7ee;border-radius:7px;padding:5px 8px;font-size:12.5px;color:#1d2129;background:#fff;cursor:pointer;max-width:150px;}
+.gsel:focus{outline:none;border-color:#7a5bff;}
+.st-pill{display:inline-block;border-radius:5px;padding:2px 8px;font-size:12px;font-weight:700;}
+.sp1{background:#fdeceb;color:#d5372c;}
+.sp2{background:#fff3e0;color:#d98a12;}
+.sp3{background:#eef3ff;color:#2f6bff;}
+.sp4{background:#e8f7ee;color:#1f9d57;}
+.dfoot{background:#fff;border-top:1px solid #eef0f4;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.dfoot .stat{font-size:13px;color:#4a4f5c;}
+.dfoot .stat b{color:#7a5bff;}
+.dfoot .sp{margin-left:auto;}
+.gbtn{border:1px solid #e5e7ee;background:#fff;border-radius:9px;height:40px;padding:0 20px;font-size:14px;color:#4a4f5c;cursor:pointer;}
+.gbtn:hover{border-color:#7a5bff;color:#7a5bff;}
+.gbtn.primary{background:linear-gradient(135deg,#8a6bff,#6b57ff);border:none;color:#fff;font-weight:700;padding:0 26px;}
+
+/* feedback card in chat */
+.fbcard{background:#fff;border:1px solid #d9d0ff;border-radius:14px;padding:18px 20px;max-width:920px;margin-top:18px;box-shadow:0 2px 10px rgba(122,91,255,.08);}
+.fbcard .fbh{display:flex;align-items:center;gap:8px;font-weight:700;color:#7a5bff;margin-bottom:12px;}
+.fbcard .you{text-align:right;color:#a3a8b3;font-size:12px;margin:14px 0 4px;}
+.mvtable{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:13px;}
+.mvtable th{background:#f7f8fb;text-align:left;padding:9px 12px;color:#6b7280;font-weight:600;border-bottom:1px solid #eef0f4;font-size:12.5px;}
+.mvtable td{padding:9px 12px;border-bottom:1px solid #f2f3f7;}
+.arw2{color:#7a5bff;font-weight:700;margin:0 6px;}
+.distrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px;}
+.distpill{border:1px solid #eef0f4;border-radius:9px;padding:8px 12px;font-size:12.5px;background:#fafbfd;}
+.distpill b{font-size:15px;}
+.delta-up{color:#1f9d57;font-weight:700;}
+.delta-dn{color:#e14b4b;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="logo"><span class="mk">采</span>采销工作台</div>
+    <div class="search"><span class="ai">Ai 搜索</span><span class="sep">|</span><span>审批中心入口</span></div>
+    <div class="topnav">
+      <span class="act">Ai 经营中心</span><span>超级运营</span><span>消息</span><span>工具箱</span><span>反馈</span><span>采销成长</span>
+      <div class="user"><div class="av">Z</div><div><div class="un">zhangwen21 ▾</div><span class="tag">一线采销</span></div></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <!-- sidebar -->
+    <div class="side">
+      <div class="ttl"><span class="ai">Ai</span> 经营中心</div>
+      <div class="newchat">＋ 新对话</div>
+      <div class="menu">
+        <div class="mi">🧩 货盘发现</div>
+        <div class="mi on">📈 操盘中心</div>
+        <div class="mi">🕘 策略中心</div>
+        <div class="mi">📉 AI 作战室</div>
+        <div class="mi">👤 AI 技能库</div>
+      </div>
+      <div class="grp">超级工具</div>
+      <div class="menu">
+        <div class="mi">📊 超级运营</div>
+        <div class="mi">🔲 超级大表<span class="dot"></span></div>
+        <div class="mi">👥 协同任务</div>
+      </div>
+      <div class="grp">历史记录</div>
+      <div class="hist">秋季机会盘 目标对齐</div>
+      <div class="hist">近30天不动销 诊断×处方矩阵</div>
+      <div class="hist">如何查询自营店铺会员权益…</div>
+      <div class="hist">怎么给 skuid：10028399…</div>
+      <div class="hist">如何实现新品破零</div>
+      <div class="allrec">≡ 全部记录</div>
+    </div>
+
+    <!-- main -->
+    <div class="main">
+      <div class="mhead">
+        <span class="pill">货盘</span><span class="pname">手机配件货盘</span>
+        <div class="steps">
+          <span class="s on"><span class="n">1</span>货盘理解</span><span class="arw">→</span>
+          <span class="s"><span class="n">2</span>策略匹配</span><span class="arw">→</span>
+          <span class="s"><span class="n">3</span>目标约束</span><span class="arw">→</span>
+          <span class="s"><span class="n">4</span>开启托管</span>
+        </div>
+        <div class="rt">
+          <button class="btnw red">未开启托管</button>
+          <button class="btnw">已开启托管</button>
+          <button class="btnw dark">📊 量化盯盘</button>
+        </div>
+      </div>
+
+      <div class="chatwrap">
+        <div class="chat">
+          <div class="msgs" id="msgs">
+            <div class="aihdr">AI 操盘手</div>
+            <div class="card">
+              <p><b>971 个 SKU</b> 近 30 天数据分析完成（GMV ¥2,180 万 · 日均广告消耗 ¥4,100 · 盘均 ROI 2.3 · UV 转化 3.1%，类目均值 4.5%）。按 <span class="hl">先出清 → 再短板 → 再漏斗 → 后正常</span> 拆成 4 堆：
+                <span class="viewlink" onclick="openDrawer()">🔍 查看明细</span>
+              </p>
+              <table class="dtable">
+                <thead><tr><th style="width:210px">堆</th><th style="width:90px">数量</th><th>特征摘要</th></tr></thead>
+                <tbody>
+                  <tr><td class="stack">堆一 · 不经营/待处置</td><td class="num"><span class="box">132</span></td><td>滞销库存 ¥68万：无库存 86（<span class="warn">31 个仍在漏广告费 ¥4,300/30天</span>）· 停产机型件 46</td></tr>
+                  <tr><td class="stack">堆二 · 单一明显短板</td><td class="num">168</td><td>素材/信息分 94 · 价格星级≤2 降权 37 · 评价差 24（恶性 9）· 服务差 13</td></tr>
+                  <tr><td class="stack">堆三 · 漏斗有明显问题</td><td class="num">383</td><td>流量弱 201 · 点击弱 87 · 转化弱 65 · 广告低效 30（11 个 ROI&lt;0.8）</td></tr>
+                  <tr class="rowgreen"><td class="stack">堆四 · 健康经营</td><td class="num">288</td><td><b>贡献全盘 71% GMV，精细化维持为主</b></td></tr>
+                </tbody>
+              </table>
+              <div class="qbox">
+                <div class="qt">定策略前有 <span class="hl">两个口径问题</span>需要你判断：</div>
+                <div class="qi"><b>1)</b> 堆一里 46 个停产机型件，我默认按「退供/清退」——壳膜类是否有线下或渠道尾货出路？</div>
+                <div class="qi"><b>2)</b> 盘里 34 个磁吸类 SKU（磁吸充电宝/支架/Qi2）目前躺在「流量弱」——但 9 月新机季是潜在机会品，要不要单独拎出、不按滞销处理？</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chips">
+            <div class="chip">调整剔除范围</div>
+            <div class="chip">调整分堆口径</div>
+            <div class="chip">拍底线价</div>
+            <div class="chip">改预算与 ROI</div>
+            <div class="chip amber">补一条品牌规则</div>
+          </div>
+          <div class="composer">
+            <input class="inp" placeholder="输入消息…（Enter 发送, Shift+Enter 换行）">
+            <button class="send">发送</button>
+          </div>
+          <div class="tokens">Tokens: 41,203 in / 1,820 out</div>
+        </div>
+
+        <!-- right strategy panel -->
+        <div class="rpanel">
+          <div class="rtabs">
+            <div class="rtab">货盘认知</div>
+            <div class="rtab">目标约束</div>
+            <div class="rtab on">经营策略</div>
+          </div>
+          <div class="rlist">
+            <div class="scard">
+              <div class="sh"><div class="ic" style="background:#eaf1ff">🖼️</div><div><div class="st">素材 · 信息分优化</div><div class="su">涉及 94 个 SKU</div></div><span class="cnt">1 已执行 · 1 待采纳</span></div>
+              <div class="srow"><span>白底图 / 卖点图 / 标题批量优化 <b>82 款</b>，信息达标率 61% → 86%</span><span class="badge b-done">已执行</span></div>
+              <div class="srow"><span>12 个 Anker/绿联件按规则挂起，待品牌方官方素材（达标唯一卡点）</span><span class="badge b-wait">待采纳</span></div>
+            </div>
+            <div class="scard">
+              <div class="sh"><div class="ic" style="background:#fdeef0">🎯</div><div><div class="st">促销 · 活动报名</div><div class="su">涉及 46 个 SKU</div></div><span class="cnt">2 已执行 · 1 待采纳</span></div>
+              <div class="srow"><span>清仓堆叠加「便宜包邮」频道提速出清</span><span class="badge b-done">已执行</span></div>
+              <div class="srow"><span>8/8 20:00 清仓堆秒杀场次（限清仓堆，规则内）</span><span class="badge b-signed">已报名</span></div>
+              <div class="srow"><span>转化弱堆关联搭售 + 赠品凑单</span><span class="badge b-wait">待采纳</span></div>
+            </div>
+            <div class="scard">
+              <div class="sh"><div class="ic" style="background:#eef7f0">📦</div><div><div class="st">库存处置 · 清退退供</div><div class="su">涉及 104 个 SKU</div></div><span class="cnt">2 已执行 · 1 待采纳</span></div>
+              <div class="srow"><span>31 个漏广告费 SKU 当天停投止血，无库存 86 中 22 补货回流 / 41 转清退</span><span class="badge b-done">已执行</span></div>
+              <div class="srow"><span>价格标掉价 41 修复见效，转化环节回流</span><span class="badge b-done">已执行</span></div>
+              <div class="srow"><span>退供清单 18 款（iPhone 12 及更早专用件），走退供流</span><span class="badge b-go">待你发起</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- drawer -->
+<div class="mask" id="mask" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="dh">
+    <div><div class="dt">货盘明细 · 分堆清单</div><div class="dsub">手机配件货盘 · 共 <span id="dcount">0</span> 个 SKU（可编辑分堆标识与处置建议）</div></div>
+    <div class="x" onclick="closeDrawer()">✕</div>
+  </div>
+  <div class="dfilter">
+    <div class="fchip on" data-f="all" onclick="setFilter(this,'all')">全部</div>
+    <div class="fchip" data-f="堆一" onclick="setFilter(this,'堆一')">堆一 · 待处置</div>
+    <div class="fchip" data-f="堆二" onclick="setFilter(this,'堆二')">堆二 · 单一短板</div>
+    <div class="fchip" data-f="堆三" onclick="setFilter(this,'堆三')">堆三 · 漏斗问题</div>
+    <div class="fchip" data-f="堆四" onclick="setFilter(this,'堆四')">堆四 · 健康经营</div>
+    <input class="fsearch" id="fsearch" placeholder="搜索商品名 / SKU / 品牌" oninput="renderGrid()">
+  </div>
+  <div class="dbody">
+    <table class="gtable" id="gtable">
+      <thead>
+        <tr>
+          <th>SKU ID</th><th>商品名称</th><th>品牌</th><th style="min-width:150px">分堆标识</th>
+          <th>近30天GMV</th><th>库存</th><th>广告消耗/30天</th><th>ROI</th><th>UV转化</th><th>价格星级</th><th>信息分</th>
+          <th style="min-width:130px">处置/策略建议</th>
+        </tr>
+      </thead>
+      <tbody id="gbody"></tbody>
+    </table>
+  </div>
+  <div class="dfoot">
+    <div class="stat">已调整 <b id="editcnt">0</b> 个 SKU · 当前筛选下 <b id="showcnt">0</b> 行</div>
+    <div class="sp"></div>
+    <button class="gbtn" onclick="closeDrawer()">取消</button>
+    <button class="gbtn primary" onclick="confirmChanges()">确认并代入对话</button>
+  </div>
+</div>
+
+<script>
+/* ---- mock SKU-level data (手机配件货盘) ---- */
+var STACKS=['堆一·不经营/待处置','堆二·单一明显短板','堆三·漏斗有明显问题','堆四·健康经营'];
+var ACTIONS=['退供/清退','停投止血','素材/信息分优化','价格修复','关联搭售/赠品','活动报名出清','精细化维持','单独拎出·机会品'];
+function spClass(s){ if(s.indexOf('堆一')===0)return'sp1'; if(s.indexOf('堆二')===0)return'sp2'; if(s.indexOf('堆三')===0)return'sp3'; return'sp4'; }
+function spShort(s){ return s.split('·')[0]; }
+
+var rows=[
+ {id:'100283991',name:'磁吸无线充电宝 10000mAh 22.5W',brand:'Anker',stack:0,gmv:'¥3.2万',stock:1240,ad:'¥4,300',roi:0.7,cvr:'1.4%',star:3,info:'88',act:'停投止血'},
+ {id:'100376215',name:'iPhone 12 钢化膜 全屏防窥',brand:'绿联',stack:0,gmv:'¥0.8万',stock:0,ad:'¥310',roi:0.5,cvr:'0.9%',star:2,info:'72',act:'退供/清退'},
+ {id:'100411882',name:'Type-C 数据线 1m（停产旧款）',brand:'品胜',stack:0,gmv:'¥0.4万',stock:0,ad:'¥0',roi:0,cvr:'0.6%',star:2,info:'65',act:'退供/清退'},
+ {id:'100455073',name:'苹果 12W 充电头（停产）',brand:'倍思',stack:0,gmv:'¥1.1万',stock:320,ad:'¥520',roi:0.8,cvr:'1.1%',star:3,info:'70',act:'退供/清退'},
+ {id:'100499126',name:'手机指环支架 金属款',brand:'ESR',stack:0,gmv:'¥0.6万',stock:0,ad:'¥180',roi:0.4,cvr:'0.7%',star:2,info:'60',act:'退供/清退'},
+ {id:'100512347',name:'iPhone 13 液态硅胶壳（清仓）',brand:'图拉斯',stack:0,gmv:'¥1.5万',stock:2100,ad:'¥760',roi:0.9,cvr:'1.3%',star:3,info:'80',act:'活动报名出清'},
+
+ {id:'100587641',name:'手机壳 磨砂防摔 iPhone 15',brand:'图拉斯',stack:1,gmv:'¥6.4万',stock:3400,ad:'¥2,100',roi:1.8,cvr:'2.6%',star:1,info:'54',act:'素材/信息分优化'},
+ {id:'100601298',name:'钢化膜 高清防指纹 3片装',brand:'邦克仕',stack:1,gmv:'¥5.1万',stock:5600,ad:'¥1,700',roi:2.1,cvr:'2.9%',star:2,info:'58',act:'素材/信息分优化'},
+ {id:'100634572',name:'蓝牙耳机 半入耳 降噪',brand:'QCY',stack:1,gmv:'¥9.8万',stock:2200,ad:'¥3,200',roi:1.6,cvr:'2.2%',star:2,info:'61',act:'价格修复'},
+ {id:'100678913',name:'车载手机支架 出风口款',brand:'倍思',stack:1,gmv:'¥4.3万',stock:1800,ad:'¥1,400',roi:1.9,cvr:'2.7%',star:1,info:'49',act:'素材/信息分优化'},
+ {id:'100712045',name:'快充数据线 100W 编织',brand:'Anker',stack:1,gmv:'¥7.2万',stock:2900,ad:'¥2,600',roi:2.0,cvr:'3.0%',star:2,info:'66',act:'价格修复'},
+
+ {id:'100756328',name:'磁吸充电宝 MagSafe 5000mAh',brand:'ESR',stack:2,gmv:'¥5.9万',stock:1600,ad:'¥2,800',roi:1.3,cvr:'1.8%',star:3,info:'82',act:'关联搭售/赠品'},
+ {id:'100789461',name:'Qi2 无线充电支架 15W',brand:'绿联',stack:2,gmv:'¥3.7万',stock:900,ad:'¥1,900',roi:1.1,cvr:'1.6%',star:3,info:'79',act:'单独拎出·机会品'},
+ {id:'100823174',name:'磁吸手机支架 桌面折叠',brand:'ESR',stack:2,gmv:'¥2.8万',stock:1200,ad:'¥1,500',roi:1.2,cvr:'1.7%',star:3,info:'77',act:'单独拎出·机会品'},
+ {id:'100867529',name:'氮化镓充电器 65W 双口',brand:'Anker',stack:2,gmv:'¥12.4万',stock:3100,ad:'¥4,600',roi:0.7,cvr:'2.0%',star:4,info:'85',act:'停投止血'},
+ {id:'100901836',name:'手机壳 透明防黄 iPhone 15 Pro',brand:'图拉斯',stack:2,gmv:'¥8.6万',stock:4200,ad:'¥3,400',roi:1.4,cvr:'2.4%',star:3,info:'83',act:'关联搭售/赠品'},
+ {id:'100945217',name:'钢化膜 全屏抗蓝光',brand:'邦克仕',stack:2,gmv:'¥6.1万',stock:5100,ad:'¥2,900',roi:1.5,cvr:'2.5%',star:3,info:'81',act:'关联搭售/赠品'},
+ {id:'100978643',name:'蓝牙耳机 主动降噪 入耳',brand:'QCY',stack:2,gmv:'¥15.2万',stock:1900,ad:'¥5,200',roi:1.0,cvr:'1.9%',star:4,info:'86',act:'价格修复'},
+
+ {id:'101012984',name:'磁吸充电宝 MagSafe 10000mAh',brand:'Anker',stack:3,gmv:'¥28.6万',stock:2600,ad:'¥6,800',roi:3.2,cvr:'4.1%',star:5,info:'92',act:'精细化维持'},
+ {id:'101056371',name:'氮化镓充电器 100W 三口',brand:'倍思',stack:3,gmv:'¥21.3万',stock:1800,ad:'¥5,400',roi:2.9,cvr:'3.8%',star:5,info:'90',act:'精细化维持'},
+ {id:'101099028',name:'手机壳 凯夫拉芳纶 iPhone 15 Pro Max',brand:'图拉斯',stack:3,gmv:'¥18.7万',stock:2200,ad:'¥4,100',roi:3.5,cvr:'4.4%',star:5,info:'93',act:'精细化维持'},
+ {id:'101132645',name:'钢化膜 电竞高帧 陶瓷',brand:'邦克仕',stack:3,gmv:'¥16.9万',stock:6800,ad:'¥3,600',roi:3.8,cvr:'4.6%',star:5,info:'91',act:'精细化维持'},
+ {id:'101176392',name:'蓝牙耳机 旗舰降噪 无线充',brand:'QCY',stack:3,gmv:'¥24.5万',stock:1500,ad:'¥6,200',roi:3.0,cvr:'3.9%',star:5,info:'94',act:'精细化维持'},
+ {id:'101219758',name:'快充数据线 240W USB4',brand:'绿联',stack:3,gmv:'¥13.4万',stock:3300,ad:'¥3,000',roi:3.3,cvr:'4.2%',star:5,info:'89',act:'精细化维持'},
+];
+
+var origStack={}; rows.forEach(function(r){ origStack[r.id]=r.stack; });
+var curFilter='all';
+
+function roiCls(v){ return v<0.8?'neg':(v>=2.5?'pos':''); }
+
+function renderGrid(){
+  var kw=(document.getElementById('fsearch').value||'').trim().toLowerCase();
+  var body=document.getElementById('gbody'); var html=''; var shown=0;
+  rows.forEach(function(r,idx){
+    var sname=STACKS[r.stack];
+    if(curFilter!=='all' && spShort(sname)!==curFilter) return;
+    if(kw && (r.name+r.id+r.brand).toLowerCase().indexOf(kw)<0) return;
+    shown++;
+    var edited=(r.stack!==origStack[r.id]);
+    var opts=STACKS.map(function(s,i){return '<option value="'+i+'"'+(i===r.stack?' selected':'')+'>'+s+'</option>';}).join('');
+    var aopts=ACTIONS.map(function(a){return '<option'+(a===r.act?' selected':'')+'>'+a+'</option>';}).join('');
+    html+='<tr class="'+(edited?'edited':'')+'">'
+      +'<td>'+r.id+'</td>'
+      +'<td class="prod">'+r.name+'</td>'
+      +'<td>'+r.brand+'</td>'
+      +'<td><select class="gsel" onchange="chStack('+idx+',this.value)">'+opts+'</select></td>'
+      +'<td>'+r.gmv+'</td>'
+      +'<td>'+r.stock.toLocaleString()+'</td>'
+      +'<td>'+r.ad+'</td>'
+      +'<td class="'+roiCls(r.roi)+'">'+r.roi.toFixed(1)+'</td>'
+      +'<td>'+r.cvr+'</td>'
+      +'<td>'+'★'.repeat(r.star)+'</td>'
+      +'<td>'+r.info+'</td>'
+      +'<td><select class="gsel" onchange="chAct('+idx+',this.value)">'+aopts+'</select></td>'
+      +'</tr>';
+  });
+  body.innerHTML=html;
+  document.getElementById('showcnt').textContent=shown;
+  document.getElementById('editcnt').textContent=rows.filter(function(r){return r.stack!==origStack[r.id];}).length;
+  document.getElementById('dcount').textContent=rows.length;
+}
+function chStack(i,v){ rows[i].stack=parseInt(v,10); renderGrid(); }
+function chAct(i,v){ rows[i].act=v; }
+function setFilter(el,f){ curFilter=f; document.querySelectorAll('.fchip').forEach(function(c){c.classList.remove('on');}); el.classList.add('on'); renderGrid(); }
+
+function openDrawer(){ renderGrid(); document.getElementById('mask').classList.add('show'); document.getElementById('drawer').classList.add('show'); }
+function closeDrawer(){ document.getElementById('mask').classList.remove('show'); document.getElementById('drawer').classList.remove('show'); }
+
+function confirmChanges(){
+  var moved=rows.filter(function(r){return r.stack!==origStack[r.id];});
+  // new distribution
+  var dist=[0,0,0,0]; rows.forEach(function(r){dist[r.stack]++;});
+  var orig=[0,0,0,0]; rows.forEach(function(r){orig[origStack[r.id]]++;});
+  var msgs=document.getElementById('msgs');
+
+  var moveRows = moved.length? moved.map(function(r){
+    var f=STACKS[origStack[r.id]], t=STACKS[r.stack];
+    return '<tr><td>'+r.id+'</td><td>'+r.name+'</td>'
+      +'<td><span class="st-pill '+spClass(f)+'">'+spShort(f)+'</span><span class="arw2">→</span><span class="st-pill '+spClass(t)+'">'+spShort(t)+'</span></td>'
+      +'<td>'+r.act+'</td></tr>';
+  }).join('') : '<tr><td colspan="4" style="color:#8a909e">未调整分堆，仅确认当前分堆结果与处置建议。</td></tr>';
+
+  var distHtml=STACKS.map(function(s,i){
+    var d=dist[i]-orig[i]; var dtxt=d===0?'':(d>0?'<span class="delta-up">+'+d+'</span>':'<span class="delta-dn">'+d+'</span>');
+    return '<div class="distpill"><span class="st-pill '+spClass(s)+'">'+spShort(s)+'</span> <b>'+dist[i]+'</b> 个 '+dtxt+'</div>';
+  }).join('');
+
+  var html=''
+    +'<div class="you">YOU · 已从明细表提交调整</div>'
+    +'<div class="fbcard">'
+      +'<div class="fbh">✅ 已代入你在明细表的调整（结构化）</div>'
+      +'<p style="line-height:1.7;color:#2b2f3a">本次共调整 <b style="color:#7a5bff">'+moved.length+'</b> 个 SKU 的分堆归属。更新后的分堆分布：</p>'
+      +'<div class="distrow">'+distHtml+'</div>'
+      +'<p style="margin-top:10px;color:#4a4f5c;font-weight:600">调整明细：</p>'
+      +'<table class="mvtable"><thead><tr><th>SKU ID</th><th>商品</th><th>分堆变化</th><th>处置建议</th></tr></thead><tbody>'+moveRows+'</tbody></table>'
+      +'<p style="margin-top:12px;color:#3a3f4c;line-height:1.7">已按新分堆重算策略口径：'
+        +(moved.length?'受影响 SKU 将重新匹配对应堆的处置动作，右侧「经营策略」卡片将同步刷新待采纳项。':'维持原策略。')
+        +'需要我据此<b>生成第 2 步「策略匹配」方案</b>吗？</p>'
+    +'</div>';
+  msgs.insertAdjacentHTML('beforeend',html);
+  msgs.scrollTop=msgs.scrollHeight;
+  closeDrawer();
+}
+</script>
+</body>
+</html>
