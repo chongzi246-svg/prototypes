@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>供应商管理 → 供应商经营分析 交互原型</title>
+<style>
+  :root { color-scheme: light; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#c9ccd4; color:#1f2329; display:flex; justify-content:center; padding:14px; }
+  .app { width:1600px; height:1000px; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 12px 50px rgba(0,0,0,.2); position:relative; }
+  .page { position:absolute; inset:0; display:none; flex-direction:column; }
+  .page.show { display:flex; }
+
+  .topbar { display:flex; align-items:center; gap:14px; padding:10px 18px; border-bottom:1px solid #eef0f2; font-size:14px; flex-shrink:0; }
+  .topbar .logo { display:flex; align-items:center; gap:6px; font-weight:700; cursor:pointer; }
+  .topbar .logo .lg { width:22px;height:22px;border-radius:5px;background:#e5202e;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .topbar .search { flex:0 0 620px; display:flex; align-items:center; gap:10px; border:1px solid #eceef1; border-radius:20px; padding:8px 16px; font-size:13px; color:#999; }
+  .topbar .search .ai { color:#7b5bff; font-weight:700; }
+  .topbar .rmenu { display:flex; gap:16px; margin-left:auto; font-size:13px; color:#555; align-items:center; }
+  .topbar .rmenu .ai2 { color:#7b5bff; font-weight:700; }
+
+  .a-body { flex:1; display:flex; min-height:0; }
+  .a-main { flex:1; overflow-y:auto; padding:14px 22px; background:#f4f5f7; }
+
+  /* supplier management page (图1) */
+  .sup-top { display:flex; align-items:center; font-size:13px; color:#8a9099; margin-bottom:12px; }
+  .sup-top b { color:#1f2329; } .sup-top .r { margin-left:auto; display:flex; gap:14px; color:#555; }
+  .card { background:#fff; border-radius:10px; padding:16px 18px; margin-bottom:12px; }
+  .foc-h { display:flex; align-items:center; font-size:15px; font-weight:700; } .foc-h .r { margin-left:auto; display:flex; align-items:center; gap:10px; font-size:12px; color:#8a9099; font-weight:400;} .foc-h .seg{display:flex;border:1px solid #e3e6ea;border-radius:6px;overflow:hidden;} .foc-h .seg span{padding:3px 10px;} .foc-h .seg .on{background:#2f54eb;color:#fff;}
+  .follow { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
+  .fchip { border:1px solid #e3e6ea; border-radius:6px; padding:7px 14px; font-size:13px; color:#3a3f45; }
+  .fchip.add { color:#2f54eb; border-color:#c3cffb; border-style:dashed; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .kpi { border:1px solid #eef0f2; border-radius:10px; padding:14px 16px; } .kpi .k{font-size:13px;color:#8a9099;} .kpi .v{font-size:22px;font-weight:700;margin:8px 0 4px;} .kpi .v .u{font-size:13px;font-weight:400;} .kpi .yoy{font-size:12px;color:#8a9099;}
+  .warnbar { background:#fdf3e6; color:#8a5a1a; border-radius:8px; padding:9px 14px; font-size:13px; margin-bottom:12px; } .warnbar a{color:#2f54eb;}
+  .sfilters { display:flex; align-items:center; gap:26px; flex-wrap:wrap; margin-bottom:14px; }
+  .sf { display:flex; align-items:center; gap:8px; font-size:13px; color:#3a3f45; } .sf .in{border:1px solid #dfe3e8;border-radius:6px;padding:7px 12px;font-size:13px;color:#aab0b8;width:200px;} .sf .sel{border:1px solid #dfe3e8;border-radius:6px;padding:7px 12px;font-size:13px;color:#3a3f45;width:200px;display:flex;justify-content:space-between;}
+  .sf .qbtn{background:#2f54eb;color:#fff;border:none;border-radius:6px;padding:7px 20px;font-size:13px;} .sf .rbtn{color:#3a3f45;border:1px solid #d0d3d9;border-radius:6px;padding:7px 16px;background:#fff;font-size:13px;}
+  .stoolbar { display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:6px; }
+  .stoolbar .cnt { color:#8a9099; margin-right:6px; } .stoolbar .tb { border:1px solid #dfe3e8; border-radius:6px; padding:6px 12px; color:#3a3f45; background:#fff; } .stoolbar .tb.blue{background:#2f54eb;color:#fff;border:none;}
+  table.stable { width:100%; border-collapse:collapse; }
+  .stable thead th { text-align:left; font-size:13px; color:#61666d; font-weight:600; padding:12px 12px; background:#f6f7f9; }
+  .stable td { padding:16px 12px; border-bottom:1px solid #f0f1f3; vertical-align:top; font-size:13px; }
+  .sname { font-size:14px; font-weight:600; } .sname .star{color:#f5b301;}
+  .scode { font-size:12px; color:#8a9099; margin:5px 0 8px; }
+  .stag { display:inline-block; font-size:11px; border-radius:4px; padding:2px 7px; margin-right:6px; }
+  .stag.g { background:#e9f7ec; color:#2e9e4f; } .stag.r { background:#fdecec; color:#e5484d; } .stag.o { background:#fdf3e6; color:#d98a2b; }
+  .res { display:flex; gap:22px; } .res .m .k{font-size:12px;color:#8a9099;} .res .m .v{font-size:13px;color:#3a3f45;margin-top:6px;} .res .m .y{font-size:12px;color:#22a06b;margin-top:2px;}
+  .ops { display:flex; gap:14px; align-items:center; } .ops a{color:#2f54eb;text-decoration:none;} .ops .more{color:#8a9099;}
+
+  /* super assistant panel */
+  .assist { width:420px; border-left:1px solid #eef0f2; display:flex; flex-direction:column; flex-shrink:0; background:#fff;}
+  .ai-badge { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#efeafc,#e6ecff); color:#5b5bef; font-weight:800; font-size:13px; font-style:italic; position:relative; flex-shrink:0; }
+  .ai-badge::after { content:"✦"; position:absolute; top:-3px; right:-4px; font-size:9px; color:#7b5bff; font-style:normal; }
+  .assist .ah { display:flex; align-items:center; gap:8px; padding:16px 18px 10px; font-size:17px; font-weight:800; }
+  .assist .ah .ico { margin-left:auto; display:flex; gap:14px; color:#9aa0a6; font-size:15px; font-weight:400; }
+  .assist .abody { flex:1; overflow-y:auto; padding:6px 18px; }
+  .assist .q0 { font-size:14px; color:#3a3f45; margin:6px 0 14px; }
+  .op-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:18px; }
+  .op { border:1px solid #eef0f2; border-radius:10px; padding:14px 6px; text-align:center; font-size:13px; color:#3a3f45; cursor:pointer; }
+  .op .i { font-size:18px; display:block; margin-bottom:8px; color:#7b5bff; }
+  .guess-h { display:flex; align-items:center; justify-content:space-between; font-size:13px; color:#8a9099; margin-bottom:8px; }
+  .guess-h .refresh { color:#2f54eb; cursor:pointer; }
+  .guess { border-bottom:1px solid #f2f3f5; padding:13px 2px; font-size:14px; color:#3a3f45; cursor:pointer; line-height:1.5; }
+  .guess:hover { color:#2f54eb; }
+  .assist .chat { border:1px solid #eef0f2; border-radius:12px; padding:12px; margin:14px 18px; }
+  .assist .chat .ph { color:#aab0b8; font-size:13px; min-height:40px; }
+  .assist .chat .tabs { display:flex; gap:16px; font-size:13px; color:#666; margin-top:8px; }
+  .assist .foot { text-align:center; font-size:11px; color:#b6bcc4; padding-bottom:12px; }
+
+  /* ============ PAGE B ============ */
+  .b-body { flex:1; display:flex; min-height:0; }
+  .b-left { flex:0 0 30%; border-right:1px solid #eef0f2; display:flex; flex-direction:column; min-width:0; background:#fbfbfc; transition:flex-basis .5s cubic-bezier(.4,0,.2,1);}
+  .b-left.solo { flex-basis:100% !important; }
+  .b-left .lh { display:flex; align-items:center; gap:10px; padding:16px 22px; border-bottom:1px solid #eef0f2; font-size:18px; font-weight:800; }
+  .b-left .lh .ltitle { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .b-left .lh .r { color:#9aa0a6; font-size:14px; font-weight:400; display:flex; gap:12px; flex-shrink:0;}
+  .ubub { margin-left:auto; width:fit-content; max-width:80%; background:#f2f3f5; border-radius:10px; padding:10px 14px; font-size:14px; color:#3a3f45; margin-bottom:22px; }
+  .asrow { display:flex; align-items:center; gap:8px; margin-bottom:10px; } .asrow .asname { color:#8a9099; font-size:14px; }
+  .recv { font-size:15px; font-weight:600; margin-bottom:12px; line-height:1.6; }
+  .taskline { display:flex; align-items:center; gap:8px; color:#22a06b; font-size:15px; font-weight:600; margin-bottom:12px; }
+  .confirm { display:inline-flex; align-items:center; gap:24px; border:1px solid #dfe3e8; border-radius:8px; padding:10px 16px; font-size:14px; color:#3a3f45; margin-bottom:18px; }
+  .b-left .lbody { flex:1; overflow-y:auto; padding:18px 22px; }
+  .exec { margin-bottom:16px; }
+  .step { display:flex; align-items:center; justify-content:space-between; background:#f2f4f7; border-radius:8px; padding:11px 14px; font-size:14px; color:#3a3f45; margin-bottom:10px; }
+  .step .l { display:flex; align-items:center; gap:8px; } .step .cx { color:#9aa0a6; }
+  .step .ckwrap { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; color:#22a06b; }
+  .step .sp { width:13px; height:13px; border:2px solid #c7d0f5; border-top-color:#2f54eb; border-radius:50%; display:inline-block; animation:spin .7s linear infinite; }
+  .step.pending { color:#8a9099; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .desc { font-size:14px; color:#2b2f36; line-height:1.9; margin-bottom:16px; } .desc b { color:#1f2329; }
+  .link-lead { font-size:14px; color:#3a3f45; margin-bottom:12px; }
+  .green-card { border:1px solid #cfe8d6; background:linear-gradient(135deg,#eaf7ee,#f4fbf6); border-radius:12px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; }
+  .green-card .ic { width:34px; height:34px; border-radius:8px; background:#26a65b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .green-card .n { font-size:15px; font-weight:700; } .green-card .s { font-size:12px; color:#8a9099; margin-top:3px; }
+  .green-card .thumb { margin-left:auto; width:120px; height:60px; background:#dbeee2; border-radius:8px; position:relative; }
+  .green-card .caret { position:absolute; right:8px; top:8px; color:#7aa98c; }
+  .b-chat { position:relative; border:1px solid #e3e6ea; border-radius:12px; margin:0 22px 18px; padding:14px 16px 52px; }
+  .b-chat .promo { font-size:13px; color:#8a9099; line-height:1.7; } .b-chat .promo .st-purple { color:#7b5bff; font-weight:700; }
+  .b-chat .send { position:absolute; right:14px; bottom:12px; width:36px; height:36px; border-radius:50%; background:#c9bdf5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .b-foot { text-align:center; font-size:11px; color:#b6bcc4; padding-bottom:10px; }
+
+  .reveal { opacity:0; transform:translateY(10px); transition:opacity .38s ease, transform .38s ease; } .reveal.in { opacity:1; transform:translateY(0); }
+  .green-card.pop { animation:gcpop .5s cubic-bezier(.2,.8,.3,1.3); } @keyframes gcpop { 0%{transform:scale(.82);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+  .typing { display:inline-flex; gap:4px; } .typing i { width:6px; height:6px; border-radius:50%; background:#c4c9d0; display:inline-block; animation:blink 1s infinite; } .typing i:nth-child(2){animation-delay:.2s;} .typing i:nth-child(3){animation-delay:.4s;} @keyframes blink { 0%,80%,100%{opacity:.3;} 40%{opacity:1;} }
+
+  .b-right { flex:1; display:flex; flex-direction:column; min-height:0; }
+  .b-right.hidden { display:none; } .b-right.slidein { animation:brslide .5s cubic-bezier(.2,.7,.2,1); } @keyframes brslide { from{transform:translateX(80px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+  .br-h { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid #eef0f2; } .br-h .t { font-size:18px; font-weight:800; } .br-h .r { margin-left:auto; display:flex; align-items:center; gap:16px; font-size:14px; color:#555; }
+  .br-title { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#555; border-bottom:1px solid #f2f3f5;} .br-title .fn { font-size:15px; font-weight:700; color:#1f2329; } .br-title .sp{flex:1;} .br-title .save { background:#2f54eb; color:#fff; border-radius:6px; padding:6px 18px; font-weight:600;}
+  .br-ribtabs { display:flex; gap:20px; padding:7px 20px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#555; } .br-ribtabs .on { color:#2f54eb; font-weight:600; }
+  .br-rib { height:52px; border-bottom:1px solid #f2f3f5; background:#fbfbfc; display:flex; align-items:center; gap:20px; padding:0 20px; color:#9aa0a6; font-size:12px; }
+  .br-fbar { display:flex; align-items:center; gap:10px; padding:6px 20px; border-bottom:1px solid #f2f3f5; font-size:13px; color:#3a3f45; } .br-fbar .cr { border:1px solid #e5e7eb; border-radius:4px; padding:3px 12px; width:90px; }
+  .br-sheet { flex:1; overflow:auto; }
+  table.xls { border-collapse:collapse; table-layout:fixed; font-size:11px; }
+  table.xls th, table.xls td { border:1px solid #dfe2e6; height:24px; padding:1px 6px; white-space:nowrap; overflow:hidden; text-align:right; }
+  table.xls th { background:#f4f6f8; color:#8a9099; text-align:center; font-weight:500; }
+  table.xls th.rn, table.xls td.rn { width:34px; background:#f4f6f8; color:#8a9099; text-align:center; }
+  td.tx { text-align:left; } td.gh { background:#e4f3e9; font-weight:600; color:#2b3f30; text-align:left; } td.ghc { background:#e4f3e9; font-weight:600; color:#2b3f30; text-align:right; }
+  td.trend { text-align:center; padding:1px 4px; } td.trend svg { vertical-align:middle; }
+  td.sname2 { text-align:left; font-weight:600; background:#fbfcfb; vertical-align:middle; }
+  td.rn.selrn { color:#217346; font-weight:700; background:#dbeee2; }
+  .br-tabs { display:flex; align-items:center; gap:2px; border-top:1px solid #eef0f2; padding:5px 10px; font-size:12px; background:#fafbfc; } .br-tabs .st { padding:6px 12px; border-radius:5px 5px 0 0; color:#555; } .br-tabs .st.on { color:#217346; font-weight:600; border-bottom:2px solid #217346; }
+  .br-status { border-top:1px solid #eef0f2; padding:5px 16px; font-size:12px; color:#8a9099; background:#eef6f0; display:flex; justify-content:space-between;}
+  .back { border:1px solid #d0d3d9; border-radius:7px; padding:5px 12px; font-size:13px; color:#2f54eb; cursor:pointer; }
+
+  /* chat prefill + second conversation */
+  .b-chat { cursor:text; }
+  .b-chat .typed { font-size:15px; color:#1f2329; }
+  .b-chat .send.on { background:#7b5bff; cursor:pointer; }
+  .reveal2 { opacity:0; transform:translateY(10px); transition:opacity .38s ease, transform .38s ease; } .reveal2.in { opacity:1; transform:translateY(0); }
+  .taskline2 { display:flex; align-items:center; gap:8px; color:#22a06b; font-size:15px; font-weight:600; margin-bottom:10px; }
+  .plan-sub { font-size:13px; color:#8a9099; margin:-4px 0 14px 26px; }
+  .rulecard { background:#fff; border:1px solid #eef0f2; border-radius:8px; padding:14px 16px; margin-bottom:14px; }
+  .rulecard .rc-t { font-size:14px; font-weight:700; margin-bottom:12px; }
+  .rulecard ul { list-style:none; } .rulecard li { font-size:13px; color:#3a3f45; margin-bottom:10px; line-height:1.5; }
+  .rulecard .hl { background:#1f2329; color:#fff; border-radius:3px; padding:1px 6px; }
+  .newsheet-label { font-size:15px; font-weight:700; margin:2px 0 12px; }
+  .task-meta { display:flex; align-items:center; gap:16px; color:#9aa0a6; font-size:15px; } .task-meta .dur { color:#8a9099; font-size:13px; }
+  .xls .rn.selrn { color:#217346; font-weight:700; background:#dbeee2; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- ============ PAGE A: 供应商管理 ============ -->
+    <div class="page show" id="pageA">
+      <div class="topbar">
+        <div class="logo"><span class="lg">采</span>采销工作台</div>
+        <div class="search"><span class="ai">Ai搜索</span><span style="color:#ddd;">|</span><span>审批中心入口</span></div>
+        <div class="rmenu"><span class="ai2">Ai 经营中心</span><span style="color:#7b5bff;font-weight:700;">超级运营</span><span>🔔 消息</span><span>🧰 工具箱</span><span>🖥 客户端</span></div>
+      </div>
+      <div class="a-body">
+        <div class="a-main">
+          <div class="sup-top">供应商 / 基础信息 / <b>&nbsp;供应商管理</b><span class="r"><span>有疑问咨询 ⌄ 采销小助理</span><span>提…</span></span></div>
+
+          <div class="card">
+            <div class="foc-h">我关注的供应商经营结果 ⓘ<span class="r"><span>数据时间：2026-06-15</span><span class="seg"><span class="on">日</span><span>周</span><span>月</span></span></span></div>
+            <div class="follow">
+              <span class="fchip">北京北方步步高科技有限公司</span>
+              <span class="fchip">江门市壹号陈皮农业发展有限公司</span>
+              <span class="fchip">天津市盛泰世通商贸有限公司</span>
+              <span class="fchip">岷县岷农人中药材有限责任公司</span>
+              <span class="fchip add">＋ 添加关注 4/5</span>
+            </div>
+            <div class="kpis">
+              <div class="kpi"><div class="k">本日 GMV</div><div class="v">¥0<span class="u">万</span></div><div class="yoy">同比 -%</div></div>
+              <div class="kpi"><div class="k">成交UV</div><div class="v">0<span class="u">个</span></div><div class="yoy">同比 -%</div></div>
+              <div class="kpi"><div class="k">ARPU</div><div class="v">-<span class="u">元/人</span></div><div class="yoy">同比 -%</div></div>
+              <div class="kpi"><div class="k">毛利率</div><div class="v">¥0<span class="u">万</span></div><div class="yoy">同比 -%</div></div>
+            </div>
+          </div>
+
+          <div class="warnbar">⚠ 您提交的批量修改信息正在审核中，对应供应商暂不支持编辑 <a href="#">查看添加详情</a></div>
+
+          <div class="card">
+            <div class="sfilters">
+              <div class="sf">供应商简码 <span class="in">请输入</span></div>
+              <div class="sf">供应商名称 <span class="in">请输入</span></div>
+              <div class="sf">商业模式 <span class="sel">全部 <span style="color:#aaa;">▾</span></span></div>
+              <div class="sf">供应商属性 <span class="sel">全部 <span style="color:#aaa;">▾</span></span></div>
+              <div class="sf">是否跨境 <span class="sel">全部 <span style="color:#aaa;">▾</span></span></div>
+              <div class="sf"><button class="qbtn">查询</button><button class="rbtn">重置</button></div>
+            </div>
+            <div class="stoolbar"><span class="cnt">共 211 条</span><span class="tb blue">＋ 新增供应商</span><span class="tb">添加合作关系</span><span class="tb">转移合作关系</span><span class="tb">解除合作关系</span><span class="tb">导出 ▾</span><span class="tb">供应商标签</span></div>
+            <table class="stable">
+              <thead><tr><th style="width:34%">☐ 供应商信息</th><th style="width:40%">经营结果 <span style="color:#8a9099;font-weight:400;">按日 ▾</span></th><th style="width:26%">操作</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="sname">☐ 北京北方步步高科技有限公司 <span class="star">★</span></div><div class="scode">供应商简码：bjbfbbgkj ⧉</div><span class="stag g">资质未生效</span><span class="stag r">合同全部过期</span></td>
+                  <td><div class="res"><div class="m"><div class="k">成交购买用户</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">成交ARPU</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">Net GMV</div><div class="v">¥-</div><div class="y">-%</div></div><div class="m"><div class="k">销售毛利额</div><div class="v">¥-</div><div class="y">-%</div></div></div></td>
+                  <td><div class="ops"><a href="#">基本信息</a><a href="#">基本资质</a><a href="#">产品线资质</a><a href="#">查看合同</a><span class="more">⋯</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="sname">☐ 江门市壹号陈皮农业发展有限公司 <span class="star">★</span></div><div class="scode">供应商简码：b2byhcp ⧉</div><span class="stag g">资质生效中</span><span class="stag o">未签订合同</span></td>
+                  <td><div class="res"><div class="m"><div class="k">成交购买用户</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">成交ARPU</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">Net GMV</div><div class="v">¥-</div><div class="y">-%</div></div><div class="m"><div class="k">销售毛利额</div><div class="v">¥-</div><div class="y">-%</div></div></div></td>
+                  <td><div class="ops"><a href="#">基本信息</a><a href="#">基本资质</a><a href="#">产品线资质</a><a href="#">查看合同</a><span class="more">⋯</span></div></td>
+                </tr>
+                <tr>
+                  <td><div class="sname">☐ 天津市盛泰世通商贸有限公司 <span class="star">★</span></div><div class="scode">供应商简码：tjssts ⧉</div><span class="stag g">资质生效中</span><span class="stag o">未签订合同</span></td>
+                  <td><div class="res"><div class="m"><div class="k">成交购买用户</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">成交ARPU</div><div class="v">-</div><div class="y">-%</div></div><div class="m"><div class="k">Net GMV</div><div class="v">¥-</div><div class="y">-%</div></div><div class="m"><div class="k">销售毛利额</div><div class="v">¥-</div><div class="y">-%</div></div></div></td>
+                  <td><div class="ops"><a href="#">基本信息</a><a href="#">基本资质</a><a href="#">产品线资质</a><a href="#">查看合同</a><span class="more">⋯</span></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="assist">
+          <div class="ah"><span class="ai-badge">Ai</span> 超级助手 <span class="ico">↻ ☰ ⤢ ×</span></div>
+          <div class="abody">
+            <div class="q0">Hi，需要我对这个网页进行什么操作？</div>
+            <div class="op-grid">
+              <div class="op"><span class="i">🔍</span>商详巡检</div>
+              <div class="op"><span class="i">🖼</span>主图巡检</div>
+              <div class="op"><span class="i">📦</span>库存巡检</div>
+              <div class="op"><span class="i">🗄</span>AI上下柜</div>
+              <div class="op"><span class="i">🏷</span>属性打标</div>
+              <div class="op"><span class="i">🎯</span>国补巡检</div>
+            </div>
+            <div class="guess-h"><span>猜你想问</span><span class="refresh">↻ 换一换</span></div>
+            <div class="guess" id="q1" onclick="showB()">帮我分析这些供应商近期的经营表现</div>
+            <div class="guess">查看我名下本月 top20 供应商</div>
+            <div class="guess">哪些供应商合同过期 / 未签订 / 资质未生效，需要我马上处理？</div>
+            <div class="guess">我之前提交的批量修改，现在审核到哪一步了？什么时候能生效？</div>
+          </div>
+          <div class="chat">
+            <div class="ph">新客礼金和首单价冲突吗</div>
+            <div class="tabs"><span>经营 ▾</span><span>技能 ▾</span><span>问答 ▾</span><span>📖</span><span style="margin-left:auto;color:#c3cffb;">↑</span></div>
+          </div>
+          <div class="foot">内容由AI生成，仅供参考</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PAGE B ============ -->
+    <div class="page" id="pageB">
+      <div class="topbar">
+        <div class="logo" onclick="showA()"><span class="lg">采</span>采销工作台</div>
+        <div class="search"><span class="ai">Ai搜索</span><span style="color:#ddd;">|</span><span>大促加油站：J人必备，大促合规风险早知道</span></div>
+        <div class="rmenu"><span class="ai2">Ai 经营中心</span><span style="color:#7b5bff;font-weight:700;">超级运营</span><span>🔔 消息</span><span>🧰 工具箱</span><span>🖥 客户端</span><span>📝 反馈</span><span>📖 采销成长</span><span class="back" onclick="showA()">‹ 返回</span><span>葛芸冲 ▾</span></div>
+      </div>
+      <div class="b-body">
+        <div class="b-left">
+          <div class="lh"><span class="ltitle">帮我分析这些供应商近期的经营表现</span> <span class="r"><span>💬</span><span>📄 1</span></span></div>
+          <div class="lbody">
+            <div class="ubub reveal">帮我分析这些供应商近期的经营表现</div>
+            <div class="asrow reveal"><span class="ai-badge">Ai</span><span class="asname">超级助手</span></div>
+            <div class="thinking reveal" id="thinking"><div class="taskline" style="color:#8a9099;"><span class="typing"><i></i><i></i><i></i></span> 正在分析你关注的供应商近期经营数据…</div></div>
+            <div class="recv reveal">已收到提问“帮我分析这些供应商近期的经营表现”</div>
+            <div class="taskline reveal">✓ 执行任务 ›</div>
+            <div class="confirm reveal">已确认 <span style="color:#9aa0a6;">﹀</span></div>
+            <div class="exec reveal">
+              <div class="step pending"><span class="l"><span class="ckwrap"><span class="sp"></span></span>查询业务接口详情</span><span class="cx">︿</span></div>
+              <div class="step pending"><span class="l"><span class="ckwrap"><span class="sp"></span></span>调用业务接口</span><span class="cx">︿</span></div>
+              <div class="step pending"><span class="l"><span class="ckwrap"><span class="sp"></span></span>整合结果</span></div>
+            </div>
+            <div class="desc reveal">已为您按 <b>供应商维度</b> 创建近7日核心经营数据报表，数据覆盖 Net GMV、销量、商详UV、订单转化率、毛利率、现货库存及周转等指标。</div>
+            <div class="link-lead reveal">请点击下方链接查看监控看板：</div>
+            <div class="green-card reveal"><div class="ic">📊</div><div><div class="n">供应商近7日核心经营数据</div><div class="s">super_excel</div></div><div class="thumb"><span class="caret">▾</span></div></div>
+
+            <!-- second conversation: 增加近4周 → 绑定 → 新sheet -->
+            <div class="convo2" id="convo2" style="display:none; margin-top:22px;">
+              <div class="ubub reveal2 u2">增加近4周的数据表现</div>
+              <div class="asrow reveal2 a2"><span class="ai-badge">Ai</span><span class="asname">超级助手</span></div>
+              <div class="recv reveal2 r2">已收到提问“增加近4周的数据表现”</div>
+              <div class="taskline2 reveal2 plan"><span>✓</span> 规划 ›</div>
+              <div class="plan-sub reveal2 psub">查询关注供应商近4周核心经营数据并插入新 sheet</div>
+              <div class="taskline2 reveal2 qdata"><span>✓</span> 查询指标数据</div>
+              <div class="rulecard reveal2 rule">
+                <div class="rc-t">▤ 本次查询规则</div>
+                <ul>
+                  <li>维度：主供应商</li>
+                  <li>指标：Net GMV、销量（财务）、商详UV、<span class="hl">综合毛利率（不含返利）</span> 等 10 项</li>
+                  <li>周期：<b>按周–近4周</b>（week25 ~ week28）</li>
+                  <li>过滤：我关注的供应商（上海庄臣、上海曼伦商贸、中山榄菊…）</li>
+                </ul>
+              </div>
+              <div class="taskline2 reveal2 bind"><span>✓</span> 绑定查询规则到表格</div>
+              <div class="newsheet-label reveal2 nslabel">近4周经营数据</div>
+              <div class="task-meta reveal2 meta">↻ ⧉ 💬 👍 👎 <span class="dur">| 任务耗时 10s</span></div>
+            </div>
+          </div>
+          <div class="b-chat" id="chatBox" onclick="fillChat()">
+            <div class="promo" id="chatPromo"><b class="st-purple">超级大表</b> 我可以帮你查数建表、解读分析、生成公式。试试输入：帮我生成当前 sheet 页的分析解读</div>
+            <div class="typed" id="chatTyped" style="display:none;">增加近4周的数据表现</div>
+            <div class="send" id="sendBtn" onclick="event.stopPropagation(); sendQuery2();">↑</div>
+          </div>
+          <div class="b-foot">内容由AI生成，仅供参考</div>
+        </div>
+
+        <div class="b-right hidden">
+          <div class="br-h"><span class="t">超级大表</span><span class="r"><span>在大表中打开</span><span>⤢</span><span onclick="showA()" style="cursor:pointer;">×</span></span></div>
+          <div class="br-title"><span class="fn">供应商近7日核心经营数据</span> ✎ <span>本人编辑中 ✓</span><span class="sp"></span><span>⋯</span><span class="save">保存 ▾</span></div>
+          <div class="br-ribtabs"><span>文件</span><span class="on">开始</span><span>插入</span><span>页面布局</span><span>公式</span><span>数据</span><span>审阅</span><span>视图</span><span>设置</span></div>
+          <div class="br-rib"><span>↺ 撤销</span><span>📋 粘贴</span><span>Calibri 11</span><span>B I U</span><span>对齐方式</span><span>数字</span><span>样式</span><span>单元格</span><span>编辑</span></div>
+          <div class="br-fbar"><span class="cr" id="brcell">M10 ▾</span><span style="color:#999;">fx</span></div>
+          <div class="br-sheet"><table class="xls" id="xls"></table></div>
+          <div class="br-tabs"><span class="st" id="tab-week" style="display:none;">近4周经营数据</span><span class="st on" id="tab-sup">供应商经营数据</span><span class="st">数据源</span><span class="st">＋</span></div>
+          <div class="br-status"><span>就绪</span><span>— 100% ＋</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const sleep = ms => new Promise(r=>setTimeout(r, ms));
+  function scrollBottom(){ const L=document.querySelector('#pageB .lbody'); if(L) L.scrollTop=L.scrollHeight; }
+  function showA(){ document.getElementById('pageB').classList.remove('show'); document.getElementById('pageA').classList.add('show'); }
+  function showB(){ document.getElementById('pageA').classList.remove('show'); document.getElementById('pageB').classList.add('show'); runExec(); }
+  window.showA=showA; window.showB=showB;
+
+  async function runExec(){
+    const L=document.querySelector('#pageB .lbody'), bl=document.querySelector('#pageB .b-left'), br=document.querySelector('#pageB .b-right');
+    bl.classList.add('solo'); br.classList.add('hidden'); br.classList.remove('slidein');
+    L.querySelectorAll('.reveal').forEach(e=>e.classList.remove('in'));
+    // reset 2nd flow + chat + tabs + sheet
+    const c2=document.getElementById('convo2'); c2.style.display='none'; c2.querySelectorAll('.reveal2').forEach(e=>e.classList.remove('in'));
+    document.getElementById('chatPromo').style.display='block';
+    document.getElementById('chatTyped').style.display='none';
+    document.getElementById('sendBtn').classList.remove('on');
+    exec2Done=false;
+    document.getElementById('tab-week').style.display='none';
+    document.getElementById('tab-sup').classList.add('on');
+    document.getElementById('brcell').textContent='M10 ▾';
+    buildSupplierSheet();
+    const think=document.getElementById('thinking');
+    const steps=[...L.querySelectorAll('.exec .step')];
+    steps.forEach(s=>{ s.classList.add('pending'); s.querySelector('.ckwrap').innerHTML='<span class="sp"></span>'; });
+    const inn=sel=>{ const e=L.querySelector(sel); if(e) e.classList.add('in'); scrollBottom(); };
+    await sleep(300);  inn('.ubub');
+    await sleep(600);  think.classList.add('in');
+    await sleep(1200); think.classList.remove('in'); inn('.asrow');
+    await sleep(300);  inn('.recv');
+    await sleep(500);  inn('.taskline');
+    await sleep(350);  inn('.confirm');
+    await sleep(300);  inn('.exec');
+    for(const s of steps){ await sleep(750); s.classList.remove('pending'); s.querySelector('.ckwrap').textContent='☑'; scrollBottom(); }
+    await sleep(400);  inn('.desc');
+    await sleep(500);  inn('.link-lead');
+    await sleep(500);  const gc=L.querySelector('.green-card'); gc.classList.add('in','pop'); scrollBottom();
+    await sleep(800);  bl.classList.remove('solo'); br.classList.remove('hidden'); br.classList.add('slidein');
+  }
+
+  /* ===== chat prefill + second flow (增加近4周 → 新sheet) ===== */
+  let exec2Done=false;
+  function fillChat(){
+    if(exec2Done) return;
+    document.getElementById('chatPromo').style.display='none';
+    document.getElementById('chatTyped').style.display='block';
+    document.getElementById('sendBtn').classList.add('on');
+  }
+  async function sendQuery2(){
+    if(exec2Done) return;
+    if(document.getElementById('chatTyped').style.display==='none') fillChat();
+    exec2Done=true;
+    document.getElementById('chatTyped').style.display='none';
+    document.getElementById('chatPromo').style.display='block';
+    document.getElementById('sendBtn').classList.remove('on');
+    const c2=document.getElementById('convo2'); c2.style.display='block';
+    const inn=sel=>{ const e=c2.querySelector(sel); if(e) e.classList.add('in'); scrollBottom(); };
+    await sleep(200); inn('.u2');
+    await sleep(600); inn('.a2');
+    await sleep(300); inn('.r2');
+    await sleep(500); inn('.plan');
+    await sleep(300); inn('.psub');
+    await sleep(500); inn('.qdata');
+    await sleep(500); inn('.rule');
+    await sleep(800); inn('.bind');       // 绑定 → 新建 sheet
+    addWeekSheet();
+    await sleep(400); inn('.nslabel');
+    await sleep(400); inn('.meta');
+  }
+  function addWeekSheet(){
+    const tw=document.getElementById('tab-week');
+    tw.style.display='inline-block';
+    document.getElementById('tab-sup').classList.remove('on');
+    tw.classList.add('on');
+    document.getElementById('brcell').textContent='Q8 ▾';
+    buildWeekSheet();
+  }
+  window.fillChat=fillChat; window.sendQuery2=sendQuery2;
+
+  /* ===== supplier sheet (图2) ===== */
+  const dates=["2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-01","2026-08-02","2026-08-03"];
+  const METRICS=["Net GMV","销量（财务）","商详UV","商详UV订单转化率","广告毛利率","综合毛利率（不含返利）","现货库存金额（新）","现货库存数量（新）","PV现货率（新）","本地现货率（新）"];
+  const suppliers=[
+    {name:"上海庄臣有限公司", data:[
+      ["310,964","299,930","302,988","291,998","323,782","342,881","361,210"],
+      ["13,037","12,025","12,403","12,244","13,175","15,559","17,345"],
+      ["19,373","18,494","18,942","18,978","21,553","22,057","23,567"],
+      ["49%","48%","48%","50%","51%","48%","50%"],
+      ["4%","3%","4%","3%","3%","3%","3%"],
+      ["9%","9%","11%","7%","7%","3%","3%"],
+      ["6,983,999","6,725,681","6,684,658","6,931,909","6,841,429","7,140,125","8,289,431"],
+      ["318,550","307,748","303,319","312,521","309,749","322,374","368,927"],
+      ["100%","100%","100%","100%","100%","100%","100%"],
+      ["91%","91%","91%","91%","91%","91%","89%"],
+    ]},
+    {name:"上海曼伦商贸有限公司", data:[
+      ["846,011","727,401","701,727","902,029","1,228,704","1,219,511","1,232,222"],
+      ["13,810","11,906","12,065","16,522","22,319","21,538","22,193"],
+      ["52,938","41,663","51,554","48,958","57,062","60,244","60,718"],
+      ["17%","19%","18%","22%","24%","23%","23%"],
+      ["3%","2%","4%","3%","3%","3%","3%"],
+      ["6%","5%","7%","3%","6%","8%","8%"],
+      ["5,446,185","4,727,826","4,689,996","9,431,896","17,322,881","19,090,506","20,121,363"],
+      ["84,435","72,251","69,787","162,503","326,748","361,818","382,385"],
+      ["94%","93%","96%","98%","99%","99%","100%"],
+      ["20%","18%","17%","19%","22%","25%","27%"],
+    ]},
+    {name:"中山榄菊销售有限公司", data:[
+      ["243,683","224,873","216,400","195,740","138,659","135,995","299,867"],
+      ["5,253","4,713","4,577","4,424","3,333","3,286","6,009"],
+      ["8,652","7,704","7,185","7,720","6,747","6,638","15,951"],
+      ["35%","34%","35%","34%","34%","34%","23%"],
+      ["4%","4%","6%","4%","5%","5%","3%"],
+      ["15%","14%","16%","13%","15%","15%","15%"],
+      ["4,325,862","4,175,653","4,086,767","3,950,137","3,864,035","3,855,228","3,620,460"],
+      ["96,120","92,540","90,880","88,410","85,660","84,220","80,150"],
+      ["98%","98%","97%","98%","98%","99%","99%"],
+      ["45%","44%","43%","42%","41%","40%","38%"],
+    ]},
+  ];
+  function spark(vals){
+    const nums=vals.map(x=>parseFloat(String(x).replace(/[¥,%\s]/g,''))||0);
+    const w=88,h=16,pad=2; const min=Math.min(...nums),max=Math.max(...nums); const rng=(max-min)||1;
+    const pts=nums.map((n,i)=>{ const x=pad+i*((w-2*pad)/(nums.length-1)); const y=h-pad-((n-min)/rng)*(h-2*pad); return x.toFixed(1)+','+y.toFixed(1); }).join(' ');
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="#2f6fdb" stroke-width="1.3"/></svg>`;
+  }
+  function buildSupplierSheet(){
+    const NC=10; // A trend, B name, C 值, D-J 7 dates
+    let h='<colgroup><col class="rn"><col style="width:96px"><col style="width:150px"><col style="width:200px">';
+    for(let c=5;c<=NC;c++)h+='<col style="width:100px">'; h+='</colgroup>';
+    h+='<tr><th class="rn"></th>'; for(let c=1;c<=NC;c++)h+=`<th${c===13?'':''}>${String.fromCharCode(64+c)}</th>`; h+='</tr>';
+    h+='<tr><td class="rn">1</td><td class="gh">数据趋势</td><td class="gh">主供应商名称</td><td class="gh">值</td>'+dates.map(d=>`<td class="ghc">${d}</td>`).join('')+'</tr>';
+    let rn=2;
+    suppliers.forEach(sup=>{
+      sup.data.forEach((vals,mi)=>{
+        const sel = (rn===10);
+        h+=`<tr><td class="rn ${sel?'selrn':''}">${rn}</td><td class="trend">${spark(vals)}</td>`;
+        if(mi===0){ h+=`<td class="sname2" rowspan="${sup.data.length}">${sup.name}</td>`; }
+        h+=`<td class="tx">${METRICS[mi]}</td>`+vals.map(v=>`<td>${v}</td>`).join('')+'</tr>';
+        rn++;
+      });
+    });
+    for(let r=rn;r<=rn+4;r++){ h+=`<tr><td class="rn">${r}</td>`+'<td></td>'.repeat(NC)+'</tr>'; }
+    document.getElementById('xls').innerHTML=h;
+  }
+  buildSupplierSheet();
+
+  /* 近4周经营数据 sheet (图) — 4 周列，第8行选中 */
+  const weeks=["week25","week26","week27","week28"];
+  function buildWeekSheet(){
+    const NC=7; // A trend, B name, C 值, D-G 4 weeks
+    let h='<colgroup><col class="rn"><col style="width:96px"><col style="width:150px"><col style="width:200px">';
+    for(let c=5;c<=NC;c++)h+='<col style="width:110px">'; h+='</colgroup>';
+    h+='<tr><th class="rn"></th>'; for(let c=1;c<=NC;c++)h+=`<th>${String.fromCharCode(64+c)}</th>`; h+='</tr>';
+    h+='<tr><td class="rn">1</td><td class="gh">数据趋势</td><td class="gh">主供应商名称</td><td class="gh">值</td>'+weeks.map(w=>`<td class="ghc">${w}</td>`).join('')+'</tr>';
+    let rn=2;
+    suppliers.forEach(sup=>{
+      sup.data.forEach((vals,mi)=>{
+        const v4=vals.slice(0,4);
+        const sel=(rn===8);
+        h+=`<tr><td class="rn ${sel?'selrn':''}">${rn}</td><td class="trend">${spark(v4)}</td>`;
+        if(mi===0){ h+=`<td class="sname2" rowspan="${sup.data.length}">${sup.name}</td>`; }
+        h+=`<td class="tx">${METRICS[mi]}</td>`+v4.map(v=>`<td>${v}</td>`).join('')+'</tr>';
+        rn++;
+      });
+    });
+    for(let r=rn;r<=rn+4;r++){ h+=`<tr><td class="rn">${r}</td>`+'<td></td>'.repeat(NC)+'</tr>'; }
+    document.getElementById('xls').innerHTML=h;
+  }
+  window.buildWeekSheet=buildWeekSheet;
+</script>
+</body>
+</html>
