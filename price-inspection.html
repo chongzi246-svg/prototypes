@@ -115,8 +115,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .rt-bad{background:#fdeceb;color:#d5372c;}
 .rt-low{background:#fff3e0;color:#d98a12;}
 .rt-na{background:#f0f1f5;color:#8a909e;}
-.sgrid tr.sel td{background:#dbe7ff!important;}
-.sgrid tr.sel td.rn{background:#b9cffb!important;color:#2f4ba8;}
+.sgrid td.selc{background:#dbe7ff!important;box-shadow:inset 0 0 0 1px #7ea6f5;}
 .selbox{position:absolute;border:2px solid #2f6bff;background:rgba(47,107,255,.06);pointer-events:none;display:none;z-index:5;border-radius:2px;}
 /* sheet tabs + status */
 .sheettabs{display:flex;align-items:center;gap:2px;background:#f6f7f9;border-top:1px solid #eef0f4;padding:0 10px;height:38px;flex-shrink:0;color:#6b7280;font-size:13px;}
@@ -194,7 +193,6 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
             <div class="s">分析价格异常商品清单</div>
             <div class="s">在超级大表筛选价差异常SKU</div>
           </div>
-          <button class="replay" onclick="runDemo()">▶ 重放：框选SKU并复制到对话</button>
         </div>
         <div class="composer">
           <div class="cbox" id="cbox">
@@ -314,12 +312,13 @@ function clickCur(on){ document.getElementById('cursor').classList.toggle('click
 function showToast(txt,x,y){ var t=document.getElementById('toast'); t.textContent=txt; t.style.left=x+'px'; t.style.top=y+'px'; t.classList.add('show'); }
 function hideToast(){ document.getElementById('toast').classList.remove('show'); }
 function clearSel(){
-  document.querySelectorAll('#gbody tr.sel').forEach(function(tr){tr.classList.remove('sel');});
+  document.querySelectorAll('#gbody td.selc').forEach(function(td){td.classList.remove('selc');});
   document.getElementById('selbox').style.display='none';
 }
-function drawSelBox(trs){
+function skuCell(tr){ return tr.children[1]; } /* children[0] is row-number gutter */
+function drawSelBox(cells){
   var wrap=document.getElementById('gridwrap'); var wr=wrap.getBoundingClientRect();
-  var f=trs[0].getBoundingClientRect(), l=trs[trs.length-1].getBoundingClientRect();
+  var f=cells[0].getBoundingClientRect(), l=cells[cells.length-1].getBoundingClientRect();
   var box=document.getElementById('selbox');
   box.style.display='block';
   box.style.left=(f.left-wr.left+wrap.scrollLeft)+'px';
@@ -342,27 +341,28 @@ async function runDemo(){
   document.getElementById('sendBtn').classList.remove('ready');
 
   var trs=SEL_SKUS.map(function(s){ return document.querySelector('#gbody tr[data-sku="'+s+'"]'); });
+  var cells=trs.map(skuCell);
   // start cursor at ribbon area
   var startRef=document.querySelector('.xls-ribbon').getBoundingClientRect();
   cur.style.transition='none'; moveCur(startRef.left+120, startRef.top+10); cur.style.display='block';
   await sleep(60); cur.style.transition='';
   await sleep(400);
 
-  // move onto first row & press
-  var r0=trs[0].getBoundingClientRect();
-  moveCur(r0.left+60, r0.top+16); await sleep(720);
-  clickCur(true); trs[0].classList.add('sel'); drawSelBox([trs[0]]); await sleep(320);
-  // drag down selecting each row
-  for(var i=1;i<trs.length;i++){
-    var ri=trs[i].getBoundingClientRect();
-    moveCur(ri.left+60, ri.top+16);
-    trs[i].classList.add('sel'); drawSelBox(trs.slice(0,i+1));
+  // move onto first SKU cell & press
+  var c0=cells[0].getBoundingClientRect();
+  moveCur(c0.left+40, c0.top+14); await sleep(720);
+  clickCur(true); cells[0].classList.add('selc'); drawSelBox([cells[0]]); await sleep(320);
+  // drag down selecting each SKU cell (first column only)
+  for(var i=1;i<cells.length;i++){
+    var ci=cells[i].getBoundingClientRect();
+    moveCur(ci.left+40, ci.top+14);
+    cells[i].classList.add('selc'); drawSelBox(cells.slice(0,i+1));
     await sleep(360);
   }
   clickCur(false);
   // copy toast near cursor
-  var lr=trs[trs.length-1].getBoundingClientRect();
-  showToast('已复制 '+trs.length+' 个 SKU（Ctrl+C）', lr.left+80, lr.top+30);
+  var lr=cells[cells.length-1].getBoundingClientRect();
+  showToast('已复制 '+cells.length+' 个 SKU（Ctrl+C）', lr.left+70, lr.top+26);
   await sleep(950); hideToast();
 
   // move to input box
@@ -371,12 +371,8 @@ async function runDemo(){
   clickCur(true); cbox.classList.add('active'); await sleep(160); clickCur(false);
   input.focus();
 
-  // paste (instant) the selected rows: SKU + short name
-  var pasteLines=trs.map(function(tr){
-    var r=rows.find(function(x){return x.sku===tr.dataset.sku;});
-    var short=r.name.length>14?r.name.slice(0,14)+'…':r.name;
-    return r.sku+'\t'+short;
-  });
+  // paste (instant) the selected SKUs (first column only)
+  var pasteLines=trs.map(function(tr){ return tr.dataset.sku; });
   input.value=pasteLines.join('\n')+'\n';
   input.scrollTop=input.scrollHeight;
   await sleep(520);
