@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>价格巡检 · 超级大表副屏</title>
+<style>
+:root{color-scheme:light;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#eceef2;color:#1d2129;font-size:14px;}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* top bar */
+.topbar{height:56px;background:#fff;border-bottom:1px solid #eef0f4;display:flex;align-items:center;padding:0 20px;gap:20px;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;white-space:nowrap;}
+.logo .mk{width:32px;height:32px;border-radius:8px;background:#e1251b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;}
+.search{flex:1;max-width:640px;height:38px;border:1px solid #e5e7ee;border-radius:19px;display:flex;align-items:center;padding:0 6px 0 6px;gap:10px;color:#8a909e;background:#fff;}
+.search .ai{background:#efeaff;color:#7a5bff;font-weight:700;border-radius:15px;padding:6px 12px;font-size:13px;}
+.search .sep{color:#dfe2ea;}
+.search .ph{color:#9aa0ac;font-size:13px;}
+.topnav{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:13.5px;color:#4a4f5c;white-space:nowrap;}
+.topnav .it{display:flex;align-items:center;gap:5px;cursor:pointer;}
+.topnav .act{color:#7a5bff;font-weight:700;}
+.topnav .u{display:flex;align-items:center;gap:6px;font-weight:600;}
+.topnav .u .av{width:26px;height:26px;border-radius:50%;background:#7a5bff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+/* main shell = big rounded card */
+.shell{flex:1;display:flex;overflow:hidden;padding:14px;gap:0;}
+.card-shell{flex:1;display:flex;background:#fff;border-radius:16px;box-shadow:0 8px 30px -18px rgba(30,40,70,.3);overflow:hidden;}
+
+/* left icon rail */
+.rail{width:52px;background:#fff;border-right:1px solid #f0f1f5;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;flex-shrink:0;}
+.rail .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#8a909e;cursor:pointer;font-size:16px;position:relative;}
+.rail .ic:hover{background:#f4f5f8;}
+.rail .ic.on{background:#efeaff;color:#7a5bff;}
+.rail .ic .dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:#e1251b;border-radius:50%;}
+.rail .sp{flex:1;}
+.rail .line{width:22px;height:1px;background:#eef0f4;margin:4px 0;}
+
+/* chat panel */
+.chat{width:520px;display:flex;flex-direction:column;border-right:1px solid #f0f1f5;flex-shrink:0;}
+.chat-h{padding:18px 22px 12px;display:flex;align-items:center;gap:10px;}
+.chat-h .t{font-size:19px;font-weight:800;}
+.chat-h .rt{margin-left:auto;display:flex;align-items:center;gap:14px;color:#8a909e;font-size:15px;}
+.chat-h .rt .b{display:flex;align-items:center;gap:3px;cursor:pointer;}
+.chat-body{flex:1;overflow-y:auto;padding:6px 22px 10px;}
+.chat-body p{line-height:1.8;color:#2b2f3a;margin-bottom:6px;}
+.chat-body .lnk{color:#2f6bff;cursor:pointer;word-break:break-all;}
+.filecard{border:1px solid #eef0f4;border-radius:12px;padding:14px 16px;margin:12px 0 6px;background:#fff;}
+.filecard .top{display:flex;align-items:center;gap:12px;}
+.filecard .xi{width:40px;height:44px;border-radius:8px;background:#e8f6ee;color:#1f9d57;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
+.filecard .fn{font-weight:600;font-size:14px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.filecard .ft{color:#a3a8b3;font-size:12px;margin-top:2px;}
+.filecard .bg{margin-left:auto;font-size:34px;color:#e8efe9;}
+.filecard .bar{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:11px;border-top:1px solid #f2f3f7;color:#8a909e;font-size:12.5px;flex-wrap:wrap;}
+.filecard .bar .b{display:flex;align-items:center;gap:4px;cursor:pointer;}
+.filecard .bar .b:hover{color:#7a5bff;}
+.sugh{color:#4a4f5c;margin:14px 0 8px;font-size:13.5px;}
+.sug{display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+.sug .s{border:1px solid #e5e7ee;background:#fbfbfd;border-radius:10px;padding:10px 14px;font-size:13.5px;color:#3a3f4c;cursor:pointer;}
+.sug .s:hover{border-color:#7a5bff;color:#7a5bff;}
+.replay{margin:16px 0 4px;display:inline-flex;align-items:center;gap:6px;background:#efeaff;color:#7a5bff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;}
+.replay:hover{background:#e6dfff;}
+
+.composer{padding:12px 18px 8px;flex-shrink:0;}
+.cbox{border:1px solid #e5e7ee;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fff;transition:border-color .2s;}
+.cbox.active{border-color:#7a5bff;box-shadow:0 0 0 3px rgba(122,91,255,.1);}
+.ci{border:none;resize:none;outline:none;font-size:14px;line-height:1.6;min-height:46px;max-height:120px;font-family:inherit;color:#1d2129;white-space:pre-wrap;}
+.ci::placeholder{color:#a3a8b3;}
+.ctools{display:flex;align-items:center;gap:16px;color:#4a4f5c;font-size:13px;}
+.ctools .tt{display:flex;align-items:center;gap:5px;cursor:pointer;}
+.ctools .tt.kb{color:#7a5bff;font-weight:600;}
+.ctools .send{margin-left:auto;width:36px;height:36px;border-radius:50%;background:#c9bff5;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+.ctools .send.ready{background:linear-gradient(135deg,#8a6bff,#6b57ff);}
+.chat-foot{text-align:center;color:#b6bac4;font-size:12px;padding:6px 0 12px;flex-shrink:0;}
+
+/* right = 超级大表 subscreen */
+.sub{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden;min-width:0;}
+.xls-head{padding:16px 22px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.xls-head .big{font-size:20px;font-weight:800;}
+.xls-head .rt{margin-left:auto;display:flex;align-items:center;gap:12px;color:#4a4f5c;font-size:14px;}
+.xls-head .rt .op{cursor:pointer;font-weight:600;}
+.xls-head .rt .vsep{color:#e0e3ea;}
+.xls-head .rt .x{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;font-size:17px;color:#4a4f5c;}
+.xls-head .rt .x:hover{background:#f2f3f7;}
+.xls-file{padding:2px 22px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid #eef0f4;}
+.xls-file .fn{font-size:16px;font-weight:700;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.xls-file .pen{color:#8a909e;cursor:pointer;}
+.xls-file .ed{color:#8a909e;font-size:13px;}
+.xls-file .more{margin-left:auto;color:#8a909e;letter-spacing:1px;cursor:pointer;font-weight:700;}
+.xls-file .save{background:#2f6bff;color:#fff;border:none;border-radius:8px;height:36px;padding:0 20px;font-weight:700;font-size:14px;cursor:pointer;}
+.xls-ribbon{background:#f6f7f9;padding:11px 22px;display:flex;gap:26px;font-size:14px;color:#3a3f4c;flex-shrink:0;}
+.xls-ribbon span{cursor:pointer;}
+.xls-ribbon span:hover{color:#2f6bff;}
+.xls-formula{padding:7px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid #eef0f4;border-top:1px solid #eef0f4;}
+.namebox{border:1px solid #e5e7ee;border-radius:6px;height:32px;width:120px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px;color:#4a4f5c;}
+.fxwrap{display:flex;align-items:center;gap:10px;font-size:13px;}
+.fxwrap .fx{color:#2f6bff;font-style:italic;font-weight:700;}
+.fxbar{flex:1;border:1px solid #eef0f4;border-radius:6px;height:32px;background:#fafbfc;display:flex;align-items:center;padding:0 12px;color:#3a3f4c;font-size:13px;}
+/* grid */
+.gridwrap{flex:1;overflow:auto;position:relative;}
+.sgrid{border-collapse:collapse;font-size:13px;}
+.sgrid th,.sgrid td{border:1px solid #e6e8ee;padding:7px 10px;white-space:nowrap;background:#fff;}
+.sgrid .cl{background:#f3f4f7;color:#8a909e;text-align:center;font-weight:600;font-size:12px;height:26px;position:sticky;top:0;z-index:3;}
+.sgrid .rn{background:#f3f4f7;color:#8a909e;text-align:center;font-weight:600;font-size:12px;position:sticky;left:0;z-index:2;min-width:38px;}
+.sgrid .corner{position:sticky;left:0;top:0;z-index:4;background:#eceef3;min-width:38px;}
+.sgrid .xh{background:#e9f2e7;font-weight:700;color:#2b3a2b;position:sticky;top:26px;z-index:1;}
+.sgrid td.nm{white-space:normal;min-width:230px;max-width:280px;line-height:1.45;}
+.sgrid .neg{color:#e14b4b;font-weight:600;}
+.sgrid .pos{color:#1f9d57;font-weight:600;}
+.sgrid .muted{color:#a3a8b3;}
+.thumb{width:44px;height:44px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;}
+.rtag{display:inline-block;border-radius:5px;padding:2px 8px;font-size:12px;font-weight:600;}
+.rt-ok{background:#e8f7ee;color:#1f9d57;}
+.rt-bad{background:#fdeceb;color:#d5372c;}
+.rt-low{background:#fff3e0;color:#d98a12;}
+.rt-na{background:#f0f1f5;color:#8a909e;}
+.sgrid tr.sel td{background:#dbe7ff!important;}
+.sgrid tr.sel td.rn{background:#b9cffb!important;color:#2f4ba8;}
+.selbox{position:absolute;border:2px solid #2f6bff;background:rgba(47,107,255,.06);pointer-events:none;display:none;z-index:5;border-radius:2px;}
+/* sheet tabs + status */
+.sheettabs{display:flex;align-items:center;gap:2px;background:#f6f7f9;border-top:1px solid #eef0f4;padding:0 10px;height:38px;flex-shrink:0;color:#6b7280;font-size:13px;}
+.sheettabs .nav{padding:4px 6px;color:#9aa0ac;cursor:pointer;}
+.sheettabs .tab{padding:8px 16px;cursor:pointer;border-top:2px solid transparent;}
+.sheettabs .tab.on{background:#fff;color:#1f9d57;font-weight:700;border-top-color:#1f9d57;border-left:1px solid #eef0f4;border-right:1px solid #eef0f4;}
+.statusbar{height:30px;background:#217346;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:12.5px;flex-shrink:0;}
+.statusbar .z{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.statusbar .zbar{width:120px;height:4px;background:rgba(255,255,255,.35);border-radius:2px;position:relative;}
+.statusbar .zbar::after{content:"";position:absolute;left:52%;top:-4px;width:11px;height:11px;border-radius:50%;background:#fff;}
+
+/* fake cursor + toast */
+.cursor{position:fixed;width:22px;height:22px;z-index:200;pointer-events:none;display:none;transition:left .6s cubic-bezier(.4,.1,.2,1),top .6s cubic-bezier(.4,.1,.2,1);}
+.cursor.click{transform:scale(.82);}
+.toast{position:fixed;z-index:210;background:rgba(40,44,52,.94);color:#fff;font-size:13px;padding:9px 16px;border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.25);opacity:0;transition:opacity .25s,transform .25s;transform:translateY(6px);pointer-events:none;}
+.toast.show{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="logo"><span class="mk">采</span>采销工作台</div>
+    <div class="search"><span class="ai">Ai 搜索</span><span class="sep">|</span><span class="ph">采销工作台"大促加油站"全面开启！</span></div>
+    <div class="topnav">
+      <span class="it act">✦ Ai 经营中心</span>
+      <span class="it" style="color:#7a5bff;font-weight:700">超级运营</span>
+      <span class="it">🔔 消息</span><span class="it">🧰 工具箱</span><span class="it">🖥 客户端</span><span class="it">💬 反馈</span><span class="it">📖 采销成长</span>
+      <span>✦</span>
+      <span class="u"><span class="av">葛</span>葛芸冲 ▾</span>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="card-shell">
+      <!-- left icon rail -->
+      <div class="rail">
+        <div class="ic">◧</div>
+        <div class="ic on">↻</div>
+        <div class="ic">📈</div>
+        <div class="ic">🔗</div>
+        <div class="ic">⊞</div>
+        <div class="ic">▤</div>
+        <div class="line"></div>
+        <div class="ic">📉</div>
+        <div class="ic">📊<span class="dot"></span></div>
+        <div class="ic">👥</div>
+        <div class="sp"></div>
+        <div class="ic">🕘</div>
+      </div>
+
+      <!-- chat panel -->
+      <div class="chat">
+        <div class="chat-h">
+          <div class="t">价格巡检</div>
+          <div class="rt"><span class="b">💬</span><span class="b">📄 1</span></div>
+        </div>
+        <div class="chat-body">
+          <p>价格巡检已完成，本次共为您巡检 <b>24</b> 次，任务耗时 <b>3</b> 秒，预计帮您节省约 <b>12</b> 分钟。</p>
+          <p>具体价格信息请下载文件查看：<span class="lnk">价格巡检_4565642_1785904230127.xlsx</span></p>
+          <div class="filecard">
+            <div class="top">
+              <div class="xi">X</div>
+              <div><div class="fn">价格巡检_4565642_178…</div><div class="ft">xlsx</div></div>
+              <div class="bg">📊</div>
+            </div>
+            <div class="bar">
+              <span class="b">🎯 技能 1</span><span>|</span><span class="b">↻</span><span class="b">⧉</span>
+              <span class="b">◎ 设置自动化任务</span><span class="b">💬</span><span class="b">👍</span><span class="b">👎</span>
+              <span>|</span><span>任务耗时 52s</span>
+            </div>
+          </div>
+          <div class="sugh">您可以继续问我：</div>
+          <div class="sug">
+            <div class="s">分析价格异常商品清单</div>
+            <div class="s">在超级大表筛选价差异常SKU</div>
+          </div>
+          <button class="replay" onclick="runDemo()">▶ 重放：框选SKU并复制到对话</button>
+        </div>
+        <div class="composer">
+          <div class="cbox" id="cbox">
+            <textarea class="ci" id="chatInput" placeholder="请输入问题，可shift+回车换行"></textarea>
+            <div class="ctools">
+              <span class="tt">🌐 经营场景 ⌄</span>
+              <span class="tt">🎯 技能 ⌄</span>
+              <span class="tt">⚡ 自动 ⌄</span>
+              <span class="tt kb">📚 知识库</span>
+              <button class="send" id="sendBtn">↑</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-foot">内容由AI生成，仅供参考</div>
+      </div>
+
+      <!-- right 超级大表 subscreen -->
+      <div class="sub">
+        <div class="xls-head">
+          <span class="big">超级大表</span>
+          <div class="rt"><span class="op">在大表中打开</span><span class="vsep">|</span><span class="op">⤢</span><span class="vsep">|</span><span class="x">✕</span></div>
+        </div>
+        <div class="xls-file">
+          <span class="fn">价格巡检_4565642_1785904230127.xlsx</span><span class="pen">✎</span><span class="ed">本人编辑中</span>
+          <span class="more">···</span><button class="save">保存 ▾</button>
+        </div>
+        <div class="xls-ribbon"><span>文件</span><span>开始</span><span>插入</span><span>页面布局</span><span>公式</span><span>数据</span><span>审阅</span><span>视图</span><span>设置</span></div>
+        <div class="xls-formula">
+          <div class="namebox"><span id="cellref">A2</span><span>▾</span></div>
+          <span style="color:#cdd1da">⋮</span>
+          <div class="fxwrap"><span style="color:#cdd1da">✕</span><span style="color:#1f9d57">✓</span><span class="fx">fx</span></div>
+          <div class="fxbar" id="fxbar">100135172567</div>
+        </div>
+        <div class="gridwrap" id="gridwrap">
+          <table class="sgrid" id="gtable"><tbody id="gbody"></tbody></table>
+          <div class="selbox" id="selbox"></div>
+        </div>
+        <div class="sheettabs">
+          <span class="nav">◀</span><span class="nav">▶</span><span class="nav">≡</span>
+          <span class="tab on">经营数据</span><span class="tab">Sheet8</span><span class="tab">Sheet7</span>
+          <span class="nav">···</span><span class="nav">⊕</span><span class="nav">⋮</span>
+        </div>
+        <div class="statusbar">就绪<div class="z"><span>—</span><div class="zbar"></div><span>＋</span><span>70%</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cursor" id="cursor"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 2 L4 19 L8.5 14.6 L11.4 21.2 L14.2 20 L11.3 13.6 L18 13.6 Z" fill="#1d2129" stroke="#fff" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---- price-inspection SKU data (consistent with 图1 theme) ---- */
+var rows=[
+ {sku:'100135172567',name:'滴露（Dettol）衣物消毒液 自然香氛洗衣除菌液 除螨去异味48h留香1000ml*1',ic:'🧴',bg:'#f27a9b',front:'无权',hand:'¥39.9',comp:'¥42.0',diff:'-5.0%',neg:false,res:'无权查看',rc:'rt-na'},
+ {sku:'390383',name:'滴露（Dettol）消毒液衣物除菌液洗衣消毒水1.8L*1 衣物混洗杀菌除螨 非84酒精',ic:'🧴',bg:'#c9a24a',front:'无权',hand:'¥29.9',comp:'¥28.5',diff:'+4.9%',neg:false,res:'高于竞对',rc:'rt-low'},
+ {sku:'100004107229',name:'白猫柠檬红茶洗洁精5kg*4桶（整箱）A类食品用去油祛味红茶香洗洁精',ic:'🍋',bg:'#f0a92e',front:'无权',hand:'¥69.9',comp:'¥75.0',diff:'-6.8%',neg:true,res:'低于竞对',rc:'rt-low'},
+ {sku:'100211884430',name:'蓝月亮 深层洁净护理洗衣液 3kg*2瓶 机洗手洗通用',ic:'🌙',bg:'#3f7ad6',front:'¥59.9',hand:'¥49.9',comp:'¥52.0',diff:'-4.0%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100056231107',name:'立白 天然抑菌洗洁精 1.29kg*4瓶 果蔬餐具清洁',ic:'🍏',bg:'#2fae6a',front:'¥39.9',hand:'¥29.9',comp:'¥31.5',diff:'-5.1%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100189773201',name:'威露士 衣物消毒液 家用杀菌除螨 1.6L*2',ic:'🧴',bg:'#6c5ce7',front:'¥69.9',hand:'¥55.0',comp:'¥49.9',diff:'+10.2%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100077452318',name:'高露洁 光感白牙膏 清新薄荷 180g*3支',ic:'🦷',bg:'#e14b4b',front:'¥45.0',hand:'¥35.9',comp:'¥36.0',diff:'-0.3%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100143889025',name:'舒肤佳 纯白清香型香皂 125g*6块 除菌沐浴',ic:'🧼',bg:'#4aa3df',front:'¥33.9',hand:'¥25.9',comp:'¥27.0',diff:'-4.1%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100098234561',name:'维达 超韧抽纸 3层130抽*24包 整箱纸巾',ic:'🧻',bg:'#00b3a4',front:'¥69.9',hand:'¥59.9',comp:'¥54.9',diff:'+9.1%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100112667890',name:'清风 原木纯品卷纸 4层180g*27卷 家用卫生纸',ic:'🧻',bg:'#0984e3',front:'¥49.9',hand:'¥42.9',comp:'¥44.0',diff:'-2.5%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100155903412',name:'洁柔 face系列乳霜纸 3层100抽*6包 婴儿保湿纸巾',ic:'🧻',bg:'#e17055',front:'¥29.9',hand:'¥23.9',comp:'¥24.5',diff:'-2.4%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100066120983',name:'心相印 茶语系列抽纸 3层120抽*18包',ic:'🍵',bg:'#26a65b',front:'无权',hand:'¥36.9',comp:'¥38.0',diff:'-2.9%',neg:true,res:'无权查看',rc:'rt-na'},
+ {sku:'100201338745',name:'超能 天然皂粉洗衣粉 1.6kg*2袋 低泡易漂',ic:'💧',bg:'#3498db',front:'¥45.9',hand:'¥36.9',comp:'¥33.9',diff:'+8.8%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100088457123',name:'奥妙 净蓝全效洗衣液 3.5kg*2瓶 深层去渍',ic:'🌊',bg:'#2e86de',front:'¥79.9',hand:'¥65.0',comp:'¥67.0',diff:'-3.0%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100177209846',name:'汰渍 全效洁净洗衣液 3kg*2瓶 去油除渍',ic:'🫧',bg:'#e67e22',front:'¥69.9',hand:'¥58.0',comp:'¥59.5',diff:'-2.5%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100033671209',name:'妙管家 洁厕灵 蓝泡泡马桶清洁剂 500ml*6瓶',ic:'🚽',bg:'#00a8b5',front:'¥39.9',hand:'¥29.9',comp:'¥26.9',diff:'+11.2%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100144778520',name:'花王 洁霸净白洗衣粉 4.5kg 强效去渍',ic:'👕',bg:'#d63031',front:'¥55.0',hand:'¥45.9',comp:'¥47.0',diff:'-2.3%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100109983377',name:'金纺 衣物护理柔顺剂 薰衣草 3L*2瓶',ic:'🌸',bg:'#a29bfe',front:'无权',hand:'¥52.9',comp:'¥55.0',diff:'-3.8%',neg:true,res:'无权查看',rc:'rt-na'},
+ {sku:'100055412876',name:'雕牌 超效加酶洗衣粉 1.8kg*3袋 家庭装',ic:'🦅',bg:'#0652DD',front:'¥42.9',hand:'¥33.9',comp:'¥35.0',diff:'-3.1%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100188002314',name:'蓝月亮 手洗专用洗衣液 天然植萃 1kg*3瓶',ic:'🌙',bg:'#4b7bec',front:'¥49.9',hand:'¥39.9',comp:'¥36.9',diff:'+8.1%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100077230981',name:'立白 洗衣皂 尚品植护 202g*8块 内衣皂',ic:'🧼',bg:'#20bf6b',front:'¥33.9',hand:'¥25.9',comp:'¥26.5',diff:'-2.3%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100166745023',name:'威露士 免洗抑菌洗手液 卫诺 450ml*3瓶',ic:'🖐',bg:'#8854d0',front:'¥46.9',hand:'¥37.9',comp:'¥38.9',diff:'-2.6%',neg:true,res:'正常',rc:'rt-ok'},
+ {sku:'100099817450',name:'洁柔 黑Face可湿水 3层120抽*8包 加厚纸巾',ic:'🧻',bg:'#2d3436',front:'¥45.9',hand:'¥35.9',comp:'¥33.0',diff:'+8.8%',neg:false,res:'价格异常',rc:'rt-bad'},
+ {sku:'100122389004',name:'滴露 消毒液经典松木香 750ml*3瓶 家居除菌',ic:'🌲',bg:'#26de81',front:'无权',hand:'¥59.9',comp:'¥62.0',diff:'-3.4%',neg:true,res:'无权查看',rc:'rt-na'}
+];
+
+function roiCls(){}
+function render(){
+  var body=document.getElementById('gbody'); var html='';
+  var cols=['SKU','商品名称','主图(APP)','前台价','到手价','竞对最低价','价差率','巡检结果'];
+  var letters=['A','B','C','D','E','F','G','H'];
+  html+='<tr><th class="corner"></th>';
+  letters.forEach(function(l){ html+='<th class="cl">'+l+'</th>'; });
+  html+='</tr>';
+  html+='<tr><td class="rn">1</td>';
+  cols.forEach(function(c){ html+='<td class="xh">'+c+'</td>'; });
+  html+='</tr>';
+  rows.forEach(function(r,idx){
+    var rn=idx+2;
+    var frontCls=r.front==='无权'?'muted':'';
+    var diffCls=r.neg?'neg':'pos';
+    html+='<tr data-sku="'+r.sku+'"><td class="rn">'+rn+'</td>'
+      +'<td>'+r.sku+'</td>'
+      +'<td class="nm">'+r.name+'</td>'
+      +'<td><div class="thumb" style="background:'+r.bg+'">'+r.ic+'</div></td>'
+      +'<td class="'+frontCls+'">'+r.front+'</td>'
+      +'<td>'+r.hand+'</td>'
+      +'<td>'+r.comp+'</td>'
+      +'<td class="'+diffCls+'">'+r.diff+'</td>'
+      +'<td><span class="rtag '+r.rc+'">'+r.res+'</span></td>'
+      +'</tr>';
+  });
+  body.innerHTML=html;
+}
+render();
+
+/* ---- fake-mouse demo: select SKUs -> copy -> paste to chat ---- */
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+var SEL_SKUS=['100135172567','390383','100004107229','100211884430'];
+
+function moveCur(x,y){ var c=document.getElementById('cursor'); c.style.left=x+'px'; c.style.top=y+'px'; }
+function clickCur(on){ document.getElementById('cursor').classList.toggle('click',!!on); }
+function showToast(txt,x,y){ var t=document.getElementById('toast'); t.textContent=txt; t.style.left=x+'px'; t.style.top=y+'px'; t.classList.add('show'); }
+function hideToast(){ document.getElementById('toast').classList.remove('show'); }
+function clearSel(){
+  document.querySelectorAll('#gbody tr.sel').forEach(function(tr){tr.classList.remove('sel');});
+  document.getElementById('selbox').style.display='none';
+}
+function drawSelBox(trs){
+  var wrap=document.getElementById('gridwrap'); var wr=wrap.getBoundingClientRect();
+  var f=trs[0].getBoundingClientRect(), l=trs[trs.length-1].getBoundingClientRect();
+  var box=document.getElementById('selbox');
+  box.style.display='block';
+  box.style.left=(f.left-wr.left+wrap.scrollLeft)+'px';
+  box.style.top=(f.top-wr.top+wrap.scrollTop)+'px';
+  box.style.width=(f.width-2)+'px';
+  box.style.height=(l.bottom-f.top-2)+'px';
+}
+
+async function typeInto(el,text,delay){
+  for(var i=0;i<text.length;i++){ el.value+=text[i]; el.scrollTop=el.scrollHeight; await sleep(delay); }
+}
+
+var demoRunning=false;
+async function runDemo(){
+  if(demoRunning) return; demoRunning=true;
+  var input=document.getElementById('chatInput');
+  var cbox=document.getElementById('cbox');
+  var cur=document.getElementById('cursor');
+  input.value=''; clearSel(); hideToast();
+  document.getElementById('sendBtn').classList.remove('ready');
+
+  var trs=SEL_SKUS.map(function(s){ return document.querySelector('#gbody tr[data-sku="'+s+'"]'); });
+  // start cursor at ribbon area
+  var startRef=document.querySelector('.xls-ribbon').getBoundingClientRect();
+  cur.style.transition='none'; moveCur(startRef.left+120, startRef.top+10); cur.style.display='block';
+  await sleep(60); cur.style.transition='';
+  await sleep(400);
+
+  // move onto first row & press
+  var r0=trs[0].getBoundingClientRect();
+  moveCur(r0.left+60, r0.top+16); await sleep(720);
+  clickCur(true); trs[0].classList.add('sel'); drawSelBox([trs[0]]); await sleep(320);
+  // drag down selecting each row
+  for(var i=1;i<trs.length;i++){
+    var ri=trs[i].getBoundingClientRect();
+    moveCur(ri.left+60, ri.top+16);
+    trs[i].classList.add('sel'); drawSelBox(trs.slice(0,i+1));
+    await sleep(360);
+  }
+  clickCur(false);
+  // copy toast near cursor
+  var lr=trs[trs.length-1].getBoundingClientRect();
+  showToast('已复制 '+trs.length+' 个 SKU（Ctrl+C）', lr.left+80, lr.top+30);
+  await sleep(950); hideToast();
+
+  // move to input box
+  var ir=input.getBoundingClientRect();
+  moveCur(ir.left+40, ir.top+22); await sleep(720);
+  clickCur(true); cbox.classList.add('active'); await sleep(160); clickCur(false);
+  input.focus();
+
+  // paste (instant) the selected rows: SKU + short name
+  var pasteLines=trs.map(function(tr){
+    var r=rows.find(function(x){return x.sku===tr.dataset.sku;});
+    var short=r.name.length>14?r.name.slice(0,14)+'…':r.name;
+    return r.sku+'\t'+short;
+  });
+  input.value=pasteLines.join('\n')+'\n';
+  input.scrollTop=input.scrollHeight;
+  await sleep(520);
+
+  // type the instruction sentence
+  await typeInto(input,'对这些sku执行主图巡检',52);
+  document.getElementById('sendBtn').classList.add('ready');
+  await sleep(300);
+  cur.style.display='none';
+  demoRunning=false;
+}
+
+/* auto-play once shortly after load */
+window.addEventListener('load',function(){ setTimeout(runDemo,1100); });
+</script>
+</body>
+</html>
