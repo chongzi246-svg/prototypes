@@ -244,6 +244,41 @@
   .hintcard b{color:#2f6bff;font-weight:800;}
   .ainput{padding:0 16px 16px;}
   .ainput .box{border:1px solid #e6e8ec;background:#fff;border-radius:12px;padding:14px 16px;color:#b7bbc4;font-size:13.5px;min-height:76px;box-shadow:0 2px 10px rgba(60,60,120,.04);}
+
+  /* ===============  热点资讯详情 view (news → 大表)  =============== */
+  #newsView .nvbody{flex:1;display:flex;min-height:0;}
+  .nv-left{flex:0 0 40%;display:flex;flex-direction:column;min-width:0;background:#fbfbfc;border-right:1px solid #eceef2;transition:flex-basis .55s cubic-bezier(.4,0,.2,1);}
+  .nv-left.solo{flex-basis:100% !important;}
+  .nv-lh{display:flex;align-items:center;gap:10px;padding:15px 20px;border-bottom:1px solid #eef0f3;font-size:16px;font-weight:800;}
+  .nv-lh .tt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nv-lh .r{color:#9aa0ab;font-size:13px;font-weight:400;display:flex;gap:12px;flex-shrink:0;}
+  .nv-scroll{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+  .newslinks{display:flex;flex-direction:column;gap:8px;}
+  .newslink{display:flex;align-items:center;gap:8px;border:1px solid #eef0f3;border-radius:9px;padding:9px 12px;font-size:13px;color:#3a3f47;background:#fff;}
+  .newslink .src{background:#eef1ff;color:#2f4bff;border-radius:5px;font-size:11px;padding:1px 7px;flex-shrink:0;}
+  .newslink .u{margin-left:auto;color:#2f6bff;font-size:12px;white-space:nowrap;}
+  .metabar{display:flex;gap:8px;flex-wrap:wrap;}
+  .metabar .mt{background:#f4f6fb;border-radius:8px;padding:6px 10px;font-size:12px;color:#5a5f68;}
+  .metabar .mt b{color:#e14b4b;}
+  .recq{border:1px dashed #b9c4f7;background:#f5f8ff;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#2f54eb;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .recq:hover{background:#eef2ff;}
+  .recq .i{color:#7b5bff;}
+  .nv-chatbox{border:1px solid #e6e8ec;background:#fff;border-radius:14px;margin:0 20px 10px;padding:16px 18px;position:relative;}
+  .nv-chatbox .ph{color:#9aa0ab;font-size:15px;min-height:60px;}
+  .nv-chatbox .row{display:flex;align-items:center;gap:24px;color:#2b2f36;font-size:15px;margin-top:6px;}
+  .nv-chatbox .row .t{display:flex;align-items:center;gap:6px;}
+  .nv-chatbox .row .kb{color:#7b3ff2;}
+  .nv-chatbox .row .send{margin-left:auto;width:34px;height:34px;border-radius:10px;background:#efeafc;color:#7b3ff2;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .nv-foot{text-align:center;font-size:11px;color:#b7bbc4;padding-bottom:12px;}
+  .nv-right{flex:1;display:flex;flex-direction:column;min-height:0;background:#fff;}
+  .nv-right.hidden{display:none !important;}
+  .nv-right.slidein{animation:nvsl .55s cubic-bezier(.2,.7,.2,1);}
+  @keyframes nvsl{from{transform:translateX(90px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+  .greencard{display:flex;align-items:center;gap:12px;border:1px solid #cfe8d6;background:linear-gradient(135deg,#eaf7ee,#f4fbf6);border-radius:12px;padding:13px 15px;box-shadow:0 2px 8px rgba(40,140,80,.06);}
+  .greencard .fi{width:38px;height:38px;border-radius:9px;background:#26a65b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .greencard .ft b{font-size:13.5px;} .greencard .ft .s{color:#9aa0ab;font-size:12px;margin-top:2px;}
+  .greencard.pop{animation:gcpop .5s cubic-bezier(.2,.8,.3,1.3);}
+  @keyframes gcpop{0%{transform:scale(.85);opacity:0;}100%{transform:scale(1);opacity:1;}}
 </style>
 </head>
 <body>
@@ -384,13 +419,9 @@
             <div class="gcard">
               <div class="gh">热点资讯 <span class="r">&#8250;</span></div>
               <div class="list">
-                <div class="news">
+                <div class="news" style="cursor:pointer;" onclick="openNews()">
                   <div class="ni hot">&#128293;</div>
-                  <div><div class="nt">品类消费趋势 · 家居家电</div><div class="nd">厨卫刚需品类受地产低迷与人口增长乏力影响，整体表现承压，预计2026年市场规模将突破新的关口，需关注结构性机会。</div></div>
-                </div>
-                <div class="news">
-                  <div class="ni">&#128202;</div>
-                  <div><div class="nt">行业咨询分析 · 厨房电器</div><div class="nd">头部竞品本周加大促销力度，主要集中在小家电板块；新兴内容电商渠道竞争加剧，传统货架流量被进一步分流。</div></div>
+                  <div><div class="nt">含糖碳酸饮料"5元2瓶都卖不动"；35岁女子每天5瓶可乐喝出一身病登热榜</div><div class="nd">含糖碳酸饮料促销动销乏力，叠加"每天5瓶可乐喝出一身病"健康话题登上热榜，消费者对高糖饮料的健康担忧升温，需关注对相关品类的经营影响。</div></div>
                 </div>
               </div>
             </div>
@@ -544,6 +575,76 @@
         <div class="icons"><span>&#10227;</span><span>&#9776;</span><span>&#8598;</span><span onclick="backHome()">&#10005;</span></div>
       </div>
       <div class="abody" id="abody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ===============  热点资讯详情 view  ================== -->
+<!-- ===================================================== -->
+<div class="app hidden" id="newsView">
+  <div class="topbar">
+    <div class="logo"><span class="m">采</span>采销工作台</div>
+    <div class="aisearch"><span class="ai">Ai搜索</span><span>创建批量任务</span></div>
+    <div class="topnav">
+      <span class="grad">Ai 经营中心</span><span class="grad">超级运营</span>
+      <span>&#128276; 消息</span><span>&#129520; 工具箱</span><span>&#128421; 客户端</span>
+      <span>&#128172; 反馈</span><span>&#128200; 采销成长</span><span class="grad">&#10022;</span>
+      <span class="u">&#128100; 葛芸冲 &#9662;</span>
+    </div>
+  </div>
+  <div class="smain nvbody">
+    <div class="railicons">
+      <span class="ri click" onclick="backHomeFromNews()" title="返回">&#8617;</span>
+      <span class="ri">&#128444;</span><span class="ri on">&#10022;</span>
+      <span class="ri">&#128193;</span><span class="ri">&#128203;</span><span class="ri">&#128200;</span>
+      <span class="ri">&#128101;</span><span class="ri" style="margin-top:auto;">&#128339;</span>
+    </div>
+
+    <!-- 主屏：热点资讯分析对话 -->
+    <div class="nv-left solo" id="nvLeft">
+      <div class="nv-lh"><span class="tt">含糖碳酸饮料"5元2瓶都卖不动"…热点资讯分析</span><span class="r"><span>&#128172;</span><span>&#128203; 1</span></span></div>
+      <div class="nv-scroll" id="nvbody"></div>
+      <div class="nv-chatbox">
+        <div class="ph">请输入问题，可 shift+回车换行</div>
+        <div class="row">
+          <span class="t">&#128455; 经营场景 &#9662;</span>
+          <span class="t">&#9901; 技能 &#9662;</span>
+          <span class="t">&#9889; 自动 &#9662;</span>
+          <span class="t kb">&#128214; 知识库</span>
+          <span class="send">&#9632;</span>
+        </div>
+      </div>
+      <div class="nv-foot">内容由AI生成，仅供参考</div>
+    </div>
+
+    <!-- 副屏：热点资讯影响分析 大表（图3） -->
+    <div class="nv-right hidden" id="nvRight">
+      <div class="filebar">
+        <span class="ficon">&#128203;</span>
+        <span class="fn">热点资讯影响分析</span>
+        <span class="edit">&#9998;</span>
+        <span class="st">&#9679; 本人编辑中</span>
+        <span class="right">
+          <span class="mi">&#128172; 反馈</span><span class="mi">&#128336; 报表刷新时间 21:36:56</span>
+          <span class="mi">&#10227; 刷新</span><span class="mi">&#8598; 全屏</span>
+          <span class="btn p">&#128190; 保存 &#9662;</span>
+        </span>
+      </div>
+      <div class="ribbon-tabs">
+        <span class="rt">文件</span><span class="rt on">开始</span><span class="rt">插入</span>
+        <span class="rt">页面布局</span><span class="rt">公式</span><span class="rt">数据</span>
+        <span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span>
+      </div>
+      <div class="formula"><span class="namebox">O7</span><span>&#9662;</span><span class="fx"><i>fx</i></span><span class="bar"></span></div>
+      <div class="grid">
+        <table class="sheet">
+          <thead><tr><th style="min-width:30px;"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th></tr></thead>
+          <tbody id="nvgrid"></tbody>
+        </table>
+      </div>
+      <div class="sheettabs"><span>&#9776;</span><span class="st on">经营数据</span><span class="st">Sheet8</span><span class="st">Sheet7</span><span class="add">&#8853;</span></div>
+      <div class="statusbar">就绪</div>
     </div>
   </div>
 </div>
@@ -708,6 +809,137 @@ async function run(){
   add(el('<div class="followup step">'+S.followup+'</div>'));
   await sleep(500);
   add(el('<div class="hintcard step"><b>'+S.hint.t+'</b> '+S.hint.d+'</div>'));
+}
+/* ===================================================== */
+/* ===============  热点资讯详情 flow  ================== */
+/* ===================================================== */
+var newsView = document.getElementById('newsView');
+var nvbody = document.getElementById('nvbody');
+var newsRun = false, news2Run = false;
+var NEWS_Q = '查询"含糖碳酸饮料5元2瓶都卖不动；35岁女子每天5瓶可乐喝出一身病登热榜"的热点资讯';
+
+function openNews(){
+  homeView.classList.add('hidden');
+  newsView.classList.remove('hidden');
+  if(!newsRun){ newsRun = true; runNews1(); }
+}
+function backHomeFromNews(){
+  newsView.classList.add('hidden');
+  homeView.classList.remove('hidden');
+}
+window.openNews = openNews; window.backHomeFromNews = backHomeFromNews;
+
+function addN(node){ nvbody.appendChild(node); requestAnimationFrame(function(){node.classList.add('show');}); nvbody.scrollTop=nvbody.scrollHeight; return node; }
+
+async function runNews1(){
+  addN(el('<div class="userq step">'+NEWS_Q+'</div>'));
+  await sleep(650);
+  addN(el('<div class="recv step">已收到提问，正在为你检索全网相关热点资讯…</div>'));
+  await sleep(600);
+  var plan = addN(el(
+    '<div class="plan step"><div class="ph"><span class="ok">&#10003;</span> 规划 <span class="ch">&#9662;</span></div>'+
+    '<div class="pbody"><div class="ptitle">检索并解读该热点资讯</div></div></div>'));
+  var pbody = plan.querySelector('.pbody');
+  var steps1 = ['全网资讯检索','提取关键信息','舆情倾向分析'];
+  for(var k=0;k<steps1.length;k++){
+    var chip = el('<div class="chipstep step"><span class="ic"><span class="spinner"></span></span>'+steps1[k]+'<span class="ch">&#9662;</span></div>');
+    pbody.appendChild(chip); requestAnimationFrame(function(c){return function(){c.classList.add('show');};}(chip)); nvbody.scrollTop=nvbody.scrollHeight;
+    await sleep(850); chip.querySelector('.ic').innerHTML='<span class="done-check">&#10003;</span>'; await sleep(300);
+  }
+  await sleep(400);
+  addN(el('<div class="thinkline step"><span class="ok">&#10003;</span> 已完成检索 <span class="ch">&#9662;</span></div>'));
+  await sleep(400);
+  var interp = addN(el('<div class="interp step"></div>'));
+  await typeInto(interp,
+    '<b class="hl">事件概述：</b>含糖碳酸饮料在"5元2瓶"促销力度下仍动销乏力；一则"35岁女子每天5瓶可乐喝出一身病"的健康新闻登上热榜，进一步放大消费者对高糖饮料的健康担忧。<br><br>'+
+    '<b class="hl">传播热度：</b>相关话题微博阅读 <span class="hl">2.1亿</span>、抖音相关视频播放 <span class="hl">8600万</span>，24h 热度环比 <span class="neg">+340%</span>。<br>'+
+    '<b class="hl">舆情倾向：</b>负面 <span class="neg">62%</span>（健康担忧）· 中性 28% · 正面 10%。', 12);
+  await sleep(400);
+  addN(el('<div class="metabar step">'+
+    '<span class="mt">话题阅读 <b>2.1亿</b></span><span class="mt">视频播放 <b>8600万</b></span><span class="mt">24h热度 <b>+340%</b></span><span class="mt">负面舆情 <b>62%</b></span></div>'));
+  await sleep(400);
+  addN(el('<div class="newslinks step">'+
+    '<div class="newslink"><span class="src">新浪财经</span>含糖碳酸饮料"5元2瓶"都卖不动了<span class="u">finance.sina.com.cn ›</span></div>'+
+    '<div class="newslink"><span class="src">健康时报</span>35岁女子每天5瓶可乐喝出一身病<span class="u">jksb.com.cn ›</span></div>'+
+    '<div class="newslink"><span class="src">抖音热榜</span>#每天5瓶可乐喝出一身病#<span class="u">douyin.com ›</span></div>'+
+    '</div>'));
+  await sleep(500);
+  addN(el('<div class="doneline step"><span style="color:#2fae6a;">&#10003;</span> 资讯检索与解读已完成。</div>'));
+  await sleep(400);
+  addN(el('<div class="followup step">你可能还想让我：</div>'));
+  await sleep(300);
+  var rec = addN(el('<div class="recq step"><span class="i">&#10022;</span> 分析热点资讯对品类的经营影响</div>'));
+  rec.onclick = runNews2;
+}
+
+async function runNews2(){
+  if(news2Run) return; news2Run = true;
+  addN(el('<div class="userq step">分析热点资讯对品类的经营影响</div>'));
+  await sleep(600);
+  addN(el('<div class="recv step">已收到提问"<b>分析热点资讯对品类的经营影响</b>"</div>'));
+  await sleep(600);
+  var plan = addN(el('<div class="plan step"><div class="ph"><span class="ok">&#10003;</span> 规划 <span class="ch">&#9662;</span></div>'+
+    '<div class="pbody"><div class="ptitle">按三级类目查询相关品类近期核心经营数据并插入大表</div></div></div>'));
+  var pbody = plan.querySelector('.pbody');
+  var steps2 = ['查询指标数据','绑定查询规则到表格','生成查询表格'];
+  for(var k=0;k<steps2.length;k++){
+    var chip = el('<div class="chipstep step"><span class="ic"><span class="spinner"></span></span>'+steps2[k]+'<span class="ch">&#9662;</span></div>');
+    pbody.appendChild(chip); requestAnimationFrame(function(c){return function(){c.classList.add('show');};}(chip)); nvbody.scrollTop=nvbody.scrollHeight;
+    await sleep(900);
+    chip.querySelector('.ic').innerHTML='<span class="done-check">&#10003;</span>';
+    if(k===1){ buildNewsSheet(); }   // 绑定规则 → 副屏生成大表
+    await sleep(300);
+  }
+  await sleep(300);
+  addN(el('<div class="doneline step"><span style="color:#2fae6a;">&#10003;</span> 已为你生成「热点资讯影响分析」大表。</div>'));
+  await sleep(300);
+  var card = addN(el('<div class="greencard step"><div class="fi">&#128202;</div><div class="ft"><b>热点资讯影响分析</b><div class="s">super_excel · 碳酸饮料 / 无糖茶 / 电解质水</div></div></div>'));
+  card.classList.add('pop');
+  await sleep(650);
+  var r = document.getElementById('nvRight');
+  document.getElementById('nvLeft').classList.remove('solo');
+  r.classList.remove('hidden'); r.classList.add('slidein');
+}
+
+/* 图3 影响分析表 */
+function nvSpark(vals){
+  var nums=vals.map(function(x){return parseFloat(String(x).replace(/[,%]/g,''))||0;});
+  var w=76,h=15,pad=2,min=Math.min.apply(null,nums),max=Math.max.apply(null,nums),rng=(max-min)||1;
+  var pts=nums.map(function(n,i){var x=pad+i*((w-2*pad)/(nums.length-1));var y=h-pad-((n-min)/rng)*(h-2*pad);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+  return '<svg width="'+w+'" height="'+h+'"><polyline points="'+pts+'" fill="none" stroke="#2f6bff" stroke-width="1.3"/></svg>';
+}
+function buildNewsSheet(){
+  var dts=['2026-07-28','2026-07-29','2026-07-30','2026-07-31','2026-08-01'];
+  var METR=[['商详UV',['138,992','148,392','145,292','130,457','138,960']],
+    ['商详UV-同比',['33%','40%','43%','20%','26%'],'pos'],
+    ['商详UV订单转化率',['40%','37%','36%','40%','39%']],
+    ['商详UV订单转化率-同比',['-2%','-4%','-7%','-4%','-3%'],'neg'],
+    ['成交金额',['1,813,889','1,644,247','1,480,034','1,713,595','1,355,640']],
+    ['成交金额-同比',['24%','14%','9%','22%','-9%'],'mix'],
+    ['现货库存数量（新）',['1,077,753','1,054,346','1,075,078','1,077,782','1,086,640']],
+    ['现货库存数量（新）-同比',['-8%','-8%','-3%','-7%','-5%'],'neg'],
+    ['现货库存金额（新）',['24,855,301','24,182,486','24,378,052','24,115,987','24,174,900']],
+    ['现货库存金额（新）-同比',['-6%','-7%','-4%','-7%','-5%'],'neg']];
+  var cats=['碳酸饮料','无糖茶','电解质水'];
+  var jitter=[1,0.86,0.62];
+  function adj(v,f){ if(v.indexOf('%')>=0){ return v; } var n=parseFloat(v.replace(/,/g,'')); if(isNaN(n))return v; return Math.round(n*f).toLocaleString('en-US'); }
+  var html='';
+  // 表头
+  html+='<tr><td class="rownum">1</td><td class="hd">数据趋势</td><td class="hd">三级类目</td><td class="hd">值</td>'+dts.map(function(d){return '<td class="hd">'+d+'</td>';}).join('')+'</tr>';
+  var rn=1;
+  cats.forEach(function(cat,ci){
+    METR.forEach(function(m,mi){
+      rn++;
+      var vals=m[1].map(function(v){return adj(v,jitter[ci]);});
+      var cls = m[2]==='neg'?'neg':(m[2]==='pos'?'pos':'');
+      html+='<tr><td class="rownum">'+rn+'</td><td class="ctr">'+nvSpark(vals)+'</td>';
+      html+= mi===0 ? '<td class="ctr" rowspan="'+METR.length+'" style="vertical-align:middle;font-weight:600;">'+cat+'</td>' : '';
+      html+='<td>'+m[0]+'</td>';
+      html+=vals.map(function(v){ var c=cls; if(m[2]==='mix'){ c=v.indexOf('-')>=0?'neg':'pos'; } else if(v.indexOf&&v.indexOf('-')===0){ c='neg'; } return '<td class="ctr '+c+'">'+v+'</td>'; }).join('');
+      html+='</tr>';
+    });
+  });
+  document.getElementById('nvgrid').innerHTML=html;
 }
 </script>
 </body>
