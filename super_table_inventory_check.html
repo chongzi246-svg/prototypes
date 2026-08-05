@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超级大表 · SKU下探 · 库存巡检</title>
+<style>
+  :root{color-scheme:light;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#dfe3e8;color:#1a1a1a;font-size:13px;display:flex;justify-content:center;padding:14px;}
+  .app{width:1600px;height:1000px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.2);display:flex;flex-direction:column;}
+
+  /* top bar */
+  .topbar{display:flex;align-items:center;gap:14px;height:54px;padding:0 18px;background:#fff;border-bottom:1px solid #eceef2;flex-shrink:0;}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;}
+  .logo .m{width:26px;height:26px;border-radius:7px;background:#e1251b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .aisearch{display:flex;align-items:center;gap:10px;flex:0 0 560px;background:#f4f5f7;border-radius:9px;padding:8px 14px;color:#b7bbc4;}
+  .aisearch .ai{color:#2f6bff;font-weight:700;}
+  .topnav{margin-left:auto;display:flex;align-items:center;gap:16px;color:#555;font-size:12.5px;}
+  .topnav .grad{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;}
+  .topnav .u{display:flex;align-items:center;gap:5px;font-weight:600;color:#1a1a1a;}
+
+  .body{flex:1;display:flex;min-height:0;}
+  .railicons{width:46px;background:#fff;border-right:1px solid #eceef2;display:flex;flex-direction:column;align-items:center;gap:20px;padding:14px 0;color:#9aa0ab;flex-shrink:0;}
+  .railicons .ri{font-size:17px;} .railicons .ri.on{color:#2f6bff;}
+
+  .sheetwrap{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;}
+  .filebar{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #eef0f3;white-space:nowrap;}
+  .filebar .ficon{font-size:16px;color:#3ba55d;}
+  .filebar .fn{font-weight:700;font-size:14px;max-width:340px;overflow:hidden;text-overflow:ellipsis;}
+  .filebar .edit{color:#c2c6cd;}
+  .filebar .warn{color:#e6892b;font-size:12.5px;}
+  .filebar .take{color:#2f6bff;font-size:12.5px;border:1px solid #cdd9ff;border-radius:7px;padding:4px 12px;background:#f4f7ff;cursor:pointer;}
+  .filebar .right{margin-left:auto;display:flex;align-items:center;gap:16px;color:#5a5f68;font-size:12.5px;}
+  .ribbon-tabs{display:flex;gap:24px;padding:0 18px;border-bottom:1px solid #eef0f3;}
+  .ribbon-tabs .rt{padding:10px 0;color:#5a5f68;font-size:13px;border-bottom:2px solid transparent;}
+  .ribbon-tabs .rt.on{color:#1a1a1a;font-weight:600;border-bottom-color:#2f6bff;}
+  .toolbar{height:56px;border-bottom:1px solid #eef0f3;background:#fcfcfd;display:flex;align-items:center;gap:26px;padding:0 18px;color:#9aa0ab;font-size:12px;}
+  .formula{display:flex;align-items:center;gap:10px;padding:5px 14px;border-bottom:1px solid #f0f1f4;font-size:12.5px;}
+  .formula .namebox{border:1px solid #e0e2e8;border-radius:5px;padding:3px 14px;min-width:64px;text-align:center;color:#444;}
+  .formula .fx{color:#9aa0ab;} .formula .val{color:#333;}
+  .grid{flex:1;overflow:auto;}
+  table.sheet{border-collapse:collapse;font-size:11.5px;white-space:nowrap;}
+  table.sheet th,table.sheet td{border:1px solid #e6e8ec;padding:2px 7px;height:23px;color:#333;}
+  table.sheet th{background:#f7f8fa;color:#8a8f99;font-weight:600;text-align:center;position:sticky;top:0;z-index:1;}
+  td.rownum{background:#f7f8fa;color:#8a8f99;text-align:center;font-weight:600;}
+  .band-a{background:#eef4e0 !important;font-weight:700;text-align:center;color:#5b6b3a;}
+  .band-b{background:#e9f7ef !important;font-weight:700;text-align:center;color:#2b7a4b;}
+  .band-c{background:#eaf3ff !important;font-weight:700;text-align:center;color:#2f6bff;}
+  .colh{background:#f4f7ec !important;font-weight:700;text-align:center;color:#444;}
+  .colh-b{background:#eafaf0 !important;font-weight:700;text-align:center;color:#2b7a4b;}
+  .colh-c{background:#eef4ff !important;font-weight:700;text-align:center;color:#2f6bff;}
+  td.pos{color:#2fae6a;} td.neg{color:#e14b4b;} td.contrib{color:#2fae6a;}
+  td.negbg{background:#fdecec;color:#e14b4b;}
+  /* 圈选高亮 */
+  td.sel{outline:2px solid #3ba55d;outline-offset:-2px;background:#eafaf0;}
+  .sheettabs{display:flex;align-items:center;gap:2px;padding:5px 12px;border-top:1px solid #f0f1f4;background:#fafbfc;overflow-x:auto;flex-shrink:0;}
+  .sheettabs .st{padding:5px 12px;border-radius:6px 6px 0 0;color:#666;font-size:12px;white-space:nowrap;}
+  .sheettabs .st.on{background:#3ba55d;color:#fff;font-weight:600;}
+  .sheettabs .st.gt{background:#e9f7ef;color:#2b7a4b;}
+  .sheettabs .st.ot{background:#f0a94e;color:#fff;}
+  .statusbar{padding:4px 14px;border-top:1px solid #f0f1f4;color:#9aa0ab;font-size:12px;flex-shrink:0;}
+
+  /* assistant */
+  .assistant{width:392px;background:#fff;border-left:1px solid #eceef2;display:flex;flex-direction:column;flex-shrink:0;}
+  .ah{display:flex;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid #f2f3f6;}
+  .ah .title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:800;}
+  .ah .sparkt{background:linear-gradient(90deg,#2f6bff,#7a4bff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ah .icons{margin-left:auto;display:flex;gap:14px;color:#9aa0ab;font-size:15px;}
+  .abody{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+  /* intro */
+  .intro-t{font-size:16px;font-weight:700;color:#1a1a1a;}
+  .cap-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .cap{border:1px solid #eef0f3;border-radius:12px;padding:16px 8px;text-align:center;font-size:13px;color:#333;box-shadow:0 2px 8px rgba(60,60,120,.04);}
+  .cap .i{font-size:20px;display:block;margin-bottom:8px;color:#7a4bff;}
+  .guess-t{color:#9aa0ab;font-size:12.5px;margin-top:4px;}
+  .guess{color:#3a3f47;font-size:14px;padding:12px 2px;border-bottom:1px solid #f2f3f6;cursor:pointer;}
+  .guess:hover{color:#2f6bff;}
+  /* conversation */
+  .userq{align-self:flex-end;max-width:88%;background:#eef1ff;color:#1a2b6b;border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:13.5px;line-height:1.5;}
+  .userq .chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d7dcf5;border-radius:8px;padding:4px 9px;font-size:12px;color:#3a3f47;margin-bottom:8px;}
+  .userq .chip .tb{color:#3ba55d;}
+  .step{opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s;} .step.show{opacity:1;transform:none;}
+  .recv{color:#5a5f68;font-size:13px;line-height:1.55;} .recv b{color:#1a1a1a;}
+  .plan{border:1px solid #eef0f3;border-radius:12px;overflow:hidden;}
+  .plan .ph{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#f7f8fa;font-weight:600;color:#333;} .plan .ph .ok{color:#2fae6a;} .plan .ph .ch{margin-left:auto;color:#b7bbc4;}
+  .plan .pbody{padding:6px 14px 12px;display:flex;flex-direction:column;gap:8px;}
+  .plan .ptitle{color:#8a8f99;font-size:12.5px;margin:4px 0 2px;}
+  .chipstep{display:flex;align-items:center;gap:9px;border:1px solid #eef0f3;border-radius:9px;padding:9px 12px;font-size:13px;color:#444;}
+  .chipstep .ic{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;} .chipstep .ch{margin-left:auto;color:#c2c6cd;}
+  .spinner{width:14px;height:14px;border:2px solid #d8def0;border-top-color:#2f6bff;border-radius:50%;animation:spin .7s linear infinite;} @keyframes spin{to{transform:rotate(360deg);}}
+  .done-check{color:#2fae6a;font-weight:700;}
+  .thinkline{display:flex;align-items:center;gap:6px;color:#333;font-weight:600;font-size:13px;} .thinkline .ok{color:#2fae6a;} .thinkline .ch{margin-left:auto;color:#b7bbc4;font-weight:400;}
+  .interp{color:#3a3f47;font-size:13px;line-height:1.75;} .interp .neg{color:#e14b4b;font-weight:600;} .interp .hl{color:#1a1a1a;font-weight:700;} .interp .pos{color:#2fae6a;font-weight:600;}
+  .caret{display:inline-block;width:7px;height:14px;background:#2f6bff;vertical-align:-2px;animation:blink .8s steps(1) infinite;} @keyframes blink{50%{opacity:0;}}
+  .invcard{border:1px solid #eef0f3;border-radius:12px;overflow:hidden;}
+  .invcard .ith{background:#f7f8fa;padding:9px 12px;font-weight:700;font-size:12.5px;}
+  .invrow{display:flex;align-items:center;padding:9px 12px;border-top:1px solid #f2f3f6;font-size:12.5px;}
+  .invrow .tag{border-radius:5px;font-size:11px;padding:1px 8px;margin-right:8px;}
+  .tag.r{background:#fdecec;color:#e14b4b;} .tag.o{background:#fff2ec;color:#f5641e;} .tag.y{background:#fff8e6;color:#a9791b;} .tag.g{background:#eafaf0;color:#2b7a4b;}
+  .invrow .n{margin-left:auto;font-weight:700;}
+  .doneline{display:flex;align-items:center;gap:6px;color:#333;font-weight:600;font-size:13px;}
+  .followup{color:#3a3f47;font-size:13px;line-height:1.6;}
+
+  /* input */
+  .ainput{padding:0 16px 16px;}
+  .inbox{border:1px solid #e6e8ec;background:#fff;border-radius:14px;padding:12px 14px 10px;box-shadow:0 2px 10px rgba(60,60,120,.05);}
+  .inbox .chip{display:inline-flex;align-items:center;gap:7px;background:#f4f6fb;border:1px solid #e6e8f0;border-radius:8px;padding:5px 11px;font-size:12.5px;color:#3a3f47;margin-bottom:10px;}
+  .tbico{display:inline-block;width:15px;height:15px;border:1.5px solid #3ba55d;border-radius:3px;position:relative;flex-shrink:0;}
+  .tbico::before{content:"";position:absolute;left:1px;right:1px;top:4px;height:1.5px;background:#3ba55d;}
+  .tbico::after{content:"";position:absolute;top:1px;bottom:1px;left:6px;width:1.5px;background:#3ba55d;}
+  .inbox .qtext{font-size:14.5px;color:#1a1a1a;min-height:24px;}
+  .inbox .qtext.ph{color:#9aa0ab;}
+  .inbox .row{display:flex;align-items:center;gap:22px;color:#2b2f36;font-size:14px;margin-top:14px;}
+  .inbox .row .t{display:flex;align-items:center;gap:6px;}
+  .inbox .row .kb{color:#7b3ff2;}
+  .inbox .row .send{margin-left:auto;width:34px;height:34px;border-radius:10px;background:#7b3ff2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;}
+  .afoot{text-align:center;color:#b7bbc4;font-size:11px;padding-bottom:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo"><span class="m">采</span>采销工作台</div>
+    <div class="aisearch"><span class="ai">Ai搜索</span><span>大促加油站：J人必备，大促合规风险早知道</span></div>
+    <div class="topnav">
+      <span class="grad">Ai 经营中心</span><span class="grad">超级运营</span>
+      <span>&#128276; 消息</span><span>&#129520; 工具箱</span><span>&#128421; 客户端</span>
+      <span class="u">&#128100; 葛芸冲 &#9662;</span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="railicons">
+      <span class="ri">&#9776;</span><span class="ri">&#10227;</span><span class="ri">&#128202;</span>
+      <span class="ri">&#10022;</span><span class="ri on">&#128203;</span><span class="ri">&#128200;</span>
+      <span class="ri">&#128101;</span><span class="ri" style="margin-top:auto;">&#128339;</span>
+    </div>
+
+    <div class="sheetwrap">
+      <div class="filebar">
+        <span class="ficon">&#128203;</span>
+        <span class="fn">销售进度监控–品牌维度_副本5671_178…</span>
+        <span class="edit">&#9998;</span>
+        <span class="warn">需重新接管编辑权</span>
+        <span class="take">接管编辑</span>
+        <span class="right"><span>&#128336; 报表刷新时间 20:33:12</span><span>&#10227; 刷新</span><span>&#8598; 全屏</span></span>
+      </div>
+      <div class="ribbon-tabs">
+        <span class="rt">文件</span><span class="rt on">开始</span><span class="rt">插入</span>
+        <span class="rt">页面布局</span><span class="rt">公式</span><span class="rt">数据</span>
+        <span class="rt">审阅</span><span class="rt">视图</span><span class="rt">设置</span>
+      </div>
+      <div class="toolbar"><span>↺ 撤销</span><span>📋 剪贴板</span><span>jingdonglangz 12</span><span>B I U</span><span>合并后居中</span><span>常规 %</span><span>条件格式 · 套用表格样式</span><span>插入 删除 格式</span><span style="margin-left:auto;">Σ 求和 · 填充 · 清除</span></div>
+      <div class="formula"><span class="namebox">A7</span><span>&#9662;</span><span class="fx"><i>fx</i></span><span class="val">=月至今sku!B2</span></div>
+      <div class="grid"><table class="sheet"><thead id="thead"></thead><tbody id="grid"></tbody></table></div>
+      <div class="sheettabs">
+        <span>&#9776;</span>
+        <span class="st gt">品牌汇总</span><span class="st on">sku下探</span><span class="st ot">GMV目标维护</span>
+        <span class="st gt">基础数据集</span><span class="st gt">昨日名下</span><span class="st gt">月至今名下</span>
+        <span class="st gt">昨日品牌</span><span class="st gt">月至今品牌</span><span class="st gt">昨日sku</span><span class="st gt">月至今sku</span>
+        <span class="add">&#8853;</span>
+      </div>
+      <div class="statusbar">就绪</div>
+    </div>
+
+    <div class="assistant">
+      <div class="ah"><div class="title"><span class="sparkt">&#10022;</span> 超级助手</div><div class="icons"><span>&#10227;</span><span>&#9776;</span><span>&#8598;</span><span>&#10005;</span></div></div>
+      <div class="abody" id="abody">
+        <div id="intro">
+          <div class="intro-t">"表"要客气，我能帮你做什么？</div>
+          <div class="cap-grid" style="margin-top:14px;">
+            <div class="cap"><span class="i">&#128202;</span>查数建表</div>
+            <div class="cap"><span class="i">&#128200;</span>数据分析</div>
+            <div class="cap"><span class="i">&#10022;</span>AI写公式</div>
+          </div>
+          <div class="guess-t" style="margin-top:18px;">猜你想问</div>
+          <div class="guess">帮我总结分析表中的数据</div>
+          <div class="guess">帮我查询月至昨日GMV数据</div>
+          <div class="guess">报表打开慢，帮我优化当前Sheet页公式</div>
+          <div class="guess">Excel公式不会写，我想对话实现</div>
+        </div>
+        <div id="convo"></div>
+      </div>
+      <div class="ainput">
+        <div class="inbox">
+          <div class="chip" id="inChip"><span class="tbico"></span>sku汇总 / A7:A24</div>
+          <div class="qtext" id="inQtext">对我圈选的sku执行库存巡检</div>
+          <div class="row">
+            <span class="t">&#128455; 经营场景 &#9662;</span>
+            <span class="t">&#9901; 技能 &#9662;</span>
+            <span class="t">&#9889; 自动 &#9662;</span>
+            <span class="t kb">&#128214; 知识库</span>
+            <span class="send" id="sendBtn" onclick="sendInv()">&#8593;</span>
+          </div>
+        </div>
+      </div>
+      <div class="afoot">内容由AI生成，仅供参考</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- spreadsheet ---------- */
+var DATA=[
+ ['10167002565509','依云饮用天然矿泉水','pop','19447','依云 (evian)','水饮冲调','饮用水','矿泉水','802','0%','25%','3,678','2617%','18%','920','1,000'],
+ ['10195011524947','保洁鲜鸡蛋（3','pop','35247','无品牌','生鲜','禽肉蛋品','蛋类','182','0%','6%','877','0%','5%','219','1,000'],
+ ['10168643747828','金枕榴莲B果 2','pop','0','未知','生鲜','水果','新鲜榴莲','69','0%','2%','752','0%','4%','188','—'],
+ ['10163207628574','【时令】金枕…','pop','0','未知','生鲜','水果','新鲜榴莲','-','0%','0%','639','0%','3%','160','—'],
+ ['10163096580986','鲁花压榨葵花…','pop','11742','鲁花','粮油调味','食用油','葵花籽油','-','0%','0%','589','17%','3%','147','1,000'],
+ ['10163114583073','【水果礼盒】f…','pop','90192','佳沛 (zespri)','生鲜','水果','奇异果/猕猴桃','307','0%','10%','571','0%','3%','143','1,000'],
+ ['100153201997','测试商品2026','owner','809564','库柏（COOPE','工业品','公共设施','照明','509','16%','3%','502','0%','3%','126','—'],
+ ['10163090230590','古越龙山十年陈','pop','7551','古越龙山','酒类','黄酒/养生酒','黄酒','474','15%','2%','474','0%','2%','118','—'],
+ ['10163115496404','金枕榴莲B果 3','pop','0','未知','生鲜','水果','新鲜榴莲','127','0%','4%','367','0%','2%','92','—'],
+ ['10167002682175','依云天然矿泉水','pop','19447','依云 (evian)','水饮冲调','饮用水','矿泉水','-','0%','0%','314','0%','1%','79','1,000'],
+ ['10163115572249','金枕榴莲B果 2','pop','0','未知','生鲜','水果','新鲜榴莲','-89','0%','-3%','261','0%','1%','65','1,000'],
+ ['10163095283111','天润润康全脂…','pop','16904','天润','水饮冲调','低温奶','低温酸奶','163','0%','5%','247','0%','1%','62','—'],
+ ['100153291446','测试商品，tes','owner','809564','库柏（COOPE','工业品','公共设施','照明','240','0%','7%','240','0%','1%','60','—'],
+ ['10210844608531','石库门黑标9年…','pop','15853','石库门','酒类','黄酒/养生酒','黄酒','-','0%','0%','207','0%','1%','50','—'],
+ ['10163096820821','九华粮品有机…','pop','0','未知','生鲜','禽肉蛋品','鸡肉','-','-100%','-2%','201','31%','0%','50','—'],
+ ['10198855797487','52度泸州老窖…','pop','11736','泸州老窖（LU','酒类','白酒','白酒','-','0%','0%','188','0%','0%','47','—'],
+ ['10210844671465','优诺4.0高钙优…','pop','267385','优诺 (voplait)','水饮冲调','低温奶','低温牛奶','-','0%','0%','181','0%','0%','45','—'],
+ ['100134679737','测试商品请勿…','owner','809564','库柏（COOPE','工业品','公共设施','照明','60','0%','2%','180','0%','0%','45','—'],
+ ['100115764411','测试商品，请…','owner','809564','库柏（COOPE','工业品','公共设施','照明','179','0%','6%','179','0%','0%','45','—'],
+ ['10192968168980','联华质造挪威…','pop','0','未知','生鲜','海鲜水产','鱼类','-','0%','0%','177','0%','0%','44','—'],
+ ['10192963354987','金龙鱼优质东…','pop','9429','金龙鱼','粮油调味','米','其他大米','-','0%','0%','177','0%','0%','44','—'],
+ ['10163087851021','金龙鱼外婆乡…','pop','9429','金龙鱼','粮油调味','食用油','菜籽油','-','0%','0%','171','0%','0%','43','—'],
+];
+function buildSheet(){
+  var L=['','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+  var th='<tr>'; for(var i=0;i<L.length;i++){ th+='<th'+(i===0?' style="min-width:30px;"':'')+'>'+L[i]+'</th>'; } th+='</tr>';
+  document.getElementById('thead').innerHTML=th;
+  var h='';
+  // row4 bands
+  h+='<tr><td class="rownum">4</td><td class="band-a" colspan="8">商品基础信息</td><td class="band-b" colspan="3">昨日</td><td class="band-c" colspan="5">月至今</td></tr>';
+  // row5 sub
+  h+='<tr><td class="rownum">5</td><td class="band-a" colspan="8"></td><td class="band-b" colspan="3">整体</td><td class="band-c" colspan="4">整体</td><td class="band-c">目标</td></tr>';
+  // row6 headers
+  var heads=['SKU ID','商品长标题','经营模式','主品牌id','主品牌名称','一级类目','二级类目','三级类目','GMV','同比','同比贡献','累计GMV','同比','同比贡献','日均GMV','GMV目标'];
+  h+='<tr><td class="rownum">6</td>'+heads.map(function(x,i){var c=i<8?'colh':(i<11?'colh-b':'colh-c');return '<td class="'+c+'">'+x+'</td>';}).join('')+'</tr>';
+  DATA.forEach(function(d,idx){
+    var rn=idx+7;
+    var selEnd = 24; // 圈选 A7:A24
+    h+='<tr><td class="rownum">'+rn+'</td>';
+    d.forEach(function(v,ci){
+      var cls='';
+      if(ci===0 && rn<=selEnd) cls='sel';
+      if(ci===8 && v.indexOf('-')===0 && v!=='-') cls='neg';           // GMV negative
+      if((ci===9||ci===12) ){ if(v.indexOf('-')===0&&v!=='-'&&v!=='0%')cls='neg'; else if(v!=='0%'&&v!=='-')cls='pos'; } // 同比
+      if(ci===10||ci===13){ if(v.indexOf('-')===0&&v!=='-')cls='negbg'; else if(v!=='0%'&&v!=='-')cls='contrib'; } // 同比贡献
+      var ctr=(ci>=8)?' style="text-align:right;"':'';
+      h+='<td class="'+cls+'"'+ctr+'>'+v+'</td>';
+    });
+    h+='</tr>';
+  });
+  document.getElementById('grid').innerHTML=h;
+}
+buildSheet();
+
+/* ---------- AI 库存巡检 execution ---------- */
+var convo=document.getElementById('convo');
+var sent=false;
+function el(html){var d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function add(node){convo.appendChild(node);requestAnimationFrame(function(){node.classList.add('show');});document.getElementById('abody').scrollTop=99999;return node;}
+
+async function sendInv(){
+  if(sent) return; sent=true;
+  document.getElementById('intro').style.display='none';
+  // 输入框恢复初始样式
+  document.getElementById('inChip').style.display='none';
+  var qt=document.getElementById('inQtext'); qt.textContent='请输入问题，可 shift+回车换行'; qt.classList.add('ph');
+  add(el('<div class="userq step"><div class="chip"><span class="tbico"></span>sku汇总 / A7:A24</div><div>对我圈选的sku执行库存巡检</div></div>'));
+  await sleep(650);
+  add(el('<div class="recv step">已收到提问"<b>对我圈选的 SKU 执行库存巡检</b>"，正在解析圈选范围…</div>'));
+  await sleep(650);
+  var plan=add(el('<div class="plan step"><div class="ph"><span class="ok">&#10003;</span> 规划 <span class="ch">&#9662;</span></div><div class="pbody"><div class="ptitle">对圈选 SKU 执行库存巡检并汇总异常</div></div></div>'));
+  var pbody=plan.querySelector('.pbody');
+  var steps=['解析圈选单元格范围（A7:A24）','提取 18 个 SKU 清单','调用库存巡检服务','汇总巡检结果'];
+  for(var k=0;k<steps.length;k++){
+    var chip=el('<div class="chipstep step"><span class="ic"><span class="spinner"></span></span>'+steps[k]+'<span class="ch">&#9662;</span></div>');
+    pbody.appendChild(chip); requestAnimationFrame(function(c){return function(){c.classList.add('show');};}(chip)); document.getElementById('abody').scrollTop=99999;
+    await sleep(850); chip.querySelector('.ic').innerHTML='<span class="done-check">&#10003;</span>'; await sleep(280);
+  }
+  await sleep(350);
+  add(el('<div class="thinkline step"><span class="ok">&#10003;</span> 巡检完成 <span class="ch">&#9662;</span></div>'));
+  await sleep(400);
+  var interp=add(el('<div class="interp step"></div>'));
+  await typeInto(interp, '本次圈选共 <span class="hl">18</span> 个 SKU。库存巡检发现异常 <span class="neg">10</span> 个：其中<span class="neg">缺货 3 个</span>、<span class="neg">滞销 5 个</span>、长库龄 2 个，其余 8 个库存健康。建议对缺货 SKU 尽快补货，对滞销/长库龄 SKU 关注周转与清仓。', 12);
+  await sleep(400);
+  add(el(
+    '<div class="invcard step"><div class="ith">巡检结果汇总（18 个 SKU）</div>'+
+    '<div class="invrow"><span class="tag r">缺货</span>依云天然矿泉水、金枕榴莲B果…<span class="n">3</span></div>'+
+    '<div class="invrow"><span class="tag o">滞销</span>石库门黑标9年、优诺4.0高钙…<span class="n">5</span></div>'+
+    '<div class="invrow"><span class="tag y">长库龄</span>52度泸州老窖、九华粮品…<span class="n">2</span></div>'+
+    '<div class="invrow"><span class="tag g">健康</span>其余 SKU 库存正常<span class="n">8</span></div>'+
+    '</div>'));
+  await sleep(500);
+  add(el('<div class="doneline step"><span style="color:#2fae6a;">&#10003;</span> 库存巡检已完成，可在下方继续追问。</div>'));
+  await sleep(400);
+  add(el('<div class="followup step">需要我针对缺货 SKU 生成补货建议，或导出异常清单吗？</div>'));
+}
+async function typeInto(node,html,speed){
+  var full=html,i=0,caret='<span class="caret"></span>';
+  while(i<full.length){ if(full[i]==='<'){var j=full.indexOf('>',i);i=(j===-1?full.length:j+1);}else{i++;} node.innerHTML=full.slice(0,i)+caret; document.getElementById('abody').scrollTop=99999; await sleep(speed); }
+  node.innerHTML=full;
+}
+window.sendInv=sendInv;
+</script>
+</body>
+</html>
