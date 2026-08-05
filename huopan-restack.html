@@ -188,6 +188,21 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .sgrid .neg{color:#e14b4b;font-weight:600;}
 .sgrid tr.edited td{background:#fffdf3;}
 .sgrid tr.edited td.rn{background:#fbeecb;color:#b07d10;}
+.sgrid .xh{padding-right:26px;position:relative;}
+.fbtn{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:17px;height:17px;border:1px solid #cfd8cf;border-radius:3px;background:#fff;color:#6b7280;font-size:9px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;}
+.fbtn:hover{border-color:#2f6bff;color:#2f6bff;}
+.fbtn.on{background:#2f6bff;border-color:#2f6bff;color:#fff;}
+.cfpop{position:fixed;display:none;z-index:70;width:250px;background:#fff;border:1px solid #e0e3ea;border-radius:10px;box-shadow:0 8px 28px rgba(20,30,60,.18);padding:10px;font-size:13px;}
+.cfpop .cfsr{width:100%;height:30px;border:1px solid #e5e7ee;border-radius:6px;padding:0 8px;margin-bottom:6px;font-size:12.5px;}
+.cfpop .cfhd{border-bottom:1px solid #f0f1f5;padding-bottom:6px;margin-bottom:4px;}
+.cfpop .cflist{max-height:220px;overflow:auto;display:flex;flex-direction:column;}
+.cfpop .cfi{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:5px;cursor:pointer;color:#2b2f3a;}
+.cfpop .cfi:hover{background:#f5f6fa;}
+.cfpop .cfi input{cursor:pointer;}
+.cfpop .cfbtns{display:flex;gap:8px;margin-top:8px;border-top:1px solid #f0f1f5;padding-top:8px;}
+.cfpop .cfbtns button{flex:1;height:32px;border:1px solid #e5e7ee;border-radius:7px;background:#fff;cursor:pointer;font-size:13px;color:#4a4f5c;}
+.cfpop .cfbtns button.pri{background:#2f6bff;border-color:#2f6bff;color:#fff;font-weight:600;}
+#ftag{color:#2f6bff;font-weight:600;}
 /* AI recompute animation */
 .spin{display:inline-block;width:14px;height:14px;border:2px solid #d9d0ff;border-top-color:#7a5bff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -357,27 +372,19 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
     <div class="fxwrap"><span style="color:#cdd1da">✕</span><span style="color:#1f9d57">✓</span><span class="fx">fx</span></div>
     <div class="fxbar"></div>
   </div>
-  <div class="dfilter">
-    <span style="font-size:12.5px;color:#8a909e;margin-right:2px">分堆筛选</span>
-    <div class="fchip on" data-f="all" onclick="setFilter(this,'all')">全部</div>
-    <div class="fchip" data-f="堆一" onclick="setFilter(this,'堆一')">堆一 · 待处置</div>
-    <div class="fchip" data-f="堆二" onclick="setFilter(this,'堆二')">堆二 · 单一短板</div>
-    <div class="fchip" data-f="堆三" onclick="setFilter(this,'堆三')">堆三 · 漏斗问题</div>
-    <div class="fchip" data-f="堆四" onclick="setFilter(this,'堆四')">堆四 · 健康经营</div>
-    <input class="fsearch" id="fsearch" placeholder="搜索商品名 / SKU / 品牌" oninput="renderGrid()">
-  </div>
   <div class="dbody">
     <table class="sgrid" id="gtable">
       <tbody id="gbody"></tbody>
     </table>
   </div>
   <div class="dfoot">
-    <div class="stat">共 <b id="dcount">0</b> 个 SKU · 已调整 <b id="editcnt">0</b> 个 · 当前筛选下 <b id="showcnt">0</b> 行</div>
+    <div class="stat">共 <b id="dcount">0</b> 个 SKU · 已调整 <b id="editcnt">0</b> 个 · 当前筛选下 <b id="showcnt">0</b> 行 <span id="ftag"></span></div>
     <div class="sp"></div>
     <button class="gbtn" onclick="closeDrawer()">取消</button>
     <button class="gbtn primary" onclick="confirmChanges()">确认</button>
   </div>
 </div>
+<div class="cfpop" id="colfpop"></div>
 
 <script>
 /* ---- mock SKU-level data (手机配件货盘) ---- */
@@ -417,12 +424,34 @@ var rows=[
 ];
 
 var origStack={}; rows.forEach(function(r){ origStack[r.id]=r.stack; });
-var curFilter='all';
+
+/* per-column value getters (Excel-style header filters) */
+var colGet=[
+  function(r){return r.id;},
+  function(r){return r.name;},
+  function(r){return r.brand;},
+  function(r){return STACKS[r.stack];},
+  function(r){return r.gmv;},
+  function(r){return r.stock.toLocaleString();},
+  function(r){return r.ad;},
+  function(r){return r.roi.toFixed(1);},
+  function(r){return r.cvr;},
+  function(r){return '★'.repeat(r.star);},
+  function(r){return r.info;},
+  function(r){return r.act;}
+];
+var colFilters={}; /* colIndex -> array of allowed string values */
+
+function rowPasses(r,exceptCol){
+  return Object.keys(colFilters).every(function(k){
+    k=+k; if(k===exceptCol) return true;
+    return colFilters[k].indexOf(colGet[k](r))>=0;
+  });
+}
 
 function roiCls(v){ return v<0.8?'neg':(v>=2.5?'pos':''); }
 
 function renderGrid(){
-  var kw=(document.getElementById('fsearch').value||'').trim().toLowerCase();
   var body=document.getElementById('gbody'); var html=''; var shown=0; var rn=1;
   var cols=['SKU ID','商品名称','品牌','分堆标识','近30天GMV','库存','广告消耗/30天','ROI','UV转化','价格星级','信息分','处置/策略建议'];
   var letters=['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -430,14 +459,15 @@ function renderGrid(){
   html+='<tr><th class="corner"></th>';
   letters.forEach(function(l){ html+='<th class="cl">'+l+'</th>'; });
   html+='</tr>';
-  // field-name row (spreadsheet row 1)
+  // field-name row (spreadsheet row 1) with per-column filter buttons
   html+='<tr><td class="rn">1</td>';
-  cols.forEach(function(c){ html+='<td class="xh">'+c+'</td>'; });
+  cols.forEach(function(c,ci){
+    var on=colFilters[ci]?' on':'';
+    html+='<td class="xh">'+c+'<span class="fbtn'+on+'" onclick="openColFilter(event,'+ci+')">▾</span></td>';
+  });
   html+='</tr>';
   rows.forEach(function(r,idx){
-    var sname=STACKS[r.stack];
-    if(curFilter!=='all' && spShort(sname)!==curFilter) return;
-    if(kw && (r.name+r.id+r.brand).toLowerCase().indexOf(kw)<0) return;
+    if(!rowPasses(r,-1)) return;
     shown++; rn++;
     var edited=(r.stack!==origStack[r.id]);
     var opts=STACKS.map(function(s,i){return '<option value="'+i+'"'+(i===r.stack?' selected':'')+'>'+s+'</option>';}).join('');
@@ -462,10 +492,62 @@ function renderGrid(){
   document.getElementById('showcnt').textContent=shown;
   document.getElementById('editcnt').textContent=rows.filter(function(r){return r.stack!==origStack[r.id];}).length;
   document.getElementById('dcount').textContent=rows.length;
+  var nf=Object.keys(colFilters).length;
+  document.getElementById('ftag').textContent = nf? '· 已启用 '+nf+' 个列筛选' : '';
 }
 function chStack(i,v){ rows[i].stack=parseInt(v,10); renderGrid(); }
 function chAct(i,v){ rows[i].act=v; }
-function setFilter(el,f){ curFilter=f; document.querySelectorAll('.fchip').forEach(function(c){c.classList.remove('on');}); el.classList.add('on'); renderGrid(); }
+
+/* ---- Excel-style column filter popup ---- */
+function distinctFor(c){
+  var seen=[]; var m={};
+  rows.forEach(function(r){
+    if(!rowPasses(r,c)) return;
+    var v=colGet[c](r); if(!(v in m)){ m[v]=1; seen.push(v); }
+  });
+  return seen;
+}
+function openColFilter(e,c){
+  e.stopPropagation();
+  var pop=document.getElementById('colfpop');
+  var vals=distinctFor(c);
+  var sel=colFilters[c];
+  var items=vals.map(function(v){
+    var ck=(!sel||sel.indexOf(v)>=0)?'checked':'';
+    var label=(v===''||v==null)?'(空)':v;
+    return '<label class="cfi"><input type="checkbox" value="'+encodeURIComponent(v)+'" '+ck+'>'+label+'</label>';
+  }).join('');
+  pop.innerHTML='<input class="cfsr" placeholder="搜索..." oninput="cfSearch(this.value)">'
+    +'<div class="cfhd"><label class="cfi"><input type="checkbox" id="cfall" '+(!sel?'checked':'')+'>（全选）</label></div>'
+    +'<div class="cflist" id="cflist">'+items+'</div>'
+    +'<div class="cfbtns"><button onclick="clearColFilter('+c+')">清除</button><button class="pri" onclick="applyColFilter('+c+')">确定</button></div>';
+  pop.style.display='block';
+  var w=250, x=Math.min(e.clientX-10, window.innerWidth-w-12), y=Math.min(e.clientY+10, window.innerHeight-360);
+  pop.style.left=Math.max(12,x)+'px'; pop.style.top=Math.max(12,y)+'px';
+  document.getElementById('cfall').onchange=function(){
+    var ck=this.checked;
+    pop.querySelectorAll('#cflist input').forEach(function(x){ if(x.parentNode.style.display!=='none') x.checked=ck; });
+  };
+}
+function cfSearch(kw){
+  kw=(kw||'').toLowerCase();
+  document.querySelectorAll('#cflist .cfi').forEach(function(l){
+    l.style.display = l.textContent.toLowerCase().indexOf(kw)>=0 ? 'flex':'none';
+  });
+}
+function applyColFilter(c){
+  var pop=document.getElementById('colfpop');
+  var checked=[].slice.call(pop.querySelectorAll('#cflist input:checked')).map(function(ch){return decodeURIComponent(ch.value);});
+  var total=pop.querySelectorAll('#cflist input').length;
+  if(checked.length===0){ checked=distinctFor(c); } /* empty selection = keep all, avoid blank table */
+  if(checked.length>=total){ delete colFilters[c]; } else { colFilters[c]=checked; }
+  pop.style.display='none'; renderGrid();
+}
+function clearColFilter(c){ delete colFilters[c]; document.getElementById('colfpop').style.display='none'; renderGrid(); }
+document.addEventListener('click',function(e){
+  var pop=document.getElementById('colfpop');
+  if(pop && pop.style.display==='block' && !pop.contains(e.target) && !(e.target.classList&&e.target.classList.contains('fbtn'))){ pop.style.display='none'; }
+});
 
 function openDrawer(){ renderGrid(); document.getElementById('mask').classList.add('show'); document.getElementById('drawer').classList.add('show'); }
 function closeDrawer(){ document.getElementById('mask').classList.remove('show'); document.getElementById('drawer').classList.remove('show'); }
