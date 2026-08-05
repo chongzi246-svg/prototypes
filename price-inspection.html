@@ -38,15 +38,23 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .rail .line{width:22px;height:1px;background:#eef0f4;margin:4px 0;}
 
 /* chat panel */
-.chat{width:520px;display:flex;flex-direction:column;border-right:1px solid #f0f1f5;flex-shrink:0;}
-.chat-h{padding:18px 22px 12px;display:flex;align-items:center;gap:10px;}
+.chat{flex:1 1 0;min-width:0;display:flex;flex-direction:column;border-right:1px solid #f0f1f5;}
+.chat-h{padding:18px 22px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eef0f4;}
+.chat-inner{max-width:900px;margin:0 auto;width:100%;}
 .chat-h .t{font-size:19px;font-weight:800;}
 .chat-h .rt{margin-left:auto;display:flex;align-items:center;gap:14px;color:#8a909e;font-size:15px;}
 .chat-h .rt .b{display:flex;align-items:center;gap:3px;cursor:pointer;}
 .chat-body{flex:1;overflow-y:auto;padding:6px 22px 10px;}
 .chat-body p{line-height:1.8;color:#2b2f3a;margin-bottom:6px;}
 .chat-body .lnk{color:#2f6bff;cursor:pointer;word-break:break-all;}
-.filecard{border:1px solid #eef0f4;border-radius:12px;padding:14px 16px;margin:12px 0 6px;background:#fff;}
+.filecard{border:1px solid #eef0f4;border-radius:12px;padding:14px 16px;margin:14px 0 6px;background:#fff;position:relative;}
+.fc-acts{position:absolute;right:14px;top:12px;display:flex;gap:8px;opacity:0;transform:translateY(-3px);transition:opacity .2s,transform .2s;pointer-events:none;}
+.filecard:hover .fc-acts,.filecard.hovered .fc-acts{opacity:1;transform:none;pointer-events:auto;}
+.fa{width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid #eef0f4;box-shadow:0 6px 16px -6px rgba(30,40,70,.3);display:flex;align-items:center;justify-content:center;font-size:16px;color:#4a4f5c;cursor:pointer;position:relative;}
+.fa:hover{border-color:#c9d6ff;background:#f7f9ff;}
+.fa .tip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#282c34;color:#fff;font-size:13px;padding:8px 14px;border-radius:9px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;font-weight:600;}
+.fa .tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:#282c34;}
+.fa.tipon .tip,.fa:hover .tip{opacity:1;}
 .filecard .top{display:flex;align-items:center;gap:12px;}
 .filecard .xi{width:40px;height:44px;border-radius:8px;background:#e8f6ee;color:#1f9d57;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
 .filecard .fn{font-weight:600;font-size:14px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -74,8 +82,9 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .ctools .send.ready{background:linear-gradient(135deg,#8a6bff,#6b57ff);}
 .chat-foot{text-align:center;color:#b6bac4;font-size:12px;padding:6px 0 12px;flex-shrink:0;}
 
-/* right = 超级大表 subscreen */
-.sub{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden;min-width:0;}
+/* right = 超级大表 subscreen (slides out) */
+.sub{flex:0 0 0px;overflow:hidden;display:flex;flex-direction:column;background:#fff;min-width:0;transition:flex-basis .55s cubic-bezier(.4,.1,.2,1);border-left:1px solid #f0f1f5;}
+.sub.open{flex-basis:62%;}
 .xls-head{padding:16px 22px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .xls-head .big{font-size:20px;font-weight:800;}
 .xls-head .rt{margin-left:auto;display:flex;align-items:center;gap:12px;color:#4a4f5c;font-size:14px;}
@@ -167,34 +176,41 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
         <div class="ic">🕘</div>
       </div>
 
-      <!-- chat panel -->
-      <div class="chat">
+      <!-- chat panel (homepage = full width) -->
+      <div class="chat" id="chatPanel">
         <div class="chat-h">
           <div class="t">价格巡检</div>
-          <div class="rt"><span class="b">💬</span><span class="b">📄 1</span></div>
+          <div class="rt"><span class="b">💬</span></div>
         </div>
         <div class="chat-body">
-          <p>价格巡检已完成，本次共为您巡检 <b>24</b> 次，任务耗时 <b>3</b> 秒，预计帮您节省约 <b>12</b> 分钟。</p>
-          <p>具体价格信息请下载文件查看：<span class="lnk">价格巡检_4565642_1785904230127.xlsx</span></p>
-          <div class="filecard">
+         <div class="chat-inner">
+          <p>文件中包含了各商品的前台价格、到手价等详细巡检信息，您可下载后按需查阅。如需对特定 SKU 或价格类型做进一步巡检，随时告诉我。</p>
+          <div class="filecard" id="fcard">
             <div class="top">
               <div class="xi">X</div>
-              <div><div class="fn">价格巡检_4565642_178…</div><div class="ft">xlsx</div></div>
+              <div><div class="fn">价格巡检_4566211_202…</div><div class="ft">xlsx</div></div>
               <div class="bg">📊</div>
+              <div class="fc-acts" id="fcActs">
+                <div class="fa" id="faOpen"><span class="tip">用超级大表打开</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="15" rx="2" stroke="#4a4f5c" stroke-width="1.6"/><path d="M3 10h18M9.5 10v9.5" stroke="#4a4f5c" stroke-width="1.3"/><path d="M18 1.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#7a5bff"/></svg></div>
+                <div class="fa">👁</div>
+                <div class="fa">⬇</div>
+              </div>
             </div>
             <div class="bar">
               <span class="b">🎯 技能 1</span><span>|</span><span class="b">↻</span><span class="b">⧉</span>
               <span class="b">◎ 设置自动化任务</span><span class="b">💬</span><span class="b">👍</span><span class="b">👎</span>
-              <span>|</span><span>任务耗时 52s</span>
+              <span>|</span><span>任务耗时 47s</span>
             </div>
           </div>
           <div class="sugh">您可以继续问我：</div>
           <div class="sug">
             <div class="s">分析价格异常商品清单</div>
-            <div class="s">在超级大表筛选价差异常SKU</div>
+            <div class="s">下载价格巡检详细数据</div>
           </div>
+         </div>
         </div>
         <div class="composer">
+         <div class="chat-inner">
           <div class="cbox" id="cbox">
             <textarea class="ci" id="chatInput" placeholder="请输入问题，可shift+回车换行"></textarea>
             <div class="ctools">
@@ -205,18 +221,19 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
               <button class="send" id="sendBtn">↑</button>
             </div>
           </div>
+         </div>
         </div>
         <div class="chat-foot">内容由AI生成，仅供参考</div>
       </div>
 
       <!-- right 超级大表 subscreen -->
-      <div class="sub">
+      <div class="sub" id="sub">
         <div class="xls-head">
           <span class="big">超级大表</span>
-          <div class="rt"><span class="op">在大表中打开</span><span class="vsep">|</span><span class="op">⤢</span><span class="vsep">|</span><span class="x">✕</span></div>
+          <div class="rt"><span class="op">在大表中打开</span><span class="vsep">|</span><span class="op">⤢</span><span class="vsep">|</span><span class="x" onclick="document.getElementById('sub').classList.remove('open')">✕</span></div>
         </div>
         <div class="xls-file">
-          <span class="fn">价格巡检_4565642_1785904230127.xlsx</span><span class="pen">✎</span><span class="ed">本人编辑中</span>
+          <span class="fn">价格巡检_4566211_20250804163045.xlsx</span><span class="pen">✎</span><span class="ed">本人编辑中</span>
           <span class="more">···</span><button class="save">保存 ▾</button>
         </div>
         <div class="xls-ribbon"><span>文件</span><span>开始</span><span>插入</span><span>页面布局</span><span>公式</span><span>数据</span><span>审阅</span><span>视图</span><span>设置</span></div>
@@ -337,20 +354,45 @@ async function runDemo(){
   var input=document.getElementById('chatInput');
   var cbox=document.getElementById('cbox');
   var cur=document.getElementById('cursor');
+  var sub=document.getElementById('sub');
+  var fcard=document.getElementById('fcard');
+  var faOpen=document.getElementById('faOpen');
+  // reset to homepage state
   input.value=''; clearSel(); hideToast();
   document.getElementById('sendBtn').classList.remove('ready');
+  sub.classList.remove('open'); fcard.classList.remove('hovered'); faOpen.classList.remove('tipon');
+  cbox.classList.remove('active');
+  await sleep(250);
 
+  // cursor appears above the file card
+  var fr=fcard.getBoundingClientRect();
+  cur.style.transition='none'; moveCur(fr.left+fr.width*0.35, fr.top-34); cur.style.display='block';
+  await sleep(60); cur.style.transition='';
+  await sleep(380);
+
+  // hover onto the file card -> action icons appear
+  moveCur(fr.left+fr.width*0.55, fr.top+24);
+  fcard.classList.add('hovered');
+  await sleep(680);
+
+  // move onto the first icon (用超级大表打开) -> tooltip
+  var ir0=faOpen.getBoundingClientRect();
+  moveCur(ir0.left+ir0.width/2, ir0.top+ir0.height/2);
+  await sleep(480);
+  faOpen.classList.add('tipon');
+  await sleep(720);
+
+  // click -> subscreen slides out
+  clickCur(true); await sleep(220); clickCur(false);
+  faOpen.classList.remove('tipon'); fcard.classList.remove('hovered');
+  sub.classList.add('open');
+  await sleep(780); // wait for slide to finish
+
+  // ---- continue original flow: select SKU cells (first column) ----
   var trs=SEL_SKUS.map(function(s){ return document.querySelector('#gbody tr[data-sku="'+s+'"]'); });
   var cells=trs.map(skuCell);
-  // start cursor at ribbon area
-  var startRef=document.querySelector('.xls-ribbon').getBoundingClientRect();
-  cur.style.transition='none'; moveCur(startRef.left+120, startRef.top+10); cur.style.display='block';
-  await sleep(60); cur.style.transition='';
-  await sleep(400);
-
-  // move onto first SKU cell & press
   var c0=cells[0].getBoundingClientRect();
-  moveCur(c0.left+40, c0.top+14); await sleep(720);
+  moveCur(c0.left+40, c0.top+14); await sleep(660);
   clickCur(true); cells[0].classList.add('selc'); drawSelBox([cells[0]]); await sleep(320);
   // drag down selecting each SKU cell (first column only)
   for(var i=1;i<cells.length;i++){
@@ -367,7 +409,7 @@ async function runDemo(){
 
   // move to input box
   var ir=input.getBoundingClientRect();
-  moveCur(ir.left+40, ir.top+22); await sleep(720);
+  moveCur(ir.left+40, ir.top+22); await sleep(700);
   clickCur(true); cbox.classList.add('active'); await sleep(160); clickCur(false);
   input.focus();
 
@@ -386,7 +428,7 @@ async function runDemo(){
 }
 
 /* auto-play once shortly after load */
-window.addEventListener('load',function(){ setTimeout(runDemo,1100); });
+window.addEventListener('load',function(){ setTimeout(runDemo,1000); });
 </script>
 </body>
 </html>
