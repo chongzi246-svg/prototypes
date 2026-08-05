@@ -154,6 +154,49 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .gbtn:hover{border-color:#7a5bff;color:#7a5bff;}
 .gbtn.primary{background:linear-gradient(135deg,#8a6bff,#6b57ff);border:none;color:#fff;font-weight:700;padding:0 26px;}
 
+/* spreadsheet-style drawer chrome */
+.xls-head{background:#fff;padding:16px 22px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.xls-head .big{font-size:20px;font-weight:800;}
+.xls-head .rt{margin-left:auto;display:flex;align-items:center;gap:12px;color:#4a4f5c;font-size:14px;}
+.xls-head .rt .op{cursor:pointer;font-weight:600;}
+.xls-head .rt .vsep{color:#e0e3ea;}
+.xls-head .rt .x{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;font-size:17px;color:#4a4f5c;}
+.xls-head .rt .x:hover{background:#f2f3f7;}
+.xls-file{background:#fff;padding:2px 22px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid #eef0f4;}
+.xls-file .fn{font-size:16px;font-weight:700;}
+.xls-file .pen{color:#8a909e;cursor:pointer;}
+.xls-file .ed{color:#8a909e;font-size:13px;}
+.xls-file .more{margin-left:auto;color:#8a909e;letter-spacing:1px;cursor:pointer;font-weight:700;}
+.xls-file .save{background:#2f6bff;color:#fff;border:none;border-radius:8px;height:36px;padding:0 20px;font-weight:700;font-size:14px;cursor:pointer;}
+.xls-ribbon{background:#f6f7f9;padding:11px 22px;display:flex;gap:26px;font-size:14px;color:#3a3f4c;flex-shrink:0;}
+.xls-ribbon span{cursor:pointer;}
+.xls-ribbon span:hover{color:#2f6bff;}
+.xls-formula{background:#fff;padding:7px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid #eef0f4;border-top:1px solid #eef0f4;}
+.namebox{border:1px solid #e5e7ee;border-radius:6px;height:32px;width:130px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px;color:#4a4f5c;}
+.fxwrap{display:flex;align-items:center;gap:10px;font-size:13px;}
+.fxwrap .fx{color:#2f6bff;font-style:italic;font-weight:700;}
+.fxbar{flex:1;border:1px solid #eef0f4;border-radius:6px;height:32px;background:#fafbfc;}
+/* spreadsheet grid */
+.sgrid{border-collapse:collapse;font-size:13px;}
+.sgrid th,.sgrid td{border:1px solid #e6e8ee;padding:6px 10px;white-space:nowrap;background:#fff;}
+.sgrid .cl{background:#f3f4f7;color:#8a909e;text-align:center;font-weight:600;font-size:12px;height:26px;position:sticky;top:0;z-index:3;}
+.sgrid .rn{background:#f3f4f7;color:#8a909e;text-align:center;font-weight:600;font-size:12px;position:sticky;left:0;z-index:2;min-width:38px;}
+.sgrid .corner{position:sticky;left:0;top:0;z-index:4;background:#eceef3;min-width:38px;}
+.sgrid .xh{background:#e9f2e7;font-weight:700;color:#2b3a2b;position:sticky;top:26px;z-index:1;}
+.sgrid td.prod{white-space:normal;min-width:200px;}
+.sgrid .pos{color:#1f9d57;font-weight:600;}
+.sgrid .neg{color:#e14b4b;font-weight:600;}
+.sgrid tr.edited td{background:#fffdf3;}
+.sgrid tr.edited td.rn{background:#fbeecb;color:#b07d10;}
+/* AI recompute animation */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #d9d0ff;border-top-color:#7a5bff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.steps2{margin-top:10px;display:flex;flex-direction:column;gap:9px;}
+.step2{font-size:13px;color:#4a4f5c;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(4px);transition:.3s;}
+.step2.in{opacity:1;transform:none;}
+.sp2i{display:inline-block;width:13px;height:13px;border:2px solid #d9d0ff;border-top-color:#7a5bff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+.ck{display:inline-block;width:16px;height:16px;border-radius:50%;background:#1f9d57;color:#fff;font-size:11px;text-align:center;line-height:16px;font-weight:700;flex-shrink:0;}
+
 /* feedback card in chat */
 .fbcard{background:#fff;border:1px solid #d9d0ff;border-radius:14px;padding:18px 20px;max-width:920px;margin-top:18px;box-shadow:0 2px 10px rgba(122,91,255,.08);}
 .fbcard .fbh{display:flex;align-items:center;gap:8px;font-weight:700;color:#7a5bff;margin-bottom:12px;}
@@ -236,7 +279,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
               <table class="dtable">
                 <thead><tr><th style="width:210px">堆</th><th style="width:90px">数量</th><th>特征摘要</th></tr></thead>
                 <tbody>
-                  <tr><td class="stack">堆一 · 不经营/待处置</td><td class="num"><span class="box">132</span></td><td>滞销库存 ¥68万：无库存 86（<span class="warn">31 个仍在漏广告费 ¥4,300/30天</span>）· 停产机型件 46</td></tr>
+                  <tr><td class="stack">堆一 · 不经营/待处置</td><td class="num">132</td><td>滞销库存 ¥68万：无库存 86（<span class="warn">31 个仍在漏广告费 ¥4,300/30天</span>）· 停产机型件 46</td></tr>
                   <tr><td class="stack">堆二 · 单一明显短板</td><td class="num">168</td><td>素材/信息分 94 · 价格星级≤2 降权 37 · 评价差 24（恶性 9）· 服务差 13</td></tr>
                   <tr><td class="stack">堆三 · 漏斗有明显问题</td><td class="num">383</td><td>流量弱 201 · 点击弱 87 · 转化弱 65 · 广告低效 30（11 个 ROI&lt;0.8）</td></tr>
                   <tr class="rowgreen"><td class="stack">堆四 · 健康经营</td><td class="num">288</td><td><b>贡献全盘 71% GMV，精细化维持为主</b></td></tr>
@@ -299,11 +342,23 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 <!-- drawer -->
 <div class="mask" id="mask" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
-  <div class="dh">
-    <div><div class="dt">货盘明细 · 分堆清单</div><div class="dsub">手机配件货盘 · 共 <span id="dcount">0</span> 个 SKU（可编辑分堆标识与处置建议）</div></div>
-    <div class="x" onclick="closeDrawer()">✕</div>
+  <div class="xls-head">
+    <span class="big">超级大表</span>
+    <div class="rt"><span class="op">在大表中打开</span><span class="vsep">|</span><span class="op">⤢</span><span class="vsep">|</span><span class="x" onclick="closeDrawer()">✕</span></div>
+  </div>
+  <div class="xls-file">
+    <span class="fn">托管货盘分堆明细</span><span class="pen">✎</span><span class="ed">本人编辑中</span>
+    <span class="more">···</span><button class="save">保存 ▾</button>
+  </div>
+  <div class="xls-ribbon"><span>文件</span><span>开始</span><span>插入</span><span>页面布局</span><span>公式</span><span>数据</span><span>审阅</span><span>视图</span><span>设置</span></div>
+  <div class="xls-formula">
+    <div class="namebox"><span id="cellref">D2</span><span>▾</span></div>
+    <span style="color:#cdd1da">⋮</span>
+    <div class="fxwrap"><span style="color:#cdd1da">✕</span><span style="color:#1f9d57">✓</span><span class="fx">fx</span></div>
+    <div class="fxbar"></div>
   </div>
   <div class="dfilter">
+    <span style="font-size:12.5px;color:#8a909e;margin-right:2px">分堆筛选</span>
     <div class="fchip on" data-f="all" onclick="setFilter(this,'all')">全部</div>
     <div class="fchip" data-f="堆一" onclick="setFilter(this,'堆一')">堆一 · 待处置</div>
     <div class="fchip" data-f="堆二" onclick="setFilter(this,'堆二')">堆二 · 单一短板</div>
@@ -312,22 +367,15 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
     <input class="fsearch" id="fsearch" placeholder="搜索商品名 / SKU / 品牌" oninput="renderGrid()">
   </div>
   <div class="dbody">
-    <table class="gtable" id="gtable">
-      <thead>
-        <tr>
-          <th>SKU ID</th><th>商品名称</th><th>品牌</th><th style="min-width:150px">分堆标识</th>
-          <th>近30天GMV</th><th>库存</th><th>广告消耗/30天</th><th>ROI</th><th>UV转化</th><th>价格星级</th><th>信息分</th>
-          <th style="min-width:130px">处置/策略建议</th>
-        </tr>
-      </thead>
+    <table class="sgrid" id="gtable">
       <tbody id="gbody"></tbody>
     </table>
   </div>
   <div class="dfoot">
-    <div class="stat">已调整 <b id="editcnt">0</b> 个 SKU · 当前筛选下 <b id="showcnt">0</b> 行</div>
+    <div class="stat">共 <b id="dcount">0</b> 个 SKU · 已调整 <b id="editcnt">0</b> 个 · 当前筛选下 <b id="showcnt">0</b> 行</div>
     <div class="sp"></div>
     <button class="gbtn" onclick="closeDrawer()">取消</button>
-    <button class="gbtn primary" onclick="confirmChanges()">确认并代入对话</button>
+    <button class="gbtn primary" onclick="confirmChanges()">确认</button>
   </div>
 </div>
 
@@ -375,16 +423,27 @@ function roiCls(v){ return v<0.8?'neg':(v>=2.5?'pos':''); }
 
 function renderGrid(){
   var kw=(document.getElementById('fsearch').value||'').trim().toLowerCase();
-  var body=document.getElementById('gbody'); var html=''; var shown=0;
+  var body=document.getElementById('gbody'); var html=''; var shown=0; var rn=1;
+  var cols=['SKU ID','商品名称','品牌','分堆标识','近30天GMV','库存','广告消耗/30天','ROI','UV转化','价格星级','信息分','处置/策略建议'];
+  var letters=['A','B','C','D','E','F','G','H','I','J','K','L'];
+  // column-letter header row
+  html+='<tr><th class="corner"></th>';
+  letters.forEach(function(l){ html+='<th class="cl">'+l+'</th>'; });
+  html+='</tr>';
+  // field-name row (spreadsheet row 1)
+  html+='<tr><td class="rn">1</td>';
+  cols.forEach(function(c){ html+='<td class="xh">'+c+'</td>'; });
+  html+='</tr>';
   rows.forEach(function(r,idx){
     var sname=STACKS[r.stack];
     if(curFilter!=='all' && spShort(sname)!==curFilter) return;
     if(kw && (r.name+r.id+r.brand).toLowerCase().indexOf(kw)<0) return;
-    shown++;
+    shown++; rn++;
     var edited=(r.stack!==origStack[r.id]);
     var opts=STACKS.map(function(s,i){return '<option value="'+i+'"'+(i===r.stack?' selected':'')+'>'+s+'</option>';}).join('');
     var aopts=ACTIONS.map(function(a){return '<option'+(a===r.act?' selected':'')+'>'+a+'</option>';}).join('');
     html+='<tr class="'+(edited?'edited':'')+'">'
+      +'<td class="rn">'+rn+'</td>'
       +'<td>'+r.id+'</td>'
       +'<td class="prod">'+r.name+'</td>'
       +'<td>'+r.brand+'</td>'
@@ -411,41 +470,66 @@ function setFilter(el,f){ curFilter=f; document.querySelectorAll('.fchip').forEa
 function openDrawer(){ renderGrid(); document.getElementById('mask').classList.add('show'); document.getElementById('drawer').classList.add('show'); }
 function closeDrawer(){ document.getElementById('mask').classList.remove('show'); document.getElementById('drawer').classList.remove('show'); }
 
-function confirmChanges(){
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+
+async function confirmChanges(){
   var moved=rows.filter(function(r){return r.stack!==origStack[r.id];});
-  // new distribution
   var dist=[0,0,0,0]; rows.forEach(function(r){dist[r.stack]++;});
   var orig=[0,0,0,0]; rows.forEach(function(r){orig[origStack[r.id]]++;});
+  closeDrawer();
   var msgs=document.getElementById('msgs');
 
+  // 1) user echo + AI "正在重新计算" running card
+  var rid='run'+Date.now();
+  msgs.insertAdjacentHTML('beforeend',
+     '<div class="you">YOU · 已在明细表确认调整</div>'
+    +'<div class="aihdr" style="margin-top:14px">AI 操盘手</div>'
+    +'<div class="card" id="'+rid+'"><p id="'+rid+'t"><span class="spin"></span> 正在按照新的分堆规则重新计算…</p><div class="steps2" id="'+rid+'s"></div></div>');
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // 2) simulate AI execution steps
+  var steps=[
+    '读取明细表调整：'+moved.length+' 个 SKU 分堆变更已载入',
+    '重新扫描 971 个 SKU，按新口径归位四堆…',
+    '重算各堆处置动作（退供 / 止血 / 素材优化 / 搭售 / 维持）…',
+    '评估广告消耗与库存资金占用影响…',
+    '同步刷新右侧「经营策略」待采纳项…'
+  ];
+  var box=document.getElementById(rid+'s');
+  for(var i=0;i<steps.length;i++){
+    var el=document.createElement('div'); el.className='step2'; el.innerHTML='<span class="sp2i"></span><span>'+steps[i]+'</span>';
+    box.appendChild(el);
+    await sleep(60); el.classList.add('in'); msgs.scrollTop=msgs.scrollHeight;
+    await sleep(populated(i));
+    el.querySelector('.sp2i').outerHTML='<span class="ck">✓</span>';
+  }
+  document.getElementById(rid+'t').innerHTML='<span class="ck">✓</span> 重新计算完成（'+moved.length+' 个 SKU 调整已生效）';
+  await sleep(350);
+
+  // 3) final 最新分堆结果 card
   var moveRows = moved.length? moved.map(function(r){
     var f=STACKS[origStack[r.id]], t=STACKS[r.stack];
     return '<tr><td>'+r.id+'</td><td>'+r.name+'</td>'
       +'<td><span class="st-pill '+spClass(f)+'">'+spShort(f)+'</span><span class="arw2">→</span><span class="st-pill '+spClass(t)+'">'+spShort(t)+'</span></td>'
       +'<td>'+r.act+'</td></tr>';
-  }).join('') : '<tr><td colspan="4" style="color:#8a909e">未调整分堆，仅确认当前分堆结果与处置建议。</td></tr>';
-
+  }).join('') : '<tr><td colspan="4" style="color:#8a909e">未调整分堆，维持原分堆结果与处置建议。</td></tr>';
   var distHtml=STACKS.map(function(s,i){
     var d=dist[i]-orig[i]; var dtxt=d===0?'':(d>0?'<span class="delta-up">+'+d+'</span>':'<span class="delta-dn">'+d+'</span>');
     return '<div class="distpill"><span class="st-pill '+spClass(s)+'">'+spShort(s)+'</span> <b>'+dist[i]+'</b> 个 '+dtxt+'</div>';
   }).join('');
-
-  var html=''
-    +'<div class="you">YOU · 已从明细表提交调整</div>'
-    +'<div class="fbcard">'
-      +'<div class="fbh">✅ 已代入你在明细表的调整（结构化）</div>'
-      +'<p style="line-height:1.7;color:#2b2f3a">本次共调整 <b style="color:#7a5bff">'+moved.length+'</b> 个 SKU 的分堆归属。更新后的分堆分布：</p>'
+  msgs.insertAdjacentHTML('beforeend',
+     '<div class="fbcard">'
+      +'<div class="fbh">📊 最新分堆结果</div>'
+      +'<p style="line-height:1.7;color:#2b2f3a">已按你的调整重新计算，本次共变更 <b style="color:#7a5bff">'+moved.length+'</b> 个 SKU 的分堆归属。更新后四堆分布：</p>'
       +'<div class="distrow">'+distHtml+'</div>'
-      +'<p style="margin-top:10px;color:#4a4f5c;font-weight:600">调整明细：</p>'
+      +'<p style="margin-top:10px;color:#4a4f5c;font-weight:600">变更明细：</p>'
       +'<table class="mvtable"><thead><tr><th>SKU ID</th><th>商品</th><th>分堆变化</th><th>处置建议</th></tr></thead><tbody>'+moveRows+'</tbody></table>'
-      +'<p style="margin-top:12px;color:#3a3f4c;line-height:1.7">已按新分堆重算策略口径：'
-        +(moved.length?'受影响 SKU 将重新匹配对应堆的处置动作，右侧「经营策略」卡片将同步刷新待采纳项。':'维持原策略。')
-        +'需要我据此<b>生成第 2 步「策略匹配」方案</b>吗？</p>'
-    +'</div>';
-  msgs.insertAdjacentHTML('beforeend',html);
+      +'<p style="margin-top:12px;color:#3a3f4c;line-height:1.7">受影响 SKU 已重新匹配对应堆的处置动作，右侧「经营策略」待采纳项已同步刷新。需要我据此 <b>生成第 2 步「策略匹配」方案</b> 吗？</p>'
+    +'</div>');
   msgs.scrollTop=msgs.scrollHeight;
-  closeDrawer();
 }
+function populated(i){ return [700,900,850,800,700][i]||750; }
+
 </script>
 </body>
 </html>
